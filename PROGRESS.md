@@ -34,12 +34,18 @@
 - [ ] DL: confirm current lecture list, HW5+ content, midterm format (Canvas/Piazza once enrolled).
 - [x] Repo visibility → student is to set it to **private** in GitHub Settings (Claude cannot change repo settings).
 
+## Notion course (the student's main study interface)
+- Page **Robotics Professor** (private draft in student's Notion): https://app.notion.com/p/424fe2d3cc0281caa9d9e09c13adddf0
+- Subpages 0–6 (Foundations, RDKDC, CIS I, ASBR, Deep Learning, Computer Vision, Robot Learning). Each lesson = Why · Lecture · key equations · Build · Learn from · Self-test (hidden answers) · Lesson-done checkbox.
+- Lesson codes: F1–F10, R1–R8, C1–C8, A1–A7, D1–D8, V1–V8, H1–H8. Student can ask: "lecture me on R5", "quiz me on C2", "review my code for A5".
+
 ## Log
 
-### 2026-11-26 — Day 0 (planning)
+### 2026-11-26: planning
 - Profile update: CS engineering graduate + Associate SWE; start-from-zero is for completeness, not because of zero knowledge. Phase 0 rebalanced: faster programming, deeper math.
 - Created `knowledge-base` branch, README entry point, Phase 0 foundations plan (`courses/00-foundations/`).
 - Research complete for all six courses → `courses/0X-*/README.md` (sources cited; uncertain facts marked "(unverified)").
 - Wrote `STUDY_PLAN.md` (by subject; day schedule removed at student's request) and `CROSS_COURSE_MAP.md` (12 shared engines, convention traps, GenAI policies).
 - Decision: curated MIT 18.06/18.02 path instead of full lecture series (see foundations file).
-- **Next: Foundations → Mac setup, Python, Git, 3Blue1Brown linear algebra.**
+- Built the Notion "Robotics Professor" course (59 lessons across 7 pages).
+- **Next: Foundations F1 → Mac setup, Python, Git; start 3Blue1Brown linear algebra.**
