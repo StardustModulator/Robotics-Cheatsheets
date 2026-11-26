@@ -113,6 +113,15 @@
 - [ ] Train a model in PyTorch with autograd on MPS.
 - [ ] Comfortable with Python classes, NumPy broadcasting, Matplotlib plots, git commit/push.
 
+## Extra foundation modules scheduled later in the master plan
+- **MATLAB Onramp** (free, ~2 h), evening of Day 5. RDKDC labs are MATLAB (+ ROS Toolbox); ASBR A2 used MATLAB.
+- **C++ crash course**, Day 12: syntax, references/pointers, RAII, classes, templates basics, STL, CMake, **Eigen**.
+  Resources: learncpp.com (chapters 0–13 selectively), Eigen "Getting started" + "Geometry module".
+  Build: port your SO(3)/SE(3) toolkit to C++/Eigen with unit tests.
+- **ROS 2 day**, Day 18: Ubuntu 24.04 ARM VM (UTM free / Parallels) or Docker on the M1; ROS 2 **Jazzy**
+  beginner CLI + client-library tutorials (nodes, topics, services, actions, tf2, launch, colcon);
+  run RDKDC's public sim package and MoveIt 2 tutorials; Gazebo basics.
+
 ## Ongoing (during Phases 1–3)
 - Keep a `math-gaps.md` list; patch gaps just-in-time (≤ 45 min each) rather than up front.
 - Later, when the courses need them: C++ basics (for ROS 2 / performance), MATLAB Onramp (2 h, for RDKDC labs), ROS 2 tutorials.

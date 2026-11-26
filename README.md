@@ -16,15 +16,15 @@
 
 ## The six courses
 
-| # | Course | Folder | Main texts / sources |
-|---|--------|--------|----------------------|
-| 0 | Foundations: Python, NumPy, linear algebra, calculus, probability, PyTorch (from zero) | `courses/00-foundations/` | Phase 0, Days 1–5 |
-| 1 | Robot Devices, Kinematics, Dynamics & Control (RDKDC, EN.530.646) | `courses/01-rdkdc/` | Murray-Li-Sastry *A Mathematical Introduction to Robotic Manipulation*; Lynch & Park *Modern Robotics*; separate DH-parameter material |
-| 2 | Computer Vision for Robotics | `courses/02-computer-vision/` | Geometric vision (multi-view geometry) |
-| 3 | Machine Learning: Deep Learning (EN.601.482/682) | `courses/03-ml-deep-learning/` | Hands-on, implement models from scratch; rigorous |
-| 4 | Hands-on Robot Learning | `courses/04-hands-on-robot-learning/` | Full course is public online |
-| 5 | Algorithms for Sensor-Based Robotics (EN.601.463/663) | `courses/05-algorithms-sensor-based-robotics/` | Lecture material on the CIRL/CIIS site; student already covered a good part |
-| 6 | Computer Integrated Surgery I (EN.601.455/655) | `courses/06-cis1/` | Full coursework and PAs public on the CIIS wiki (Russell Taylor) |
+| # | Course (confirmed by research) | Instructor (latest found) | Folder |
+|---|---|---|---|
+| 0 | Foundations: Python, NumPy, linear algebra, calculus, probability, PyTorch, C++/ROS 2 | — | `courses/00-foundations/` |
+| 1 | **EN.530.646** Robot Devices, Kinematics, Dynamics & Control (RDKDC). Core. MLS + Modern Robotics; DH via Keating UR5 IK handout; MATLAB + ROS 2 Jazzy labs on UR5 | Jin Seob Kim (course built by Noah Cowan) | `courses/01-rdkdc/` |
+| 2 | **EN.601.661** Computer Vision (no JHU course is titled exactly "CV for Robotics"; **verify on your schedule**). Szeliski 2e; H&Z reference | Kapil Katyal & Greg Hager | `courses/02-computer-vision/` |
+| 3 | **EN.601.682** Machine Learning: Deep Learning. NumPy-from-scratch HWs then PyTorch; Kaggle CNN; final project | Mathias Unberath (Fall) | `courses/03-ml-deep-learning/` |
+| 4 | **EN.601.698** Hands-on Robot Learning (first offered Fall 2026). Imitation learning + VLAs on real **SO-101** arms with **LeRobot**; DL is a prerequisite | Krishna Murthy Jatavallabhula | `courses/04-hands-on-robot-learning/` |
+| 5 | **EN.601.663** Algorithms for Sensor-Based Robotics. Core. 5 C++/ROS 2 assignments; site: cirl.lcsr.jhu.edu/sensorbasedrobotics | Simon Leonard | `courses/05-algorithms-sensor-based-robotics/` |
+| 6 | **EN.601.655** Computer Integrated Surgery I. PA1–PA5 on CIIS wiki; take-home HWs instead of exams | Russell Taylor | `courses/06-cis1/` |
 
 Each course folder has a `README.md` with: course identity, reconstructed syllabus,
 textbook chapter map, assignments, a concept and equation checklist, reviews and tips,
