@@ -1,5 +1,7 @@
 # 05 — Algorithms for Sensor-Based Robotics (EN.601.463 / EN.601.663)
 
+> **Verified 2026-11-26** against the student's uploaded copy of the official CIRL course page: description, credits, instructor, meetings, lab (Wyman 170, Ubuntu 24.04 + ROS 2 Humble), **primary book = Choset *Principles of Robot Motion***, other resources (Thrun *Probabilistic Robotics*, LaValle), prerequisites (linear algebra, calculus, **C++ and MATLAB**), grading (47/25/25/3), Fall 2026 dates, weekly schedule & readings, and policies (no teamwork, no online/AI tools → F) all confirmed. Slide decks and textbooks are being distilled into `library/`.
+>
 > **Status of this file:** research compiled 2026-11-26. Everything below is either cited to a URL or
 > marked **(unverified)**. During the research session the course hosts (`cirl.lcsr.jhu.edu`,
 > `cs.jhu.edu`, `lcsr.jhu.edu`, `jhu.semester.ly`, `web.archive.org`) were **blocked by the sandbox
