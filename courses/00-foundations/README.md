@@ -1,7 +1,9 @@
 # 00 — Foundations (Phase 0, Days 1–5, ~80 hours)
 
-> Student starts from **absolute zero**: no Python, NumPy, PyTorch, C++, ROS, linear algebra
-> (SVD, eigenvalues, matrix exponentials), probability (Bayes' rule, Gaussians) or calculus fluency.
+> Student is a **CS engineering graduate and former Associate Software Engineer**, but chooses to start
+> **every topic from zero** so there are **no holes**. Rule: cover everything from first principles and skip
+> nothing, but move **fast** through programming/tooling (familiar territory) and spend the saved time on
+> **math rigor** (linear algebra, calculus, probability), the real bottleneck for these six courses.
 > Every foundation topic below is learned **by building a small robotics thing**, so that
 > the math is already "in the hands" when the six courses use it.
 
@@ -35,9 +37,13 @@
 
 ## Day-by-day (each day ≈ 16 h: ~6 h watch/read, ~9 h build, ~1 h write notes + commit)
 
-### Day 1 — Python from zero + Git
-- **Learn:** variables, types, if/for/while, functions, lists/dicts/tuples, list comprehensions,
-  classes/objects, modules, reading/writing files, exceptions, virtual envs, Jupyter, Git basics.
+### Day 1 — Python from zero (fast, complete) + Git + start Linear Algebra
+- **Learn (~6 h, rigorous but quick given SWE background):** the whole language end-to-end: types, control flow,
+  functions (args/kwargs, closures, lambdas), data structures & complexity, comprehensions, generators,
+  classes/dataclasses/dunder methods, modules/packages, exceptions, file I/O, type hints, `pytest`,
+  virtual envs, Jupyter, profiling (`timeit`, `cProfile`), Git branching/merging. Python-specific idioms
+  (mutability, copy vs view, `is` vs `==`, late binding) matter later for NumPy/PyTorch bugs.
+- **Then (~4 h):** begin 3Blue1Brown *Essence of Linear Algebra* ch. 1–5 (pulled forward from Day 2).
 - **Resources:** Harvard **CS50P** (lectures 0–6, watch at 1.5×) — https://cs50.harvard.edu/python/ ;
   official tutorial https://docs.python.org/3/tutorial/ ; *Missing Semester* (MIT) shell + git lectures https://missing.csail.mit.edu/
 - **Build:**
