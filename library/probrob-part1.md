@@ -79,15 +79,8 @@ filter (KF, EKF, histogram, PF) is a way to *represent* and *approximate* this r
 - Generative laws: (2.32)→(2.33) **state transition probability** $p(x_t|x_{0:t-1},z_{1:t-1},u_{1:t})=p(x_t|x_{t-1},u_t)$; (2.34) **measurement probability** $p(z_t|x_{0:t},z_{1:t-1},u_{1:t})=p(z_t|x_t)$. Together with $p(x_0)$ these define an HMM / dynamic Bayes network (p. 22).
 - **Belief** (2.35): $bel(x_t)=p(x_t|z_{1:t},u_{1:t})$. **Prediction** (2.36): $\overline{bel}(x_t)=p(x_t|z_{1:t-1},u_{1:t})$. Going $\overline{bel}\to bel$ = correction / measurement update.
 
-**Algorithms — Table 2.1 Bayes filter (PDF 36, p. 24):**
-```
-Algorithm Bayes_filter(bel(x_{t-1}), u_t, z_t):
-  for all x_t do
-     belbar(x_t) = ∫ p(x_t | u_t, x_{t-1}) bel(x_{t-1}) dx_{t-1}     # control update / prediction
-     bel(x_t)    = η p(z_t | x_t) belbar(x_t)                        # measurement update
-  endfor
-  return bel(x_t)
-```
+**Algorithm — Table 2.1 Bayes filter (PDF 36, p. 24), summarized:**
+- Recursion (one step, for every $x_t$): **predict** $\overline{bel}(x_t)=\int p(x_t|u_t,x_{t-1})\,bel(x_{t-1})\,dx_{t-1}$ (total probability over where you came from), then **correct** $bel(x_t)=\eta\,p(z_t|x_t)\,\overline{bel}(x_t)$ (Bayes rule, renormalize).
 Initialization: point mass if $x_0$ known; uniform if ignorant (p. 23–24). Implementable as-is only for finite state or closed-form integrals.
 
 **Derivation (§2.4.3, PDF 40–41, pp. 28–29) — know this cold for A5:**
@@ -134,16 +127,10 @@ form, measurement update is cheap in information form — the two filters are du
   3. $bel(x_0)=\mathcal N(\mu_0,\Sigma_0)$.
 - **Notation (Thrun): $R_t$ = process/motion noise covariance, $Q_t$ = measurement noise covariance.** This is the *opposite* of much control/EE literature and of many course slides (often $Q$=process, $R$=measurement). Always check which is which.
 
-**Algorithm — Table 3.1 Kalman filter (PDF 48, p. 36):**
-```
-Algorithm Kalman_filter(μ_{t-1}, Σ_{t-1}, u_t, z_t):
- 2: μ̄_t = A_t μ_{t-1} + B_t u_t
- 3: Σ̄_t = A_t Σ_{t-1} A_tᵀ + R_t
- 4: K_t = Σ̄_t C_tᵀ (C_t Σ̄_t C_tᵀ + Q_t)⁻¹
- 5: μ_t = μ̄_t + K_t (z_t − C_t μ̄_t)
- 6: Σ_t = (I − K_t C_t) Σ̄_t
- 7: return μ_t, Σ_t
-```
+**Algorithm — Table 3.1 Kalman filter (PDF 48, p. 36), summarized:**
+- Predict: $\bar\mu_t=A_t\mu_{t-1}+B_tu_t$, $\;\bar\Sigma_t=A_t\Sigma_{t-1}A_t^T+R_t$.
+- Gain: $K_t=\bar\Sigma_tC_t^T(C_t\bar\Sigma_tC_t^T+Q_t)^{-1}$.
+- Correct: $\mu_t=\bar\mu_t+K_t(z_t-C_t\bar\mu_t)$, $\;\Sigma_t=(I-K_tC_t)\bar\Sigma_t$.
 - Complexity (p. 37): Line 4 inversion ~$O(k^{2.8})$ (k = measurement dim), Line 6 at least $O(n^2)$; for mapping (k ≪ n) the $O(n^2)$ dominates. EKF same: $O(k^{2.8}+n^2)$ (p. 53).
 - Illustration Fig 3.2 (PDF 50, p. 38): 1-D localization with GPS-like measurement: fusing prior and measurement yields a mean *between* the two and a variance *smaller than both* (information integration); motion shifts and widens. Measurement decreases, prediction increases uncertainty. (Text on p. 39 says "Lines 5-7" for the measurement update — a draft typo; it is Lines 4–6.)
 
@@ -156,41 +143,23 @@ Algorithm Kalman_filter(μ_{t-1}, Σ_{t-1}, u_t, z_t):
 **EKF (§3.3, PDF 60–66, pp. 48–54):**
 - Model (3.47)/(3.48): $x_t=g(u_t,x_{t-1})+\varepsilon_t$, $z_t=h(x_t)+\delta_t$. Belief is then *not* Gaussian; EKF approximates it by one.
 - Linearize (3.49)–(3.50): $g(u_t,x_{t-1})\approx g(u_t,\mu_{t-1})+G_t(x_{t-1}-\mu_{t-1})$, $G_t=\partial g/\partial x_{t-1}$ at $(u_t,\mu_{t-1})$ (n×n). (3.52): $h(x_t)\approx h(\bar\mu_t)+H_t(x_t-\bar\mu_t)$, $H_t=\partial h/\partial x_t$ at $\bar\mu_t$ (k×n). Note: **$G_t$ linearizes at the previous posterior mean, $H_t$ at the predicted mean.**
-- **Table 3.3 EKF (PDF 63, p. 51):**
-```
-Algorithm Extended_Kalman_filter(μ_{t-1}, Σ_{t-1}, u_t, z_t):
- 2: μ̄_t = g(u_t, μ_{t-1})
- 3: Σ̄_t = G_t Σ_{t-1} G_tᵀ + R_t
- 4: K_t = Σ̄_t H_tᵀ (H_t Σ̄_t H_tᵀ + Q_t)⁻¹
- 5: μ_t = μ̄_t + K_t (z_t − h(μ̄_t))
- 6: Σ_t = (I − K_t H_t) Σ̄t
- 7: return μ_t, Σ_t
-```
+- **Table 3.3 EKF (PDF 63, p. 51), summarized:**
+- Predict: $\bar\mu_t=g(u_t,\mu_{t-1})$, $\;\bar\Sigma_t=G_t\Sigma_{t-1}G_t^T+R_t$.
+- Gain: $K_t=\bar\Sigma_tH_t^T(H_t\bar\Sigma_tH_t^T+Q_t)^{-1}$.
+- Correct: $\mu_t=\bar\mu_t+K_t(z_t-h(\bar\mu_t))$, $\;\Sigma_t=(I-K_tH_t)\bar\Sigma_t$.
   KF→EKF swap table (p. 51): $A\mu+Bu\to g(u,\mu)$, $C\bar\mu\to h(\bar\mu)$, $A,B\to G$, $C\to H$.
 - Derivation sketch (3.54)–(3.63) parallels KF with $\Phi_t=(G_t^TR_t^{-1}G_t+\Sigma_{t-1}^{-1})^{-1}$ (3.57). **Typo in draft (3.63):** gain printed as $\bar\Sigma_tH_t^T(H_t\bar\Sigma_{t-1}H_t^T+Q_t)^{-1}$ — the $\bar\Sigma_{t-1}$ should be $\bar\Sigma_t$ (Table 3.3 Line 4 is correct).
 - Practical (§3.3.4, pp. 53–54): EKF = "single guess + uncertainty ellipse"; most popular estimator; robust in practice even when assumptions are violated. Multi-modal extension: mixture of Gaussians (3.64) $bel(x)=\sum_j a_j\mathcal N(x;\mu_{j,t},\Sigma_{j,t})$, $a_j\ge0,\sum a_j=1$ → **multi-hypothesis EKF (MHEKF)** (relevant to the ASBR "multiple hypotheses" week). Linearization quality depends on (i) degree of nonlinearity and (ii) **width of the belief** — keep uncertainty small. EKF does *not* preserve true mean/covariance; UKF and moment matching do better (p. 54).
 
 **Information filter (§3.4, PDF 67–75, pp. 55–63):**
 - Canonical form (3.65)/(3.66): $\Omega=\Sigma^{-1}$ (information/precision matrix), $\xi=\Sigma^{-1}\mu$; back: $\Sigma=\Omega^{-1}$, $\mu=\Omega^{-1}\xi$ (3.67)/(3.68). Gaussian (3.72): $p(x)=\eta\exp\{-\tfrac12x^T\Omega x+x^T\xi\}$; (3.73) $-\log p(x)=\text{const}+\tfrac12x^T\Omega x-x^T\xi$ — quadratic, minimum at $\Omega^{-1}\xi$ (3.74). Ω-weighted quadratic distance = **Mahalanobis distance** (p. 57).
-- **Table 3.4 Information filter (PDF 69, p. 57):**
-```
-Algorithm Information_filter(ξ_{t-1}, Ω_{t-1}, u_t, z_t):
- 2: Ω̄_t = (A_t Ω_{t-1}⁻¹ A_tᵀ + R_t)⁻¹
- 3: ξ̄_t = Ω̄_t (A_t Ω_{t-1}⁻¹ ξ_{t-1} + B_t u_t)
- 4: Ω_t = C_tᵀ Q_t⁻¹ C_t + Ω̄_t
- 5: ξ_t = C_tᵀ Q_t⁻¹ z_t + ξ̄_t
- 6: return ξ_t, Ω_t
-```
+- **Table 3.4 Information filter (PDF 69, p. 57), summarized:**
+- Predict: $\bar\Omega_t=(A_t\Omega_{t-1}^{-1}A_t^T+R_t)^{-1}$, $\;\bar\xi_t=\bar\Omega_t(A_t\Omega_{t-1}^{-1}\xi_{t-1}+B_tu_t)$ (i.e. convert to moments, predict, convert back).
+- Correct (additive!): $\Omega_t=\bar\Omega_t+C_t^TQ_t^{-1}C_t$, $\;\xi_t=\bar\xi_t+C_t^TQ_t^{-1}z_t$.
 - Duality (p. 58): IF prediction needs two n×n inversions ($O(n^{2.8})$); IF measurement update is *additive* ($O(n^2)$, cheaper if the measurement touches few variables). KF: the reverse. Derivation (3.77)–(3.85): substitute (3.79) into KF prediction; measurement update by multiplying out the exponent and reading off quadratic/linear terms.
-- **Table 3.5 Extended information filter (PDF 72, p. 60):**
-```
- 2: μ_{t-1} = Ω_{t-1}⁻¹ ξ_{t-1}
- 3: Ω̄_t = (G_t Ω_{t-1}⁻¹ G_tᵀ + R_t)⁻¹
- 4: ξ̄_t = Ω̄_t g(u_t, μ_{t-1})
- 5: μ̄_t = g(u_t, μ_{t-1})
- 6: Ω_t = Ω̄_t + H_tᵀ Q_t⁻¹ H_t
- 7: ξ_t = ξ̄_t + H_tᵀ Q_t⁻¹ [z_t − h(μ̄_t) − H_t μ̄_t]     ← SIGN ERROR in draft
-```
+- **Table 3.5 Extended information filter (PDF 72, p. 60), summarized:**
+- Recover $\mu_{t-1}=\Omega_{t-1}^{-1}\xi_{t-1}$; predict $\bar\Omega_t=(G_t\Omega_{t-1}^{-1}G_t^T+R_t)^{-1}$, $\bar\mu_t=g(u_t,\mu_{t-1})$, $\bar\xi_t=\bar\Omega_t\bar\mu_t$.
+- Correct: $\Omega_t=\bar\Omega_t+H_t^TQ_t^{-1}H_t$, $\;\xi_t=\bar\xi_t+H_t^TQ_t^{-1}[z_t-h(\bar\mu_t)\;\mathbf{+}\;H_t\bar\mu_t]$ (corrected sign — the draft prints "−", see below).
   **Draft error (Table 3.5 Line 7 and Eqs. 3.97–3.100):** the linearized measurement is $h(\bar\mu)+H(x-\bar\mu)=Hx+(h(\bar\mu)-H\bar\mu)$, so the linear term is $H^TQ^{-1}[z_t-h(\bar\mu_t)+H_t\bar\mu_t]$. The 2005 book (Table 3.6) has the correct **$+H_t\bar\mu_t$**. Sanity check: if $h$ is linear, $h(\bar\mu)=H\bar\mu$ and the bracket must reduce to $z_t$ (as in Table 3.4) — only "+" does that.
 - Practical (§3.4.6, pp. 62–63): global uncertainty is trivial ($\Omega=0$); numerically more stable; natural for **decentralized multi-robot fusion** (information adds, order-independent). Downsides: nonlinear EIF must recover $\mu=\Omega^{-1}\xi$ each step (inversion); prediction needs inversions. But **Ω is often sparse when Σ is dense** → Gaussian Markov random fields; sets up SEIF/GraphSLAM (Ch 11–12).
 

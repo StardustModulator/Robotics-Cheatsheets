@@ -369,11 +369,11 @@ Summary (p. 143–144) is a perfect one-page R3/R5/R6 crib (PoE, workspaces, SP1
 - Ex 2 (inertia of ellipsoid, cylinder), **Ex 3** (inertia under change of frame $\mathcal M_c=\mathrm{Ad}^T_{g_{bc}}\mathcal M_b\mathrm{Ad}_{g_{bc}}$; parallel-axis theorem in disguise) — R7.
 - Ex 4–6 (spatial Euler/Newton–Euler; $\mathcal M\dot V^b+C V^b=F^b$ with skew property).
 - **Ex 7** (verify $M>0$, $\dot M-2C$ skew for (4.11)) and **Ex 8** (passivity ⇒ $\dot H=\dot\theta\cdot\tau$) — R7 must-do.
-- **Ex 9** (workspace PD exponential tracking), **Ex 10** (Slotine–Li-type law $\tau=M(\ddot\theta_d+\lambda\dot e)+C(\dot\theta_d+\lambda e)+N+K_v\dot e+K_pe$ — note the book's sign convention here, see pitfalls), **Ex 11** (skewed-Lyapunov positivity lemma) — R8.
+- **Ex 9** (workspace PD exponential tracking), **Ex 10** (Slotine–Li-type law $\tau=M(\ddot\theta_d+\lambda\dot e)+C(\dot\theta_d+\lambda e)+N+K_v\dot e+K_pe$, which needs $e=\theta_d-\theta$; see pitfall 1), **Ex 11** (skewed-Lyapunov positivity lemma) — R8.
 - Ex 12 (hybrid control in workspace coordinates for the slot) — R8 optional.
 
 **Conventions / pitfalls (Ch. 4):**
-1. $e=\theta-\theta_d$ (actual minus desired) ⇒ feedback terms are $-K_v\dot e-K_pe$. **The chapter Summary (p. 207, PDF 225) prints both laws with $+K_v\dot e+K_pe$** — a sign typo relative to (4.49)/(4.53) (with $e=\theta-\theta_d$ the "+" versions are unstable). Ex 10 also prints "$+K_v\dot e+K_pe$" (same convention issue, presumably intended with $e=\theta_d-\theta$ or a sign slip).
+1. **Error sign convention.** In §5 (eqs. 4.49–4.54) $e=\theta-\theta_d$ (actual minus desired) ⇒ feedback terms are $-K_v\dot e-K_pe$. The chapter Summary (p. 207, PDF 225) prints both laws with $+K_v\dot e+K_pe$, and Ex 10 writes $M(\ddot\theta_d+\lambda\dot e)+C(\dot\theta_d+\lambda e)+N+K_v\dot e+K_pe$; these are correct only with the opposite convention $e=\theta_d-\theta$. Mixing the two conventions makes the loop unstable — always state which $e$ you use.
 2. **Prop 4.9 (pure PD) assumes no gravity:** the closed loop (4.52) drops $N$. With gravity, pure PD has steady-state error; use PD + gravity compensation $\tau=-K_v\dot\theta-K_p(\theta-\theta_d)+N(\theta)$ (or an integral term).
 3. $\dot M-2C$ skew holds only for the Christoffel-symbol C (4.23); other factorizations with the same $C\dot\theta$ need not satisfy it.
 4. Augmented PD uses $C(\theta,\dot\theta)\dot\theta_d$ — using $C\dot\theta$ would break the error equation $M\ddot e+C\dot e+\dots$.
