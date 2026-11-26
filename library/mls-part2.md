@@ -442,8 +442,9 @@ Ch. 7); push-forward/pull-back; **Prop A.1** $F_*[X,Y]=[F_*X,F_*Y]$; Lie algebra
   $=V^s_{ab}\cdot F_a=V^b_{ab}\cdot F_b$ (same frame!).
 - Transformation laws (p. 421): $V^s_{ac}=\mathrm{Ad}_{g_{ab}}V^s_{bc}$ (change of spatial frame); changing body frame leaves $V^s$
   unchanged; $V^b_{ac}=\mathrm{Ad}_{g_{bc}^{-1}}V^b_{ab}$ (fixed $g_{bc}$); moving frames: $V^s_{ac}=V^s_{ab}+\mathrm{Ad}_{g_{ab}}V^s_{bc}$;
-  $\mathrm{Ad}_g=\begin{bmatrix}R&\hat pR\\0&R\end{bmatrix}$; wrenches $F_b=\mathrm{Ad}^T_{g_{ab}}F_a$ (book writes $\mathrm{Ad}^T_{g^{-1}_{ab}}$-style coadjoint; pairing is preserved:
-  $F'\cdot V'=F\cdot V$).
+  $\mathrm{Ad}_g=\begin{bmatrix}R&\hat pR\\0&R\end{bmatrix}$; wrenches: if twists go $V'=\mathrm{Ad}_gV$ then wrenches go $F'=\mathrm{Ad}^T_{g^{-1}}F$ so that $F'\cdot V'=F\cdot V$ (p. 429). Since
+  $V_b=\mathrm{Ad}_{g_{ab}^{-1}}V_a$, this gives **$F_b=\mathrm{Ad}^T_{g_{ab}}F_a$** — consistent with Ch. 2 and with Ch. 5's $F_o=\mathrm{Ad}^T_{g_{oc}^{-1}}F_c$.
+  **Typo p. 422:** printed $F_b=\mathrm{Ad}^T_{g_{ab}^{-1}}F_a$ has a spurious inverse (rule of thumb: $F_{new}=\mathrm{Ad}^T_{g_{old,new}}F_{old}$).
 - **Metrics (§3.2):** the ℝ⁶ dot product of twists is not Ad-invariant (explicit $\mathrm{Ad}_g^T\mathrm{Ad}_g\ne I$ when $p\ne0$).
   Lemma A.2: a symmetric matrix commuting with all of SO(n) is αI ⇒ **Prop A.3** unique invariant metric on ℝⁿ up to
   length scale. **Prop A.5:** bi-invariant quadratic forms on SE(3) are exactly $\Psi_e=\begin{bmatrix}0&\beta I\\\beta I&\gamma I\end{bmatrix}$ (order $(v,\omega)$).
