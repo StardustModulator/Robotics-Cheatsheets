@@ -38,6 +38,7 @@ STUDY_PLAN.md              ← master plan: subjects, what to learn, how, where 
 PROGRESS.md                ← running log: what's done, what's next, open questions
 CROSS_COURSE_MAP.md        ← how concepts overlap between courses (learn once, use 3×)
 courses/0X-*/README.md     ← per-course knowledge base
+library/                   ← page-by-page notes from the student's own textbooks & ASBR slides (index, notation table, errata)
 ```
 
 ## How to resume in a new session

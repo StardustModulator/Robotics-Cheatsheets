@@ -41,7 +41,7 @@ Foundations → RDKDC + CIS I + ASBR (same rigid-body math) alongside Deep Learn
 ## 3. ASBR: Algorithms for Sensor-Based Robotics (EN.601.663)
 **Learn:** rigid motion & velocity · resolved-rate control · hand-eye calibration AX = XB (Park–Martin) · C-space & collision checking · potential fields · A*/Dijkstra · PRM, RRT, RRT*, EST · Bayes filter, Kalman filter, EKF, particle filter (Monte Carlo localization).
 **Build:** prototype each in Python → port to C++/ROS 2: resolved-rate on a UR5e · hand-eye on synthetic data · A* and potential fields on a grid · RRT/PRM for a 2-link arm · EKF fusing GPS + IMU · particle-filter localization.
-**Where:** `cirl.lcsr.jhu.edu/sensorbasedrobotics` + slides at `cs.jhu.edu/~sleonard` · Choset *Principles of Robot Motion* · LaValle *Planning Algorithms* (free) · Thrun *Probabilistic Robotics* · Modern Robotics ch. 10 · Cyrill Stachniss lectures (YouTube).
+**Where:** the course slides (your uploads; notes in `library/asbr-slides-part*.md`) · **Choset *Principles of Robot Motion* (primary text)** · LaValle *Planning Algorithms* (free) · Thrun *Probabilistic Robotics* · Modern Robotics ch. 10 · Cyrill Stachniss lectures (YouTube).
 **Watch out:** assignments are C++/ROS 2/MoveIt 2; AI use = F.
 
 ## 4. Deep Learning: Machine Learning: Deep Learning (EN.601.682)
