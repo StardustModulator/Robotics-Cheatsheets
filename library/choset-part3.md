@@ -148,3 +148,81 @@ Source: cb2bd4a2-Robot_Motion_Theory_and_Algorithms.pdf, PDF pages 411–616 (bo
 ## Bibliography & Index (PDF pp. 578–616, book pp. 565–603)
 Reference list (≈ 430 entries) and index; skimmed only. Useful pointers for this course plan: Thrun–Burgard–Fox *Probabilistic Robotics* lineage for Ch 9; Murray–Li–Sastry [330] for Lie brackets/nonholonomic steering (R-course overlap); Laumond [266] for car planning; Stentz [397] for D*; Gilbert–Johnson–Keerthi [163] for GJK; Reeds–Shepp [360].
 
+---
+
+# DEEP DIVE (outside assigned range, read for the A5/A6 check): Ch 8 Kalman Filtering and Ch 9 Bayesian Methods
+
+## Ch 8 Kalman Filtering (PDF pp. 283–314, book pp. 269–300) — Lessons: A5 (primary), F8, F4, F5
+**Big idea:** Dead reckoning loses information every step; sensors inject it back. Any probabilistic estimator is a loop of **predict** (push the belief through the motion model — uncertainty grows) and **update** (fuse a measurement — uncertainty shrinks). The Kalman filter is the special case where everything is linear and Gaussian, so the belief stays Gaussian and the loop reduces to closed-form updates of a mean $\hat x$ and covariance $P$. Choset's derivation is *geometric*: the update is "the point on the set of states consistent with the measurement that is closest to the prediction" — first in Euclidean distance (naive observer), then in Mahalanobis distance (noise-free KF), then with a noisy measurement (full KF).
+
+**Notation (memorise — it differs from most slides/Thrun/ASBR):**
+
+| Choset | Meaning | Thrun / typical slides |
+|---|---|---|
+| $x(k+1)=F(k)x(k)+G(k)u(k)+v(k)$ (8.1) | process model | $A,B$; $x_t=A_tx_{t-1}+B_tu_t+\epsilon_t$ |
+| $y(k)=H(k)x(k)+w(k)$ (8.2) | measurement model | $C$ or $H$; $z_t$ |
+| $V(k)$ = cov of $v$ | process-noise covariance | $R_t$ (Thrun) / $Q$ (most others) |
+| $W(k)$ = cov of $w$ | measurement-noise covariance | $Q_t$ (Thrun) / $R$ (most others) |
+| $\hat x(k_1\mid k_2)$, $P(k_1\mid k_2)$ | estimate at $k_1$ using outputs up to $k_2$ | $\bar\mu_t,\bar\Sigma_t$ (predicted), $\mu_t,\Sigma_t$ |
+| $\nu$ | innovation | $z-\hat z$ |
+| $S$ | innovation covariance | $S$ |
+| $R=PH^TS^{-1}$ | **Kalman gain** | $K$ |
+
+So in Choset **$R$ is the gain, not the measurement noise**, and **$V,W$ are the noise covariances**. Mixing this up with the "$Q$ process / $R$ measurement" convention is the #1 source of bugs.
+
+**Key definitions:** white noise = independent across time (footnote p. 273); $H(k)$ assumed full row rank; observer = reconstructs state from $u,y$ history; Mahalanobis norm $\lVert x\rVert_M^2=x^TP^{-1}x$ ("distance in standard deviations", footnote p. 279).
+
+**Derivation chain (book pp. 274–284):**
+1. **Simple observer, no noise** (§8.2.2, Eqs 8.3–8.5): predict $\hat x(k+1|k)=F\hat x(k|k)+Gu$. The measurement confines the state to the hyperplane $\Omega=\{x: Hx=y(k+1)\}$. Shortest correction $\Delta x\perp\Omega$ ⇒ $\Delta x\in\mathrm{col}(H^T)$ (null-space/row-space facts, F4), $\Delta x=H^TK\nu$; enforcing $H(\hat x+\Delta x)=y$ gives $K=(HH^T)^{-1}$ (8.7): **$\hat x^+=\hat x^-+H^T(HH^T)^{-1}(y-H\hat x^-)$** — the minimum-norm (pseudo-inverse) correction. Flaw: errors parallel to $\Omega$ are never corrected.
+2. **Gaussian belief, process noise, no measurement noise** (§8.2.3): (8.8) Gaussian PDF; covariance prediction derived from the definition using independence of $v$: **$P(k+1|k)=FP(k|k)F^T+V$ (8.12)**. Update = most-likely point of the predicted Gaussian on $\Omega$ ⇔ minimise $\lVert\Delta x\rVert_M$ ⇒ $\Delta x\perp_M\Omega$ ⇒ $\Delta x=P^-H^TK\nu$ (8.13) ⇒ $K=(HP^-H^T)^{-1}$ ⇒ $\hat x^+=\hat x^-+P^-H^T(HP^-H^T)^{-1}\nu$ (8.14), $P^+=P^--RHP^-$ (8.15). Flaw: $P^+$ becomes singular (perfect measurements).
+3. **Full KF** (§8.2.4): project prediction into output space, $\hat y=H\hat x^-$, $\hat W=HP^-H^T$; fuse with the measurement Gaussian $(y,W)$ via **Thm 8.2.1 (product of Gaussians):** $(z_1,C_1)\cdot(z_2,C_2)\propto N(z_3,C_3)$ with $Q=C_1(C_1+C_2)^{-1}$, $z_3=z_1+Q(z_2-z_1)$, $C_3=C_1-QC_1$. The most-likely output is $y^*=\hat y+\hat W(\hat W+W)^{-1}(y-\hat y)$; then do step 2 with $\Omega^*=\{Hx=y^*\}$. Because $y^*-H\hat x^-=\hat W(\hat W+W)^{-1}\nu$ and $\hat W=HP^-H^T$, the $(HP^-H^T)^{-1}$ cancels and the gain becomes $P^-H^T(HP^-H^T+W)^{-1}$.
+
+**Key results — the KF (§8.2.5, Eqs 8.26–8.32):**
+$$\text{predict: }\ \hat x(k+1|k)=F(k)\hat x(k|k)+G(k)u(k),\qquad P(k+1|k)=F(k)P(k|k)F(k)^T+V(k)$$
+$$\text{update: }\ \nu=y(k+1)-H(k+1)\hat x(k+1|k),\quad S=H P(k+1|k)H^T+W(k+1),\quad R=P(k+1|k)H^TS^{-1}$$
+$$\hat x(k+1|k+1)=\hat x(k+1|k)+R\nu,\qquad P(k+1|k+1)=P(k+1|k)-RH(k+1)P(k+1|k)$$
+"Large" $R$ ⇒ trust the sensor; "small" $R$ ⇒ trust the prediction. The result is not just "best" but the exact Bayesian posterior for Gaussian prior + linear-Gaussian models; with non-Gaussian noise it is the best *linear* estimator.
+
+**Observability (§8.2.7, Thm 8.2.2):** LTI $(F,H)$ observable iff $\mathrm{rank}[H;HF;\dots;HF^{n-1}]=n$; for observable systems the KF error stays bounded. Dead-reckoning example measures only velocity ⇒ $[0\ 1;0\ 1]$ rank 1 ⇒ position variance grows without bound — not the filter's fault.
+
+**Dead-reckoning example (§8.2.6, Eqs 8.33–8.34; Figs 8.5–8.7):** $x=[x_r,v_r]^T$, $F=\begin{bmatrix}1&T\\0&1\end{bmatrix}$, $G=[0,T/m]^T$, $H=[0\ 1]$; $m=1,T=0.5,W=0.5,V=\begin{bmatrix}0.2&0.05\\0.05&0.1\end{bmatrix}$, $\hat x=[2,4]^T$, $P=\mathrm{diag}(1,2)$, $u=0$, 95 % confidence ellipses. Redo it in NumPy and reproduce the three figures (prediction ellipse grows/shears, 1-D fusion in output space, update squashes the ellipse vertically).
+
+**EKF (§8.3, Eqs 8.35–8.45):** $x(k+1)=f(x,u,k)+v$, $y=h(x,k)+w$. Predict with $f$ itself, covariance with Jacobian $F=\partial f/\partial x|_{\hat x(k|k)}$; innovation with $h$ itself, $\nu=y-h(\hat x(k+1|k))$, gain/covariance with $H=\partial h/\partial x|_{\hat x(k+1|k)}$. Everything else identical to the KF.
+- **Range–bearing localisation (§8.3.1):** unicycle $x=[x_r,y_r,\theta_r]$, $u=[u_1,u_2]$ (here *per-step* displacement and rotation — no $T$), $f=[x_r+u_1\cos\theta_r,\ y_r+u_1\sin\theta_r,\ \theta_r+u_2]$, $F=\begin{bmatrix}1&0&-u_1\sin\theta_r\\0&1&u_1\cos\theta_r\\0&0&1\end{bmatrix}$. Landmarks $(x_{\ell j},y_{\ell j})$ known; variable number $p(k)$ of measurements; association map $a(i)$; stacked $h$ and $H$. Range row $[\frac{\hat x_r-x_\ell}{\rho},\frac{\hat y_r-y_\ell}{\rho},0]$, bearing row $[-\frac{\hat y_r-y_\ell}{\rho^2},\frac{\hat x_r-x_\ell}{\rho^2},-1]$ (book writes it in the $1/(1+(\Delta y/\Delta x)^2)$ form).
+- **Data association (§8.3.2):** for measurement $i$ and landmark $j$: $\nu_{ij}=y_i-h_i(\hat x^-,j)$, $S_{ij}=H_iP^-H_i^T+W_i$, $\chi^2_{ij}=\nu_{ij}^TS_{ij}^{-1}\nu_{ij}$; pick the $j$ minimising it (nearest neighbour in Mahalanobis distance). Fig 8.8: Nomad Scout EKF track.
+- **Range-only (§8.3.3):** delete the bearing rows.
+
+**KF-SLAM (§8.4):**
+- **Simple SLAM (§8.4.1)** (Smith–Self–Cheeseman): state $[x_r,y_r,x_{\ell1},y_{\ell1},\dots]^T$; landmarks static so $F=I$, $G=[I_2;0]$, $V=\mathrm{blkdiag}(V_r,0,\dots)$; measurement = landmark position relative to robot, $y_i=[x_{\ell i}-x_r,\ y_{\ell i}-y_r]+w_i$ ⇒ **linear** $H_i$ with $-1$ in columns 1/2 and $+1$ in columns $2i+1/2i+2$; stack all $H_i$, $W=\mathrm{blkdiag}(W_i)$; plain KF solves SLAM.
+- **Range–bearing EKF-SLAM (§8.4.2, Eqs 8.46–8.47):** $y_i=[\rho_i,\ \mathrm{atan2}(y_{\ell i}-y_r,x_{\ell i}-x_r)-\theta_r]+w_i$; $H_i$ is dense in the three robot columns and the two columns of landmark $i$, zero elsewhere: range row $[\frac{x_r-x_{\ell}}{\rho},\frac{y_r-y_\ell}{\rho},0,\dots,\frac{x_\ell-x_r}{\rho},\frac{y_\ell-y_r}{\rho},\dots]$, bearing row $[\frac{y_\ell-y_r}{\rho^2},\frac{x_r-x_\ell}{\rho^2},-1,\dots,\frac{y_r-y_\ell}{\rho^2},\frac{x_\ell-x_r}{\rho^2},\dots]$. Gating (8.48): if the minimum $\chi^2$ exceeds a threshold, initialise a **new landmark**.
+
+**Algorithms:** KF loop (8.26–8.32); EKF loop (8.37–8.45); NN data association with χ² gate.
+
+**Worked examples worth redoing:** dead-reckoning KF (p. 285–289) — reproduce Figs 8.5–8.7; range–bearing EKF (p. 291–292) — derive $F$ and $H_i$ yourself; simple SLAM $H_i$ (p. 295).
+
+**Exercises worth doing (book pp. 297–300):**
+- **P9 (do this first — it is a miniature of ASBR Assignment 4):** unicycle with $T=0.25$, $\hat x(1|1)=[1,0.5,\pi/4]$, $u=[3,\pi]$, $P=I$, scalar measurement $y=x_1+w$ with variance 0.5, $y(2)=1.7$. My NumPy check (taking $V=0$ since the problem only specifies one variance, and $W=0.5$): $\hat x(2|1)=[1.5303,1.0303,1.5708]$, $P(2|1)=\begin{bmatrix}1.2812&-0.2812&-0.5303\\-0.2812&1.2812&0.5303\\-0.5303&0.5303&1\end{bmatrix}$, $S=1.7812$, $R=[0.7193,-0.1579,-0.2977]^T$, $\hat x(2|2)=[1.6524,1.0035,1.5203]$, $P(2|2)_{11}=0.3596$. (If you also take $V=0.5I$: $\hat x(2|2)=[1.6628,1.0094,1.5314]$.) Note how a measurement of $x_1$ alone corrects $\theta$ through the off-diagonal covariance.
+- **P10:** input noise $s_1,s_2$ ⇒ $P^-=FPF^T+G_uMG_u^T$ with $G_u=\partial f/\partial u$, $M=\mathrm{diag}(\sigma_1^2,\sigma_2^2)$ — exactly how IMU noise enters the A4 EKF.
+- **P7 / P8:** derive $P^+=P^--RHP^-$ and prove Thm 8.2.1 (product of Gaussians) — F8 core.
+- **P2:** Euler-discretise the mass–spring–damper (links to App J).
+- **P3–P6:** geometry of $\Omega$, null space ⟂ row space (F4).
+- **P11:** unbiasedness of the KF.
+- **P1:** why real noise (range, bearing, wheel mismatch, slip, multipath, gyro drift) is not zero-mean white Gaussian — great discussion question for A5.
+
+**Conventions / pitfalls:**
+- Choset's $R$ = gain, $V$ = process noise, $W$ = measurement noise (table above).
+- $P^+=P^--RHP^-$ is only valid with the optimal gain and loses symmetry/PSD numerically; in code prefer the **Joseph form** $P^+=(I-RH)P^-(I-RH)^T+RWR^T$ and symmetrise.
+- **Angle wrapping:** wrap the bearing innovation $\nu$ (and $\theta$) to $[-\pi,\pi)$ — the book never mentions it.
+- EKF Jacobians are evaluated at different points: $F$ at $\hat x(k|k)$, $H$ at $\hat x(k+1|k)$.
+- Discretisation: the book's examples use Euler ($F=I+TA$); for IMU integration with large $T$ use exact or higher-order discretisation (App J note).
+- "Optimal in the sense that the expected value of the error is minimised" (p. 285) is loose: the KF is unbiased and minimises the *mean-squared* error ($\mathrm{tr}\,P$).
+
+**Book errata found in Ch 8:**
+1. **p. 283, $y^*$ sign error:** printed $y^*=\hat y+\hat W(\hat W+W)^{-1}(\hat y-y(k+1))$; by Thm 8.2.1 it must be $(y(k+1)-\hat y)$. The next line also uses $W(k)$ where $W(k+1)$ is meant.
+2. **p. 291 bearing model:** $\mathrm{atan2}(y_r-y_\ell,\ x_r-x_\ell)-\theta_r$ is the direction from the *landmark to the robot*, off by π from the usual robot-to-landmark bearing; §8.4.2 (8.46) uses the correct $\mathrm{atan2}(y_\ell-y_r,x_\ell-x_r)-\theta_r$. The Jacobian rows are identical either way, but the predicted measurement differs by π — fatal without angle wrapping/consistency.
+3. **p. 286, (8.34):** "$y(k+1)=[0\ 1]x(k)+w(k)=Gx(k)+w(k)$" should be $y(k)=Hx(k)+w(k)$ with $H=[0\ 1]$ ($G$ is the input matrix).
+4. **p. 293:** $\chi^2_{ij}=\nu_{ij}S_{ij}^{-1}\nu_{ij}^T$ has the transposes swapped (ν is a column) → $\nu^TS^{-1}\nu$. **p. 297 (8.48)** omits the inverse: $\chi^2=(y_i-h_j)^TS_{ij}^{-1}(y_i-h_j)$.
+5. **p. 278:** in the $P(k+1|k)$ expansion the cross term is written $2F(x-\hat x)v^T$; it is $F(x-\hat x)v^T+v(x-\hat x)^TF^T$ (both vanish in expectation, so (8.12) is right).
+6. **p. 298 Problem 7:** uses $P_k$ for the *updated* covariance $P(k+1|k+1)$ and a non-symmetric "$-2R\nu(\cdot)^T$" cross term; it is the noise-free derivation (no $+RWR^T$ term).
+
+## Ch 9 Bayesian Methods

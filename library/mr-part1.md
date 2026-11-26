@@ -267,3 +267,65 @@ Summary table (p. 112–113/PDF 130–131) is the best one-page SO(3)/SE(3) chea
 - MR's manipulability derivation writes $J^{-1}$, but the ellipsoid formula with $A=JJ^T$ holds for any full-row-rank (redundant) J.
 - MLS derives $J^s_{st}$ from $\hat V^s=\sum_i(\partial g/\partial\theta_i\,g^{-1})\dot\theta_i$; MR's derivation (5.6) is the same computation written with adjoints.
 
+---
+
+## Master table: MR vs MLS (RDKDC) conventions, Ch. 2–5
+| Concept | Modern Robotics (MR) | Murray–Li–Sastry (MLS) | MR page (book/PDF) |
+|---|---|---|---|
+| Skew matrix | $[\omega]$ (hat = *unit vector*, e.g. $\hat\omega$) | $\hat\omega$ (hat = skew) | 77/95 |
+| Rotation exp | $e^{[\hat\omega]\theta}$, θ∈[0,π] in log | $e^{\hat\omega\theta}$ | 84/102 |
+| Rigid transform | $T=(R,p)$ | $g=(p,R)$ | 89/107 |
+| Twist / velocity 6-vector | $\mathcal V=(\omega,v)$ angular first | $\xi=(v,\omega)$ linear first | 98/116 |
+| se(3) matrix | $[\mathcal V]=\begin{bmatrix}[\omega]&v\\0&0\end{bmatrix}$ | $\hat\xi=\begin{bmatrix}\hat\omega&v\\0&0\end{bmatrix}$ | 98/116 |
+| Spatial / body velocity | $[\mathcal V_s]=\dot TT^{-1}$, $[\mathcal V_b]=T^{-1}\dot T$ | $\hat V^s=\dot gg^{-1}$, $\hat V^b=g^{-1}\dot g$ (same) | 101/119 |
+| Adjoint | $\begin{bmatrix}R&0\\[p]R&R\end{bmatrix}$ | $\begin{bmatrix}R&\hat pR\\0&R\end{bmatrix}$ | 100/118 |
+| Normalized joint axis | "screw axis" $\mathcal S$ (‖ω‖=1 or ω=0,‖v‖=1) | "unit twist" ξ | 104/122 |
+| Revolute axis | $(\omega,\ -\omega\times q)$ | $(-\omega\times q,\ \omega)$ | 142/160 |
+| SE(3) exp translation | $G(\theta)v=(I\theta+(1-c)[\omega]+(\theta-s)[\omega]^2)v$ | $(I-e^{\hat\omega\theta})(\omega\times v)+\omega\omega^Tv\theta$ | 105/123 |
+| SE(3) log | $v=G^{-1}(\theta)p$, $G^{-1}=\frac1\theta I-\frac12[\omega]+(\frac1\theta-\frac12\cot\frac\theta2)[\omega]^2$ | $v=A^{-1}p$ (same matrix) | 106/124 |
+| Wrench | $\mathcal F=(m,f)$ | $F=(f,\tau)$ | 109/127 |
+| Wrench change of frame | $\mathcal F_a=[\mathrm{Ad}_{T_{ba}}]^T\mathcal F_b$ | $F_a=\mathrm{Ad}^T_{g_{ba}}F_b$ | 110/128 |
+| PoE (space) | $e^{[\mathcal S_1]\theta_1}\cdots e^{[\mathcal S_n]\theta_n}M$ | $e^{\hat\xi_1\theta_1}\cdots e^{\hat\xi_n\theta_n}g_{st}(0)$ | 142/160 |
+| PoE (body) | $Me^{[\mathcal B_1]\theta_1}\cdots$, $\mathcal B_i=[\mathrm{Ad}_{M^{-1}}]\mathcal S_i$ | not written explicitly | 149/167 |
+| Space Jacobian col i | $[\mathrm{Ad}_{e^{[\mathcal S_1]\theta_1}\cdots e^{[\mathcal S_{i-1}]\theta_{i-1}}}]\mathcal S_i$ | $\xi_i'$ same, rows (v;ω) | 180/198 |
+| Body Jacobian col i | $[\mathrm{Ad}_{e^{-[\mathcal B_n]\theta_n}\cdots e^{-[\mathcal B_{i+1}]\theta_{i+1}}}]\mathcal B_i$ | $\xi_i^\dagger=\mathrm{Ad}^{-1}_{e^{\hat\xi_i\theta_i}\cdots e^{\hat\xi_n\theta_n}g_{st}(0)}\xi_i$ | 185/203 |
+| Statics | $\tau=J_b^T\mathcal F_b=J_s^T\mathcal F_s$ | $\tau=(J^b_{st})^TF^b$ | 190/208 |
+| Manipulability | ellipsoid of $A=JJ^T$; $\mu_1,\mu_2,\mu_3$ | $\sigma_{min}$, $\sigma_{min}/\sigma_{max}$, $\det J$ | 196–199/214–217 |
+| D–H (App. C) | **modified/Craig**: $\mathrm{Rot}(\hat x,\alpha_{i-1})\mathrm{Trans}(\hat x,a_{i-1})\mathrm{Trans}(\hat z,d_i)\mathrm{Rot}(\hat z,\phi_i)$ | not used | 590/608 |
+
+## Errata / text inconsistencies found in this preprint (pages 1–219)
+- p. 92/PDF 110 (Fig 3.14 text): "$T_{bc}$ … represents {b} relative to {c}" — by the book's own subscript convention it is {c} relative to {b}.
+- p. 144/PDF 162, Ex 4.1 table: $v_3$ listed as $(0,L_2,0)$; the narrative and the $[\mathcal S_3]$ matrix give $(0,-L_2,0)$, which is what $-\omega_3\times q_3$ yields. Use $(0,-L_2,0)$.
+- No other equation errors found in §§2–5 (pp. 1–201) when checked against derivations.
+
+---
+
+## Corrections & upgrades for the knowledge base
+- **[R1]** current: "Euler angles … hit gimbal lock, which exponential coordinates and quaternions avoid." → MR p. 86/PDF 104 fn 5: *every* three-parameter representation of SO(3) has singularities; exponential coordinates have theirs at θ = π (log not unique: antipodal points of the radius-π ball, Fig 3.13, p. 88–89) and the rate map $A(r)$ blows up at ‖r‖ = 2π (Ex 5.5). Only implicit reps (R, unit quaternions — double cover) are singularity-free (p. 28). → Fix: "Exponential coordinates avoid the Euler-angle *rate* singularity inside the ball ‖ω̂θ‖<π but still have a representation singularity at θ = π; only R and quaternions are globally singularity-free."
+- **[R1]** formulas ($e^{\hat\omega\theta}$, log, θ=π case via $R+I=2\omega\omega^T$) all check against MR Eq (3.51), (3.54), (3.55)–(3.61). Upgrade: add MR's explicit θ=π recipe $\hat\omega=\frac{1}{\sqrt{2(1+r_{33})}}(r_{13},r_{23},1+r_{33})$ (Eq 3.58, pick a column with $1+r_{ii}\neq0$), and the warning that $\pm\sqrt{(r_{ii}+1)/2}$ alone loses signs (Ex 3.8). "Learn from" → MR §3.2.3.3 pp. 85–89 (PDF 103–107).
+- **[R2]** all MLS formulas correct (twist exp, $\mathrm{Ad}_g$, revolute/prismatic twists). Upgrade: put the MR equivalents next to them (table above) — $[\mathrm{Ad}_T]=\begin{bmatrix}R&0\\[p]R&R\end{bmatrix}$, $G(\theta)v$, $\mathcal F=(m,f)$ — since the Fall-2026 lab handout uses (ω,v). Also add the physical meaning of $v_s=\dot p-\omega_s\times p$ (velocity of the body point at the {s} origin, MR Eq 3.73, p. 99/PDF 117) — students otherwise assume $v_s=\dot p$. Add wrenches + power invariance (MR §3.4, Prop 3.27) to R2 or R5; "Learn from" should be MR §3.3–3.4 (PDF 107–129), not only 3.3.
+- **[R3]** formulas correct; self-test body form $\xi'_i=\mathrm{Ad}_{g_{st}(0)^{-1}}\xi_i$ matches MR Eq (4.16). Upgrade: cite MR Ex 4.5 (UR5, PDF 165–166) and Ex 4.3/4.6 (same 6R in space and body form) as worked checks, and warn that MR's UR5 zero pose (arm stretched along +x̂s, M = [[−1,0,0,L1+L2],[0,0,1,W1+W2],[0,1,0,H1−H2]]) differs from the UR D–H zero pose. Note MR's own Ex 4.1 table typo (above).
+- **[R4] ERROR-PRONE REFERENCE:** the lesson teaches **standard (Spong) DH** $A_i=\mathrm{Rot}_z(\theta_i)\mathrm{Trans}_z(d_i)\mathrm{Trans}_x(a_i)\mathrm{Rot}_x(\alpha_i)$ but lists "MR Appendix C" as a source. MR App. C (p. 590/PDF 608; also Ex 4.21 p. 169/PDF 187) uses the **modified (Craig) convention** $T_{i-1,i}=\mathrm{Rot}(\hat x,\alpha_{i-1})\mathrm{Trans}(\hat x,a_{i-1})\mathrm{Trans}(\hat z,d_i)\mathrm{Rot}(\hat z,\phi_i)$. → Fix: label MR App. C as "modified DH — read for the PoE↔DH relation (§C.5), not for the Keating table"; keep Spong ch. 3 as the DH source. Also add the MR URDF section (§4.2, PDF 170–176) as the third convention students meet in ROS 2 (joint origin xyz+rpy, axis in child frame).
+- **[R5]** Jacobian, $J^b=\mathrm{Ad}_{g^{-1}}J^s$, τ = JᵀF, finite-difference self-test: all correct vs MR (5.11), (5.18), (5.22), (5.26). Upgrades: (i) state τ = J_bᵀF_b = J_sᵀF_s — frame of J and F must match, and the J-row order must match the wrench order (MLS (f,τ) vs MR (m,f)); (ii) the top/bottom halves of $J_s$ are *not* $(\omega,\dot p)$ — for tool-tip velocity use $J_b$ or $\mathrm{diag}(R_{sb},R_{sb})J_b$ (MR p. 198 says prefer $J_b$ for the linear manipulability ellipsoid); (iii) manipulability: MR's μ1 = σmax/σmin of J (not of JJᵀ), μ2 = its square, μ3 = √det(JJᵀ); MLS's "det J" only for square J — add both and note force ellipsoid = inverse semi-axes (MR p. 199); (iv) add MR's five generic singular geometries (§5.3, PDF 211–214) and that singularities are invariant to the choice of {s} and {b}; (v) UR5 wrist singularity should read "θ5 = 0 or π" (the lesson's self-test says only θ5 = 0; the README already has both) and elbow "θ3 = 0 or π". The shoulder case corresponds to MR Case III/geometric reasoning; MR does not treat the UR5 explicitly.
+- **[F3]** correct (SO(3) definition, columns = new axes in old frame, $g^{-1}$, pre- vs post-multiplication). Upgrade: add MR's "three uses of T" (represent configuration / change frame / displace, p. 91/PDF 109) and the fixed-vs-body displacement formulas (3.66)–(3.67) with Fig 3.15's numerical check; "Learn from" → MR §3.1–3.3.1 = PDF 80–115 (book 62–97); best drill = MR Ex 3.1 and 3.16.
+- **[F5]** correct (2-link $\det J=l_1l_2\sin\theta_2$ verified from MR Eq 5.1). Upgrade: cite MR Ch. 5 intro (PDF 189–195) for the 2R Jacobian, parallelogram/ellipse mapping and $\tau=J^Tf$ by power conservation; and MR Eq (2.7) $\frac{\partial g}{\partial\theta}\dot\theta=0$ (constraint Jacobian / Pfaffian form).
+- **[F7]** correct (Rodrigues; det = e^{tr}). Upgrade: cite MR Prop 3.10 (p. 82/PDF 100) for the four matrix-exponential properties, especially $Pe^{A}P^{-1}=e^{PAP^{-1}}$ (the identity behind the adjoint and body-form PoE), and MR Ex 3.33–3.35 (linear ODE + variation-of-constants) as exercises.
+- **[A2]** add MR Ex 3.25 (camera on arm, $AX=XB$: solve for B, existence condition on rotation angles, minimum number of pose pairs) and Ex 3.12 ($AR=RB$) as warm-ups before Park–Martin.
+- **[A3]** add MR Ch. 2 (C-space, topology, Grübler, holonomic vs nonholonomic, task space vs workspace; PDF 29–58) and Ex 2.26 (2R free C-space with walls) as the C-space reading.
+- **[courses/01-rdkdc/README.md]** mapping table: "Screws, Chasles' theorem → MR §3.3.2" is partly right; Chasles–Mozzi and exponential coordinates are §3.3.3.1 (PDF 122–123). "Wrenches, reciprocal screws → MR §3.4": MR §3.4 has wrenches only (no reciprocal screws).
+
+## Best-reference map
+- **[F3]** MR §3.1 (PDF 80–86), §3.2.1 (PDF 86–94), §3.3.1 (PDF 107–115); summary table PDF 130–131; Ex 3.1, 3.16, 3.17–3.23.
+- **[F5]** MR Ch. 5 intro 2R Jacobian (PDF 189–195); Eq (2.5)–(2.8) constraint Jacobians (PDF 48–49).
+- **[F7]** MR §3.2.3.1 Prop 3.10 (PDF 98–100); Rodrigues derivation PDF 100–102; Ex 3.33–3.35.
+- **[F4]** (bonus) manipulability ellipsoid as eigen/SVD of $JJ^T$ (PDF 214–217); Ex 3.10, 3.13.
+- **[R1]** MR §3.2.2–3.2.3 (PDF 94–107): Prop 3.8–3.9, Eq 3.51, log algorithm PDF 105–106; App. B for Euler/quaternions (PDF 593–602).
+- **[R2]** MR §3.3.2–3.4 (PDF 115–129): twists, Def 3.20 adjoint, Prop 3.22, Def 3.24 screw axis, Prop 3.25 exp, SE(3) log PDF 124, wrenches Prop 3.27 + Ex 3.28.
+- **[R3]** MR §4.1 (PDF 158–170): space form PDF 159–160, examples PDF 161–170 (UR5 PDF 165–166), body form PDF 166–168.
+- **[R4]** MR §4.2 URDF (PDF 170–176) and App. C (PDF 603–614, modified DH; §C.5 PoE↔DH). Ex 4.19, 4.21.
+- **[R5]** MR §5.1–5.4 (PDF 196–217): Def 5.1/5.4, Ex 5.2–5.3, §5.1.4 J_s↔J_b, §5.1.5 analytic Jacobian, §5.2 statics, §5.3 singularities (5 cases), §5.4 manipulability; summary PDF 218–219.
+- **[R6]** (preview) §5.1.6 PDF 207–208; full treatment Ch. 6 PDF 237–262 (next reader).
+- **[A1]** MR §3.3 twists/adjoint + §5.1 body Jacobian (rigid motion and resolved-rate prerequisites).
+- **[A2]** MR Ex 3.25, 3.12 (PDF 145–147, 137).
+- **[A3]** MR Ch. 2 (PDF 29–58), esp. §2.3 topology/representation, §2.4 constraints, §2.5 task space/workspace.
+- **[C1]** MR §3.3.1 frame chaining, Ex 3.19 (PDF 113–115).

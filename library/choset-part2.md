@@ -333,3 +333,81 @@ Key point: the **nonlinear** $f,h$ propagate the mean and form the innovation; t
 - Bearing convention differs between §8.3.1 ($\operatorname{atan2}(y_r-y_j,x_r-x_j)-\theta_r$, i.e. direction *from landmark to robot*) and §8.4.2 ($\operatorname{atan2}(y_j-y_r,x_j-x_r)-\theta_r$, the usual robot→landmark bearing). They differ by $\pi$; the Jacobians are the same, but the predicted measurement must use the same convention as the sensor. Always wrap bearing innovations to $(-\pi,\pi]$ — the book never mentions angle wrapping.
 - In the $P(k+1|k)$ derivation (book p. 278) the cross term is written "$2F(x-\hat x)v^T$"; it is really $Fe\,v^T+v\,e^TF^T$ (matrices don't commute) — harmless since both vanish in expectation.
 - Covariance update $P^+=(I-RH)P^-$ is the "short form"; numerically prefer Joseph form $(I-RH)P^-(I-RH)^T+RWR^T$ (not in the book).
+
+---
+
+## Ch. 9 Bayesian Methods — §9.1 Localization (PDF pp. 316–342, book pp. 301–327) — Lessons: A5, A6, F8
+**Big idea:** Drop the Kalman assumptions (linear, Gaussian, unimodal). Keep the same predict/update recursion but over an *arbitrary* belief. That is what makes **global localization** (unknown start) and the **kidnapped-robot problem** (must *unlearn* a confident wrong belief) solvable. Fig. 9.1 (1-D corridor with three identical doors) is the canonical picture: uniform prior → multimodal after seeing a door → shifted and blurred by motion → one dominant peak after the second door. Multimodality is a consequence of **unknown data association** (identical doors); if association were known a KF would suffice (book p. 304).
+
+**Key equations (book pp. 304–310):**
+- Belief / posterior: $P(x(k)\mid u(0{:}k-1),y(1{:}k))$; motion model $P(x(k)\mid u(k-1),x(k-1))$; observation model $P(y(k)\mid x(k))$; map $m$ implicit.
+- **Recursive Bayes filter** (9.1 discrete, 9.2 continuous): $\text{bel}_k(x)=\eta_k\,P(y_k\mid x)\int P(x\mid u_{k-1},x')\,\text{bel}_{k-1}(x')\,dx'$.
+- Prediction (9.3): $\overline{\text{bel}}_k(x)=\sum_{x'}P(x\mid u_{k-1},x')\,\text{bel}_{k-1}(x')$. Update (9.4): $\text{bel}_k(x)=\eta_kP(y_k\mid x)\overline{\text{bel}}_k(x)$, $\eta_k^{-1}=\sum_x P(y_k\mid x)\overline{\text{bel}}_k(x)$ (9.6) — computed on the fly.
+- **Derivation (§9.1.3, 9.7–9.15):** Bayes rule with background knowledge → **Markov assumption #1** (measurement independent of past given current state, 9.8) → total probability over $x(k-1)$ (9.10) → **Markov assumption #2** ($x_k$ depends only on $x_{k-1},u_{k-1}$, 9.11) → assumption that $u_{k-1}$ carries no information about $x_{k-1}$ (9.13; the book's two-room counter-example shows this is only approximately true).
+- Initial belief: uniform (global localization) or narrow Gaussian (tracking).
+
+**§9.1.4 Representations of the posterior:**
+1. **Kalman / EKF** — efficient, high-dim, floating-point accuracy; unimodal only; needs known start or unique landmarks (Gaussian mixtures as an extension).
+2. **Grid (Markov localization)** — topological (junctions, doors, GVD nodes [Choset & Nagatani]) or fine metric 3-D grid over $(x,y,\theta)$, 10–30 cm and 2–10° suffice (Fig. 9.2). **Algorithm 16** (book p. 313): for each step, predict by summing over all predecessors (naïvely $O(N^2)$), multiply by likelihood, normalize. Efficient prediction [Fox, Burgard, Thrun]: **shift** each $\theta$-slice by the odometry offset $(\Delta x,\Delta y)$ (which depends on $\theta$), then **convolve** with a separable bounded Gaussian kernel $[0.25,0.5,0.25]$ per axis (9.16; borders $2/3,1/3$), repeated to match motion noise. Statistics: mean (with **circular mean** $\hat\phi=\operatorname{atan2}(\sum P\sin\phi,\sum P\cos\phi)$, 9.17) vs mode (always a feasible pose, but jumps). Cost exponential in dimension; fixes: selective update, tree-structured grids storing only high-probability cells. Example: AAAI '94 arena 31×22 m, 15 cm/3°, global localization from 24 sonar sweeps in 80 s (Figs. 9.3–9.4).
+3. **Particle filter (MCL)** — $N$ weighted samples $(x,\omega)$.
+
+**Algorithm 17 — particle-filter localization (book p. 317)** (sequential importance sampling with resampling)
+```
+for i = 1..k:
+    for j = 1..N:  x_j ← sample from P(x | u(i-1), x_j)          # prediction = proposal
+    η ← 0; for j: w_j ← P(y(i) | x_j); η ← η + w_j                # importance weights
+    for j: w_j ← w_j / η
+    M ← resample(M)
+```
+**Algorithm 18 — resample, O(N) "low-variance / systematic" (book p. 318)**
+```
+M' ← ∅; Θ ← rand((0, 1/N]); c ← ω_0; i ← 0
+for j = 0..N-1:
+    u ← Θ + j/N
+    while u > c:  i ← i+1; c ← c + ω_i
+    M' ← M' ∪ {(x_i, 1/N)}
+```
+(Single random number, $N$ evenly spaced pointers; Isard–Blake binary search is $O(N\log N)$.)
+
+**Odometry motion model (Fig. 9.5, Eqs. 9.18–9.21, book pp. 317–319):** decompose each motion into rotation $\alpha$, translation $d$, rotation $\beta$; perturb
+$\alpha'=\alpha+\alpha\,\mathcal{N}(\sigma_1)+d\,\mathcal{N}(\sigma_2)$, $\beta'=\beta+\beta\,\mathcal{N}(\sigma_3)+d\,\mathcal{N}(\sigma_4)$, $d'=d+d\,\mathcal{N}(\sigma_5)+(\alpha+\beta)\,\mathcal{N}(\sigma_6)$, then
+$x^i\leftarrow x^i+[d'\cos(\theta^i+\alpha'),\ d'\sin(\theta^i+\alpha'),\ \alpha'+\beta']^T$ (same structure as Thrun's `sample_motion_model_odometry`; $\sigma_i$ learnable from data). Without observations the cloud grows and bends ("banana", Fig. 9.6). Map knowledge is easy to add: reject samples that pass through obstacles.
+- Statistics: weighted mean; mode = max-weight particle *before* resampling ($O(N)$), after resampling need kd-tree ($O(N\log N)$) or a coarse histogram.
+- Examples: global localization with 10 000 samples converges after ~65 sonar steps (Fig. 9.7); tracking (Fig. 9.8).
+- **Kidnapping / failure recovery (book pp. 321–322):** inject a fraction of uniformly random particles [Fox]; or monitor the average likelihood $\tilde p=N^{-1}\sum_jP(y\mid x_j)$ and restart global localization when it falls below a threshold [Burgard]; adapt the number of random particles to $\tilde p$ [Lenser–Veloso]; smooth $\tilde p$ [Gutmann–Fox] (precursor of Augmented MCL).
+
+**§9.1.5 Beam-based range sensor model (book pp. 322–327):** compute expected range $d(x)$ by ray casting in the map, $P(y\mid x)=P(y\mid d(x))$ (9.22). Mixture of four causes (Fig. 9.9 B21 sonar scan): (1) correct hit $\alpha\,\mathcal{N}(y;d,\sigma)$; (2) unmodelled object / crosstalk — short readings $\beta\,\lambda e^{-\lambda y}$; (3) random reading — uniform $\gamma$; (4) max-range failure — point mass $\delta$. Discretised histogram (9.23) $h_{i,j}=\int_{d_j-\Delta/2}^{d_j+\Delta/2}(\alpha_i\mathcal{N}+\beta_i\lambda_ie^{-\lambda_iy}+\gamma_i)\,dy$ for $j<n-1$, $h_{i,n-1}=\delta_i$, with $\sum_jh_{i,j}=1$ (9.24); parameters by **maximum likelihood** on recorded data (Figs. 9.10–9.11: laser much sharper than sonar; $\sigma$ also absorbs map uncertainty). Beams assumed independent, $P(y_1..y_m\mid x)=\prod_iP(y_i\mid x)$ (9.25) — over-confident, so subsample beams (Fox et al. used 60 of 181). Speed-ups: precompute expected distances in a lookup table (1 byte per entry, 256×256 histograms); non-smoothness near doorways/grazing angles → also learn per-state variance of the expected distance. Alternatives: endpoint/likelihood-field models (Konolige, Thrun) avoid ray casting.
+
+## §9.2 Mapping (PDF pp. 343–362, book pp. 328–347) — Lessons: A6 (enrichment), C6 (ICP link)
+**§9.2.1 Occupancy grid mapping with known poses (book pp. 328–336):**
+- Each cell $m_l$ binary, cells assumed independent: $P(m)=\prod_lP(m_l)$. Bayes + Markov give the odds recursion (9.34) $\text{Odds}(m\mid x_{1:k},y_{1:k})=\dfrac{\text{Odds}(m\mid x_k,y_k)\,\text{Odds}(m\mid x_{1:k-1},y_{1:k-1})}{\text{Odds}(m)}$, $\text{Odds}(x)=P/(1-P)$ (9.33).
+- **Log-odds form (9.35):** $\ell_k=\ell(m\mid x_k,y_k)-\ell_0+\ell_{k-1}$ — additive per-cell update with an **inverse sensor model** $P(m_l\mid x_k,y_k)$; with prior 0.5, $\ell_0=0$ (9.36). Recover $P=1-1/(1+\text{Odds})$ (9.37–9.39). **Algorithm 19** implements (9.40).
+- Inverse sonar model (9.41–9.42, Figs. 9.12–9.16): piecewise linear in range $d$ along the beam — prior $-s$ for $d<y-d_1$ (free), linear ramp up through $y\pm d_1$, plateau prior $+s$ until $y+d_2$ (obstacle depth), ramp back to prior by $y+d_3$, prior beyond; $s(y,\theta)=g(y)\,\mathcal{N}(\theta;0,\sigma_\theta)$ with $g$ decreasing in range and a Gaussian in the off-axis angle (15° cone, $\sigma_\theta=0.05$). Maximum-likelihood map = threshold at 0.5 (Fig. 9.18).
+- Limitations: cell independence, binary occupancy (partially covered cells), beam independence → overconfidence.
+
+**§9.2.2 Bayesian SLAM (book pp. 337–345):**
+- Full SLAM posterior over path and map (9.43). Two classic families: EKF-SLAM (landmarks; ch. 8) and global optimization (Lu–Milios spring network = early **pose-graph** SLAM; EM-based batch methods).
+- **Incremental scan matching** (9.44): $\hat x_k=\arg\max_x P(y_k\mid x,\hat m_{k-1})P(x\mid u_{k-1},\hat x_{k-1})$ — trades map consistency against odometry consistency; typically ICP (CIS I C6 link). Greedy, never revises ⇒ locally good but globally inconsistent maps after loops (Figs. 9.19–9.20: 28×28 m, 491 m travelled).
+- **Rao-Blackwellized particle filter (FastSLAM / GMapping family):** factor (9.45–9.47) $P(x_{1:k},m\mid u,y)=P(m\mid x_{1:k},y_{1:k})\,P(x_{1:k}\mid y_{1:k},u)$ — sample **paths** with a PF, compute each particle's map analytically (occupancy grid given known poses). Weight = $P(y_k\mid x_j,m^{(j)})$. **Algorithm 20** (book p. 343) = Alg. 17 with per-particle maps. Efficiency: share map history in trees (Montemerlo; Parr–Eliazar DP-SLAM) or build local maps from a few recent scans; reduce particle count by turning scan matching into accurate odometry (Hähnel et al.). Loop closure kills particles whose maps disagree (Fig. 9.22). Landmark version with per-landmark Gaussians = FastSLAM [Montemerlo].
+
+## Ch. 9 problems worth doing (PDF pp. 360–362, book pp. 345–347)
+| # | Task | Why |
+|---|---|---|
+| 1 | Bayes rule with background knowledge | used in every derivation line |
+| **2** | **derive the KF from the Bayes filter (9.2)** | ties A5 together; shows KF = Bayes filter with Gaussians |
+| **6** | circular 10-place world, landmarks at 0, 3, 6 ($P(z\mid L)=0.8$, else 0.4); observe L, move 3, observe L, move 4, observe ¬L | hand discrete Bayes filter. My answer: posterior $[0.10, 0.075, 0.075, 0.05, 0.15, 0.075, 0.025, \mathbf{0.30}, 0.075, 0.075]$ for places 0–9, max at place 7 (= 0+3+4) |
+| 7 | same with 0.8 success / 0.2 stay motion | effect of motion noise (my run: belief flattens, max 0.15) |
+| **4, 5** | implement odometry motion model + MCL with Algs. 17/18 | ASBR A6 particle filter |
+| 3 | implement the beam sensor model, histograms with 3-inch bins | sensor-model practice |
+| 9 | PF with an almost perfect sensor | particle deprivation; why you inflate $\sigma$ / need more particles |
+| 11 | circular world with a PF | compare with exact grid answer |
+| 13 | occupancy convergence with $P(m\mid y_1)=0.8$, $P(m\mid y_2)=1/3$, $y_1$ one-third of the time | log-odds increments $\ln4$ and $-\ln2$: per 3 readings $\ln4-2\ln2=0$ ⇒ stays at the prior (0.5) — a nice sanity check of (9.35) |
+| 8, 10, 12, 14, 15 | conceptual (independence, obstacle-aware motion, vision likelihoods, sensor sharpness, snail-shell SLAM) | discussion |
+
+## Conventions / pitfalls (ch. 9)
+- Choset indexes inputs $u(0{:}k-1)$ and measurements $y(1{:}k)$ (input $u(k-1)$ moves $x(k-1)\to x(k)$); Thrun's *Probabilistic Robotics* uses $u_{1:t}$, $z_{1:t}$ with $u_t$ moving $x_{t-1}\to x_t$. Same filter, shifted index.
+- Book p. 304 writes the posterior once as $P(x(k)\mid u(1{:}k-1),y(1{:}k))$ — typo for $u(0{:}k-1)$; p. 306 calls the motion model "the posterior $P(x(k)\mid u(k-1),x(k-1))$" — misnomer.
+- The book's particle mean is a plain weighted average; for $\theta$ use the circular mean as in (9.17).
+- In (9.21) the term $(\alpha+\beta)\,\mathcal{N}(\sigma_6)$ should use $|\alpha|+|\beta|$ (opposite rotations shouldn't cancel the noise) — a common fix in implementations.
+- Weighted resampling is done **every** step in Alg. 17; in practice resample only when $N_\text{eff}=1/\sum w_j^2$ is low (not in the book).
+- Grid-based and particle-based filters approximate the *same* Bayes filter; KF/EKF is the Gaussian special case.
