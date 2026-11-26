@@ -54,4 +54,5 @@
 - Decision: curated MIT 18.06/18.02 path instead of full lecture series (see foundations file).
 - Built the Notion "Robotics Professor" course (59 lessons across 7 pages).
 - Read every page of the student's uploads (MLS, MR, Choset, Thrun draft, 10 ASBR decks, course page, handwritten notes) → `library/` (index, notation table, errata in `library/README.md`). Applied corrections to Notion (RDKDC rewritten, ASBR rebuilt around the real schedule, Foundations + CIS touched) and to course READMEs.
+- Added Notion page "7 · Path to 100%" (+ `PATH_TO_100.md`): per-subject gap-closers (simulators, SO-101 kit, shadow assignments, mock exams, LaTeX deliverables).
 - **Next: Foundations F1 → Mac setup, Python, Git; start 3Blue1Brown linear algebra.**

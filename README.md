@@ -34,6 +34,7 @@ free resources, prerequisite gaps, an application-first sprint plan and sources.
 
 ```
 README.md                  ← you are here (entry point / context restore)
+PATH_TO_100.md             ← gap-closers taking each subject from ~80% to 100% before the semester
 STUDY_PLAN.md              ← master plan: subjects, what to learn, how, where (no day-schedule)
 PROGRESS.md                ← running log: what's done, what's next, open questions
 CROSS_COURSE_MAP.md        ← how concepts overlap between courses (learn once, use 3×)
