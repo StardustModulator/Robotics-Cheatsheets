@@ -55,4 +55,5 @@
 - Built the Notion "Robotics Professor" course (59 lessons across 7 pages).
 - Read every page of the student's uploads (MLS, MR, Choset, Thrun draft, 10 ASBR decks, course page, handwritten notes) → `library/` (index, notation table, errata in `library/README.md`). Applied corrections to Notion (RDKDC rewritten, ASBR rebuilt around the real schedule, Foundations + CIS touched) and to course READMEs.
 - Added Notion page "7 · Path to 100%" (+ `PATH_TO_100.md`): per-subject gap-closers (simulators, SO-101 kit, shadow assignments, mock exams, LaTeX deliverables).
+- Added Notion page "8 · Foundations Watch-List" (https://app.notion.com/p/424fe2d3cc02817987afec12edc86966) + `courses/00-foundations/VIDEOS.md`: every F1–F10 video, links checked, ~78 h required at 1× (~52 h at 1.5×), coverage map shows no gaps.
 - **Next: Foundations F1 → Mac setup, Python, Git; start 3Blue1Brown linear algebra.**
