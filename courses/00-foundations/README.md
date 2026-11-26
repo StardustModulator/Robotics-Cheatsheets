@@ -1,4 +1,4 @@
-# 00 — Foundations (Phase 0, Days 1–5, ~80 hours)
+# 00 — Foundations
 
 > Student is a **CS engineering graduate and former Associate Software Engineer**, but chooses to start
 > **every topic from zero** so there are **no holes**. Rule: cover everything from first principles and skip
@@ -23,7 +23,7 @@
 | Probability, Bayes, Gaussians | — | RANSAC, noise | losses = likelihoods | stochastic policies | **Kalman / particle filters** | error analysis |
 | PyTorch + autograd | — | CNNs for vision | **core** | **core** | — | — |
 
-## Mac setup (M1 Max, 64 GB) — Day 1, first hour
+## Mac setup (M1 Max, 64 GB)
 
 1. **Homebrew** → `brew install git wget cmake`
 2. **Python env manager:** `brew install uv` (fast) or Miniforge (conda for arm64). One env per course later; start with `robo`:
@@ -35,15 +35,15 @@
 6. **Later, only when needed:** MATLAB (free via JHU license once enrolled; MATLAB Onramp is free now),
    ROS 2 via **Docker** or **RoboStack** (conda-forge ROS on osx-arm64). Native ROS on macOS is painful, so don't try it.
 
-## Day-by-day (each day ≈ 16 h: ~6 h watch/read, ~9 h build, ~1 h write notes + commit)
+## Modules (in order: learn → build → verify)
 
-### Day 1 — Python from zero (fast, complete) + Git + start Linear Algebra
+### Module 1: Python from zero (fast, complete) + Git + start Linear Algebra
 - **Learn (~6 h, rigorous but quick given SWE background):** the whole language end-to-end: types, control flow,
   functions (args/kwargs, closures, lambdas), data structures & complexity, comprehensions, generators,
   classes/dataclasses/dunder methods, modules/packages, exceptions, file I/O, type hints, `pytest`,
   virtual envs, Jupyter, profiling (`timeit`, `cProfile`), Git branching/merging. Python-specific idioms
   (mutability, copy vs view, `is` vs `==`, late binding) matter later for NumPy/PyTorch bugs.
-- **Then (~4 h):** begin 3Blue1Brown *Essence of Linear Algebra* ch. 1–5 (pulled forward from Day 2).
+- **Then (~4 h):** begin 3Blue1Brown *Essence of Linear Algebra* ch. 1–5.
 - **Resources:** Harvard **CS50P** (lectures 0–6, watch at 1.5×) — https://cs50.harvard.edu/python/ ;
   official tutorial https://docs.python.org/3/tutorial/ ; *Missing Semester* (MIT) shell + git lectures https://missing.csail.mit.edu/
 - **Build:**
@@ -51,7 +51,7 @@
   2. Grid world: read a map from a text file, find a path with BFS (first taste of planning, used in ASBR).
   3. Push both to a `practice/` folder on a separate branch.
 
-### Day 2 — NumPy + Matplotlib + Linear Algebra I (vectors & matrices as transformations)
+### Module 2: NumPy + Matplotlib + Linear Algebra I (vectors & matrices as transformations)
 - **Learn:** arrays, shapes, broadcasting, indexing, `@` matmul; vectors, dot product, norms,
   matrices as linear maps, matrix multiplication = composition, determinant (area scaling),
   inverse, solving Ax = b, rank, 2D rotation matrices.
@@ -63,7 +63,7 @@
   2. Plot its **workspace** by sampling joint angles.
   3. Transform a 2D shape by several matrices and show det = area ratio.
 
-### Day 3 — Linear Algebra II (the "robotics core")
+### Module 3: Linear Algebra II (the "robotics core")
 - **Learn:** basis/span/null space, orthogonal matrices (Rᵀ R = I, det R = +1), 3D rotations
   (about x, y, z; composition order), homogeneous transforms (4×4), eigenvalues/eigenvectors,
   symmetric matrices, **least squares** (normal equations, pseudo-inverse), **SVD**, condition number.
@@ -76,7 +76,7 @@
   3. **SVD image compression**, then **point-set registration**: given points P and R·P+t+noise, recover R, t with SVD (Arun's method). This is CIS I PA1 and ASBR registration in miniature.
   4. Eigen-decomposition of a 2×2 covariance: draw the ellipse.
 
-### Day 4 — Calculus, Optimization, ODEs, Matrix Exponential
+### Module 4: Calculus, Optimization, ODEs, Matrix Exponential
 - **Learn:** derivatives, chain rule, partial derivatives, gradient, **Jacobian matrix**, Taylor
   expansion (linearization), gradient descent, Newton's method, constrained intuition (Lagrange
   multipliers), ODEs ẋ = f(x), Euler & RK4 integration, **matrix exponential** e^{At} and why
@@ -90,7 +90,7 @@
   3. Simulate a **pendulum** with Euler vs RK4 and add a PD controller to hold it upright (RDKDC control preview).
   4. Compute `scipy.linalg.expm` of a skew-symmetric matrix, verify it's a rotation, and compare with Rodrigues' formula.
 
-### Day 5 — Probability & Statistics + PyTorch basics
+### Module 5: Probability & Statistics + PyTorch basics
 - **Learn:** random variables, PMF/PDF, expectation/variance, joint/marginal/conditional,
   **Bayes' rule**, independence, **Gaussian** (1D & multivariate), covariance, sampling,
   maximum likelihood, law of large numbers. PyTorch: tensors, `requires_grad`, autograd,
@@ -105,7 +105,7 @@
   3. Monte-Carlo estimate of π; fit a Gaussian by MLE; sample a 2D Gaussian and recover its covariance.
   4. **Linear + logistic regression in PyTorch** on MPS with autograd, compared with your NumPy closed form.
 
-## Exit test for Phase 0 (must pass before Phase 1)
+## Exit test (pass before starting the six courses)
 - [ ] Write from memory: 3D rotation about z, a 4×4 homogeneous transform, its inverse.
 - [ ] Explain eigenvectors and SVD in one sentence each; use SVD to solve a registration problem.
 - [ ] Derive the 2-link arm Jacobian by hand; implement Newton IK.
@@ -113,20 +113,20 @@
 - [ ] Train a model in PyTorch with autograd on MPS.
 - [ ] Comfortable with Python classes, NumPy broadcasting, Matplotlib plots, git commit/push.
 
-## Extra foundation modules scheduled later in the master plan
-- **MATLAB Onramp** (free, ~2 h), evening of Day 5. RDKDC labs are MATLAB (+ ROS Toolbox); ASBR A2 used MATLAB.
-- **C++ crash course**, Day 12: syntax, references/pointers, RAII, classes, templates basics, STL, CMake, **Eigen**.
+## Extra foundation modules (do when the course that needs them comes up)
+- **MATLAB Onramp** (free, ~2 h), before RDKDC labs. RDKDC labs are MATLAB (+ ROS Toolbox); ASBR A2 used MATLAB.
+- **C++ crash course**, before ASBR projects: syntax, references/pointers, RAII, classes, templates basics, STL, CMake, **Eigen**.
   Resources: learncpp.com (chapters 0–13 selectively), Eigen "Getting started" + "Geometry module".
   Build: port your SO(3)/SE(3) toolkit to C++/Eigen with unit tests.
-- **ROS 2 day**, Day 18: Ubuntu 24.04 ARM VM (UTM free / Parallels) or Docker on the M1; ROS 2 **Jazzy**
+- **ROS 2**, before the ASBR C++ port / RDKDC labs: Ubuntu 24.04 ARM VM (UTM free / Parallels) or Docker on the M1; ROS 2 **Jazzy**
   beginner CLI + client-library tutorials (nodes, topics, services, actions, tf2, launch, colcon);
   run RDKDC's public sim package and MoveIt 2 tutorials; Gazebo basics.
 
-## Ongoing (during Phases 1–3)
+## Ongoing
 - Keep a `math-gaps.md` list; patch gaps just-in-time (≤ 45 min each) rather than up front.
 - Later, when the courses need them: C++ basics (for ROS 2 / performance), MATLAB Onramp (2 h, for RDKDC labs), ROS 2 tutorials.
 
-## Decision (Day 0): do NOT watch all of MIT 18.06 + 18.02 — curated path instead
+## Decision: do NOT watch all of MIT 18.06 + 18.02 — curated path instead
 Full 18.06 (34 lectures) + 18.02 (35 lectures) ≈ 57 h of video, 100 h+ with problem sets ≈ 20% of the
 whole 480 h sprint, and most of 18.02 (multiple integrals, line integrals, Green/Stokes/divergence theorems)
 is **never used** in these six courses. Rule: **visual intuition first → targeted rigorous lectures →

@@ -1,7 +1,7 @@
 # Robotics Cheatsheets — Knowledge Base (branch: `knowledge-base`)
 
 > **For any future Claude session:** read this file first, then `PROGRESS.md`, then
-> `STUDY_PLAN_30_DAYS.md`. Together they restore the full context of this project.
+> `STUDY_PLAN.md`. Together they restore the full context of this project.
 
 ## Who / what / why
 
@@ -34,7 +34,7 @@ free resources, prerequisite gaps, an application-first sprint plan and sources.
 
 ```
 README.md                  ← you are here (entry point / context restore)
-STUDY_PLAN_30_DAYS.md      ← master day-by-day plan across all 6 courses
+STUDY_PLAN.md              ← master plan: subjects, what to learn, how, where (no day-schedule)
 PROGRESS.md                ← running log: what's done, what's next, open questions
 CROSS_COURSE_MAP.md        ← how concepts overlap between courses (learn once, use 3×)
 courses/0X-*/README.md     ← per-course knowledge base
@@ -43,6 +43,6 @@ courses/0X-*/README.md     ← per-course knowledge base
 ## How to resume in a new session
 
 1. `git checkout knowledge-base && git pull`
-2. Read `README.md` → `PROGRESS.md` (latest entry) → today's block in `STUDY_PLAN_30_DAYS.md`.
+2. Read `README.md` → `PROGRESS.md` (latest entry) → the current subject in `STUDY_PLAN.md`.
 3. Open the relevant `courses/0X-*/README.md` for details.
 4. After each study session, append to `PROGRESS.md` and commit.

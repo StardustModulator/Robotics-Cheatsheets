@@ -21,7 +21,7 @@
 | **Exams** | None. Grade = A0 5% + A1 10% + A2 30% + A3 35% + participation/individual 20%. |
 | **Prereqs** | **Required:** Intro to ML (EN.601.475/675) **or** Deep Learning (EN.601.482/682). You must already be able to train and debug **transformers and diffusion models**. **Preferred:** Intro to Robotics (EN.601.463, EN.601.495, EN.530.420), *required for undergrads*. |
 
-**Biggest implication for your 30-day sprint:** spend the time on **PyTorch transformer and diffusion fluency, LeRobot, and the kinematics and control basics of a 5-DOF arm**. Don't spend it on PPO/SAC. RL fundamentals are still in this sheet (§4.6) because the user asked for them and other JHU robotics courses use them, but they are **optional** for this course.
+**Biggest implication for self-study:** spend the time on **PyTorch transformer and diffusion fluency, LeRobot, and the kinematics and control basics of a 5-DOF arm**. Don't spend it on PPO/SAC. RL fundamentals are still in this sheet (§4.6) because the user asked for them and other JHU robotics courses use them, but they are **optional** for this course.
 
 ---
 
@@ -222,7 +222,7 @@ Marked **[C]** = covered in course slides, **[B]** = background you're expected 
 
 ## 5. Must-read papers (prioritized for this course)
 
-**Tier 1: read before day 1 (the A2 core)**
+**Tier 1: read first (the A2 core)**
 1. Zhao, Kumar, Levine, Finn. **ACT / ALOHA**: *Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware*, RSS 2023. https://arxiv.org/abs/2304.13705 · https://tonyzhaozh.github.io/aloha/
 2. Chi et al. **Diffusion Policy**, RSS 2023. https://arxiv.org/abs/2303.04137 · https://diffusion-policy.cs.columbia.edu/
 3. Ho, Jain, Abbeel. **DDPM**, NeurIPS 2020. https://arxiv.org/abs/2006.11239
@@ -319,18 +319,18 @@ Marked **[C]** = covered in course slides, **[B]** = background you're expected 
 
 ---
 
-## 9. Compressed application-first plan (~5 study days inside the 30-day sprint)
+## 9. Build-first project sequence (do in order; you write all code)
 
-Assumptions: one CUDA GPU (Colab T4/L4 is enough for days 1–3), Python ≥ 3.12 (LeRobot 0.7.x requires it), `pip install 'lerobot[pusht,aloha]'` (extras names per LeRobot `installation.mdx`). **No robot needed.** CLI flags below are from LeRobot `main` (v0.7.1, Nov 2026); check `lerobot-train --help` if they've changed. Each day is ~6–8 focused hours. Days are ordered by course importance, with RL last and optional.
+Assumptions: one CUDA GPU (Colab T4/L4 is enough for Projects 1–3), Python ≥ 3.12 (LeRobot 0.7.x requires it), `pip install 'lerobot[pusht,aloha]'` (extras names per LeRobot `installation.mdx`). **No robot needed.** CLI flags below are from LeRobot `main` (v0.7.1, Nov 2026); check `lerobot-train --help` if they've changed. Each day is ~6–8 focused hours. Days are ordered by course importance, with RL last and optional.
 
-### Day 1: Datasets and behavior cloning from scratch (L3 + L4)
+### Project 1: Datasets and behavior cloning from scratch (L3 + L4)
 - [ ] Install LeRobot. Load `lerobot/pusht` with `LeRobotDataset`, print `dataset.meta.features`, plot one episode's `observation.state` and `action`, and run `lerobot-dataset-viz` on an SO-101 community dataset from the Hub. **Find out whether its actions are commanded or realized** (L3's PSA).
 - [ ] **Write a 150-line BC trainer** (state-only PushT: MLP, MSE, min-max normalization). Roll it out in `gym_pusht` and record success and coverage. You'll see mode-averaging failures, which motivates DP.
 - [ ] Add **action chunking** (predict 16, execute 8) to the same MLP and compare. Then try temporal ensembling.
 - [ ] Toy DAgger on a 2D point-mass or PushT with a scripted expert: show the compounding error curve vs dataset-aggregation rounds.
 - **Milestone:** a plot of success vs Hₑ ∈ {1, 4, 8, 16} for chunked BC.
 
-### Day 2: Diffusion and flow matching from scratch, then Diffusion Policy (L6)
+### Project 2: Diffusion and flow matching from scratch, then Diffusion Policy (L6)
 - [ ] Morning: open the course **week-6 demos** (all 14). Implement **DDPM on a 2D mixture-of-Gaussians** (~100 lines: MLP ε-predictor, sinusoidal embedding, linear β schedule, DDPM and DDIM samplers). Then **flow matching** on the same data with Euler sampling. Show that both capture two modes while MSE doesn't.
 - [ ] Afternoon: run the real-stanford DP **state-based PushT Colab**, then train with LeRobot:
   `lerobot-train --dataset.repo_id=lerobot/pusht --policy.type=diffusion --env.type=pusht --output_dir=outputs/train/dp_pusht --policy.device=cuda --policy.push_to_hub=false`
@@ -339,21 +339,21 @@ Assumptions: one CUDA GPU (Colab T4/L4 is enough for days 1–3), Python ≥ 3.1
 - [ ] Implement cost **guidance** on your 2D toy (push samples away from a region) and a "golden ticket" noise search.
 - **Milestone:** your DP PushT success/coverage number plus a GIF.
 
-### Day 3: ACT and the real-robot workflow, dry-run (L4 + A2)
+### Project 3: ACT and the real-robot workflow, dry-run (L4 + A2)
 - [ ] Read the ACT paper and code. Train **ACT** in LeRobot on `lerobot/aloha_sim_insertion_human` or `aloha_sim_transfer_cube_human` with `--env.type=aloha` (or on PushT), once **with and without the CVAE** (`--policy.use_vae=false`, confirmed in `configuration_act.py`), with chunk sizes {10, 30, 50} (`--policy.chunk_size`, `--policy.n_action_steps`), and with `--policy.temporal_ensemble_coeff=0.01` (which needs `n_action_steps=1`).
 - [ ] Practice the **A2 statistics pipeline** on your sim rollouts: install STEP, run `MirroredStepTest` on two policies' 0/1 sequences (n_max=25, α=0.10), compute 90% Wilson CIs, and draw Beta-posterior violins with CLD labels.
 - [ ] Read the LeRobot SO-101 docs end to end and write out the exact sequence you'll run on hardware: `lerobot-find-port` → `lerobot-setup-motors` → `lerobot-calibrate` → `lerobot-teleoperate` → `lerobot-record` → `lerobot-train --policy.type=act` → `lerobot-rollout`.
 - **Milestone:** a one-page "A2-style" report on sim: question, matched evaluation, STEP decision, violin plot.
 
-### Day 4: A1 perception and kinematics, plus VLA tokenization (L2 + L7)
+### Project 4: A1 perception and kinematics, plus VLA tokenization (L2 + L7)
 - [ ] A1 prep without hardware: write an SO-101 FK from the URDF in the SO-ARM100 repo (URDF location there is **unverified**), or use `ikpy` or `placo`, plus a damped-least-squares IK. Check the 6×5 Jacobian rank. Do HSV red/blue blob detection, ArUco pose via `solvePnP`, and pixel→table-plane back-projection on photos from your phone.
 - [ ] Implement **FAST** tokenization on PushT/ALOHA action chunks: `scipy.fft.dct` (type II, norm='ortho') per dimension, scale and round, then a BPE tokenizer (HF `tokenizers`). Compare token count against naive 256-bin tokenization and measure reconstruction error. (The official FAST tokenizer is on the Hub as `physical-intelligence/fast`.)
 - [ ] Skim π0, π0.5 and knowledge insulation. Write a 1-page "VLA anatomy" note: VLM backbone, action expert, flow matching, tokens, and cross-embodiment padding.
 - **Milestone:** working IK + blob-to-3D pipeline on static images, and a FAST compression-ratio table.
 
-### Day 5: VLA fine-tune (A3 preview), then optional RL crash course
+### Project 5: VLA fine-tune (A3 preview), then optional RL crash course
 - [ ] Fine-tune **SmolVLA** (`--policy.path=lerobot/smolvla_base`, 450M params; you need `--rename_map` to map your camera names to `camera1/2/3`, per `smolvla.mdx`) on a small SO-100/101 community dataset or LIBERO subset, or run inference only if compute is tight. Note GPU memory and throughput, then try language-conditioning on two tasks. (LeRobot docs: `smolvla.mdx`, `pi0.mdx`, `pi05.mdx`, `hardware_guide.mdx`.)
-- [ ] **RL, half day, optional for this course:** (a) tabular **Q-learning** on `FrozenLake-v1` / `CliffWalking-v0` in ~40 lines; also value iteration and policy iteration on the known model. (b) **PPO with SB3** on `Pendulum-v1` and `HalfCheetah-v5` (MuJoCo), then read CleanRL's `ppo_continuous_action.py` and reimplement GAE and the clip loss yourself. (c) Optionally SB3 **SAC** on HalfCheetah and compare sample efficiency. (d) Read the RECAP and DSRL slides again with this background.
+- [ ] **RL, optional for this course:** (a) tabular **Q-learning** on `FrozenLake-v1` / `CliffWalking-v0` in ~40 lines; also value iteration and policy iteration on the known model. (b) **PPO with SB3** on `Pendulum-v1` and `HalfCheetah-v5` (MuJoCo), then read CleanRL's `ppo_continuous_action.py` and reimplement GAE and the clip loss yourself. (c) Optionally SB3 **SAC** on HalfCheetah and compare sample efficiency. (d) Read the RECAP and DSRL slides again with this background.
 - **Milestone:** SmolVLA running inference on a Hub dataset; PPO curve on Pendulum; Q-table GIF.
 
 ### If you can get an SO-101 kit early (high value)

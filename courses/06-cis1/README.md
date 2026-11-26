@@ -566,7 +566,7 @@ Treat these as **(unverified, dated)**.
 
 ---
 
-## 9. Compressed application-first self-study plan (~5 study days within the 30-day sprint)
+## 9. Build-first project sequence (do in order; you write all code)
 
 **Goal:** arrive with a **personal, tested NumPy toolkit** (frames → registration → pivot → Bernstein → closest-point/tree → ICP) and fluency in linearized error algebra.
 
@@ -576,7 +576,7 @@ Treat these as **(unverified, dated)**.
 - Do **not** consult public solution repos.
 - Re-check the integrity rules about reusing pre-course code once the semester starts.
 
-### Day 1: Frames + registration (≈ 6 h)
+### Project 1: Frames + registration (≈ 6 h)
 1. Read `frames.pdf` (rotations, small frames, error propagation) and the Killeen frame tutorial (1.5 h).
 2. Code `frames.py`:
    - `Frame(R, p)`: `@` composition, `inv()`, `apply(points)`
@@ -585,7 +585,7 @@ Treat these as **(unverified, dated)**.
 3. Code `register(a, b)` with Arun SVD (det fix) **and** the Horn quaternion method. Test on random rigid transforms and noise, both methods agreeing, and a coplanar/reflection case.
 4. Pen and paper: derive `Δp_tip` for `p = F_1⁻¹ F_2 t` with `F* = F ΔF`, in normal form. This is the HW1 skill.
 
-### Day 2: Pivot calibration + PA1 end-to-end (≈ 6 h)
+### Project 2: Pivot calibration + PA1 end-to-end (≈ 6 h)
 1. Read the `calibration.pdf` pivot section and the PA1 handout (1 h).
 2. Code a tolerant file parser (comma or whitespace; extra header fields) and `pivot(frames_of_markers)`. The probe model comes from frame 1 with the centroid subtracted; build the stacked `[R_k | −I]` LS. Return `t_tip`, `p_dimple` and the residual RMS.
 3. PA1 pipeline:
@@ -595,20 +595,20 @@ Treat these as **(unverified, dated)**.
    - write `output1` exactly in the handout format
 4. Validate against the debug `output1` and `auxilliary1`. Tabulate the max/RMS error per debug set a-g and explain each set by its error sources.
 
-### Day 3: Distortion correction + navigation (PA2) + error intuition (≈ 6 h)
+### Project 3: Distortion correction + navigation (PA2) + error intuition (≈ 6 h)
 1. Read `interpolationreview` (Bernstein, "3D calibration of distortion") (1 h).
 2. Code `bernstein_basis(u, N)` (vectorized `(n, (N+1)³)` matrix) and `fit_distortion(measured, expected, N)` → (box, coeffs) plus `correct(q)`. Choose N ∈ {2..6} by holding out whole frames.
 3. Run the PA2 pipeline (dewarp → re-pivot → `B_j` → `F_reg` → nav tips) and validate against `output2` / `auxilliary2`.
 4. Monte Carlo (30 min): add Gaussian FLE to the fiducials. Compare the empirical TRE at the nav points with the Fitzpatrick prediction, and plot FRE vs TRE (they are uncorrelated).
 
-### Day 4: Closest point on a mesh + acceleration (PA3) (≈ 6 h)
+### Project 4: Closest point on a mesh + acceleration (PA3) (≈ 6 h)
 1. Read `lecture-finding-point-pairs` and the PA3/PA4 handout (1 h).
 2. Code `closest_point_on_triangle(a, p, q, r)`: LS for λ, μ, then edge projection. Test against a dense random sampling of each triangle, including obtuse and degenerate ones.
 3. Code brute-force `closest_point_on_mesh` (vectorize over triangles with NumPy).
 4. Then a **bounding-sphere array** filter and a **box-tree / k-d tree** over triangle bounding spheres. Assert equality with brute force on 10k random queries and time both.
 5. PA3: register A and B per sample, compute `d_k = F_B⁻¹ F_A A_tip`, take `F_reg = I`, write `pa3-X-Output.txt`, and compare with the debug outputs.
 
-### Day 5: ICP (PA4) + overview of PA5, robotics and HWs (≈ 6-7 h)
+### Project 5: ICP (PA4) + overview of PA5, robotics and HWs (≈ 6-7 h)
 1. Read the `registration_part_1` ICP outline (30 min).
 2. Code ICP:
    - η_n threshold (start large, then `3ε_n`)
@@ -633,7 +633,7 @@ Treat these as **(unverified, dated)**.
 4. Add a smooth warp, e.g., `q + 0.02·[x y, y z, z x]/100`, for the distortion.
 5. For meshes, use an icosphere or `trimesh` primitives (only for generating data).
 
-**Deliverable at the end of the 5 days:** a repo with `frames.py`, `registration.py`, `pivot.py`, `distortion.py`, `mesh.py` (closest point plus tree) and `icp.py`, each with pytest tests and a one-page "validation table". This mirrors what the PA reports require.
+**Deliverable at the end:** a repo with `frames.py`, `registration.py`, `pivot.py`, `distortion.py`, `mesh.py` (closest point plus tree) and `icp.py`, each with pytest tests and a one-page "validation table". This mirrors what the PA reports require.
 
 ---
 

@@ -290,7 +290,7 @@ Tick each item only after you can **derive it on paper and code it in under 30 m
 
 ## 8. Gaps and prerequisites to fill (for you specifically)
 
-| Gap | Why it matters here | Minimal fix (before or within the 5 days) |
+| Gap | Why it matters here | Minimal fix |
 |---|---|---|
 | **C++** (you rated yourself weak) | All 5 assignments are C++ (raw arrays `double J[6][6]`, `std::vector`, `<random>`, classes) | 1 evening: C++ refresher (references, const, STL vectors, `std::mt19937`, `std::normal_distribution`). Port one Python mini-project (RRT) to C++. |
 | **ROS 2** (weak) | Nodes, topics, `JointTrajectory`, tf2, launch.py, colcon, Gazebo `ros_gz`, MoveIt 2 plugins | On the Mac use **Docker** (`osrf/ros:jazzy-desktop` or humble) and do the official beginner client-library tutorials. Then build `simonleonard/asbr_description` and launch `ur5e_robotiq.launch.py`. |
@@ -302,18 +302,18 @@ Tick each item only after you can **derive it on paper and code it in under 30 m
 
 ---
 
-## 9. Application-first self-study plan (~5 study days inside the 30-day sprint)
+## 9. Build-first project sequence (do in order; you write all code)
 
-**Assumptions:** you already saw the basics. Days are ~16 h (about 3 h reading/video, 11 h building, 2 h
-paper derivations and notes). Code is **Python (NumPy/SciPy/Matplotlib)** for intuition. On Day 5 you
+**Assumptions:** you already saw the basics. Split each project roughly 3 parts reading/video, 11 parts building, 2 parts
+paper derivations and notes. Code is **Python (NumPy/SciPy/Matplotlib)** for intuition. On Project 5 you
 port one piece to **C++/ROS 2** because that is what gets graded. Put each mini-project in its own folder
-on a code branch; this branch keeps notes only. Each day ends with a **"closed-book check"**: re-derive the
-day's equations on paper, without notes or AI, since AI is banned in the course.
+on a code branch; this branch keeps notes only. Each project ends with a **"closed-book check"**: re-derive the
+project's equations on paper, without notes or AI, since AI is banned in the course.
 
-Schedule these days **after** the Phase-0 math and the RDKDC rigid-body days. Day 1 then becomes
+Do these **after** the foundations math and the RDKDC rigid-body projects. Project 1 then becomes
 consolidation, not new learning.
 
-### Day 1: Rigid motion → resolved-rate → hand-eye (mirrors A1 + A2)
+### Project 1: Rigid motion → resolved-rate → hand-eye (mirrors A1 + A2)
 1. **`se3.py`** (2 h): `hat`, `vee`, `expSO3` (Rodrigues), `logSO3` (with edge cases), `expSE3`, `Ad(T)`, quaternion ↔ R (both orderings), `q_mul`, `slerp`. Unit tests: `expSO3(logSO3(R)) == R` on 1,000 random R, and compare against `scipy.spatial.transform.Rotation`.
 2. **UR5e FK + Jacobian** (4 h): build PoE FK for the UR5e (screw axes from the MR book's UR5 example, with UR5e link lengths 0.1625/0.425/0.3922/0.1333/0.0997/0.0996). Compute $J_s$, then $J_b=\mathrm{Ad}_{T^{-1}}J_s$. **Check $J$ against finite differences.** Print $\det J$ near the wrist singularity ($q_5=0$).
 3. **Resolved-rate straight line** (2 h): reproduce the A1 loop: 1 mm steps toward a Cartesian goal, $\dot q=J_b^{-1}[v_b;0]$. Then switch to damped least squares and plot joint trajectories through a near-singularity.
@@ -321,7 +321,7 @@ consolidation, not new learning.
 5. **Arun SVD + ICP in 2-D/3-D** (2 h; short if already done in CIS I): register two noisy point sets, then ICP with `scipy.spatial.cKDTree`. Show convergence from a good start and failure from a 90° start.
 6. Closed-book check (2 h): derive $J_b=\mathrm{Ad}_{T^{-1}}J_s$, the AX=XB rotation/translation split, Park–Martin $R_X$, and Arun with the reflection fix.
 
-### Day 2: C-space, potentials, graph search (mirrors weeks 4–5)
+### Project 2: C-space, potentials, graph search (mirrors weeks 4–5)
 1. **Minkowski C-obstacle** (2 h): convex polygon robot translating among convex obstacles. Implement the $O(n+m)$ edge-merge Minkowski sum of $\mathcal O\oplus(-\mathcal A)$ and plot it.
 2. **2-link arm C-space** (3 h): rasterize $T^2$ at 1° resolution using FK + segment–polygon intersection. Render workspace and C-space side by side, and click a C-space point to show the arm pose.
 3. **A\* and Dijkstra on grids** (3 h): 8-connected, octile heuristic. Count expansions for Dijkstra vs A* vs weighted A* (ε = 2). Then run A* on the **2-link C-space torus** with wrap-around neighbours.
@@ -329,15 +329,15 @@ consolidation, not new learning.
 5. **Visibility graph** (2 h): polygons → visible vertex pairs → Dijkstra → shortest path. Compare its length with the grid A* path.
 6. Closed-book (3 h): hand-trace A* on a 5×5 grid; prove that a consistent heuristic is admissible; sketch the Minkowski sum for a triangle and a square; derive $\nabla U_{rep}$; Bug1/Bug2 bounds.
 
-### Day 3: Sampling-based planning (mirrors A3)
+### Project 3: Sampling-based planning (mirrors A3)
 1. **PRM** (2 h) in 2-D, then on the 2-link arm, using a shared `collision_free(q)` and `local_path_free(q, q', eps)`. Implement A3-2017 vocabulary: `make_vertices`, `make_edges` (k-NN), accessibility/departability, Dijkstra.
 2. **RRT + goal bias** (2 h), then **RRT-Connect** (2 h). Animate the tree growth.
 3. **EST, bidirectional** (2 h), mirroring the 2026 A3 API: `select_config_from_tree(w)` with $w=1/(1+\deg)$, `sample_nearby` (Gaussian σ), `find_nearest_configuration`, `is_local_path_collision_free`, `search_path`. Compare RRT, RRT-Connect and EST on a **narrow-passage** map (success rate and time over 50 seeds).
 4. **RRT\*** (2 h): choose-parent + rewire with $r_n=\gamma(\log n/n)^{1/d}$. Plot path cost vs. iterations against RRT. Add path shortcutting.
-5. **6-DOF taste** (2 h): run RRT-Connect on the UR5e FK from Day 1 with sphere-approximated links vs a box obstacle. Optionally compare with OMPL's Python bindings (`pip install ompl` if a wheel exists for your platform **(unverified)**).
+5. **6-DOF taste** (2 h): run RRT-Connect on the UR5e FK from Project 1 with sphere-approximated links vs a box obstacle. Optionally compare with OMPL's Python bindings (`pip install ompl` if a wheel exists for your platform **(unverified)**).
 6. Closed-book (2 h): write PRM / RRT / RRT* / EST pseudo-code from memory; state completeness types; explain the narrow-passage problem and Gaussian/bridge sampling.
 
-### Day 4: Bayes, KF, EKF (mirrors A4)
+### Project 4: Bayes, KF, EKF (mirrors A4)
 1. **Histogram (grid) Bayes filter** (2 h): 1-D corridor with doors; predict by convolution, update by a likelihood, normalize. Watch a multimodal belief collapse.
 2. **Linear KF** (2 h): constant-velocity 2-D tracker; plot the 3σ ellipse; compare with the 1-D gain intuition; implement the Joseph form; NIS test.
 3. **EKF landmark localization** (4 h): unicycle + range-bearing to known landmarks, with analytic $F$ and $H$ verified by finite differences. Include angle wrapping and a data-association toggle (known vs nearest-neighbour with Mahalanobis gating).
@@ -345,10 +345,10 @@ consolidation, not new learning.
 5. **UKF** (1 h, optional): swap the EKF predict/update for sigma points on the landmark problem and compare.
 6. Closed-book (2 h): derive Bayes filter → KF (Gaussian product); compute $H$ for range-bearing; do one hand-computed 1-D KF cycle.
 
-### Day 5: Particle filter, mapping, ICP + port to C++/ROS 2 (mirrors A5, consolidates the course)
+### Project 5: Particle filter, mapping, ICP + port to C++/ROS 2 (mirrors A5, consolidates the course)
 1. **MCL with a likelihood field** (4 h): occupancy-grid map with a simulated 2-D lidar (ray casting). Precompute the distance transform; scoring $w_{hit}\mathcal N(d;0,\sigma^2)+w_{rand}/z_{max}$ in log space; odometry motion model; **low-variance resampling**, $N_{eff}$ trigger. Test global localization and recovery from a kidnapping (augmented MCL).
 2. **Occupancy grid mapping** (2 h): log-odds inverse sensor model with known poses.
-3. **Scan-matching ICP odometry** (1 h): consecutive lidar scans → ICP → compare drift with wheel odometry (reuses Day 1 ICP). Optional: a 10-landmark EKF-SLAM toy (1 h).
+3. **Scan-matching ICP odometry** (1 h): consecutive lidar scans → ICP → compare drift with wheel odometry (reuses Project 1 ICP). Optional: a 10-landmark EKF-SLAM toy (1 h).
 4. **C++/ROS 2 port** (5 h, Docker on the Mac):
    - Build `simonleonard/asbr_description` and launch the UR5e.
    - Write an rclcpp node that subscribes to `/joint_states` and publishes a `JointTrajectory` to `/ur5e_controller/joint_trajectory` (A1 skeleton).

@@ -1,6 +1,6 @@
 # 03 — Machine Learning: Deep Learning (JHU EN.601.482 / EN.601.682)
 
-> Study guide for an incoming JHU **MSE in Robotics** student. You have a 30-day sprint and about **6 study days** for this course.
+> Study guide for an incoming JHU **MSE in Robotics** student.
 >
 > **How this was researched:** `deep.cs.jhu.edu`, `www.cs.jhu.edu`, `arcade.cs.jhu.edu`, `courses.jhu.edu`, `semester.ly`, `coursicle.com` and `e-catalogue.jhu.edu` could **not** be fetched directly from the research sandbox. Facts from those sites come from **search-engine snippets** of those pages and are cited by URL.
 > The strongest primary evidence is **a past student's public repo** (`github.com/mosquitozm100/JHU-EN.601.682-01-Deep-Learning`, graded "A"). It holds the actual **HW1–HW4 handouts (LaTeX/PDF), lab notebooks and a backprop lecture deck** from the Unberath-era course, and I read all of them. Other primary evidence is the 2018 public starter repo (`deep-learning-jhu/deep-learning-jhu-cs-482-682`) and 2023–2025 final-project repos.
@@ -24,7 +24,7 @@
 | **Textbook** | **None required.** The S2021 syllabus says the course "does not explicitly follow a specific textbook." Use Goodfellow (DLB), Prince (UDL) or d2l.ai as references. |
 | **Difficulty** | Students call it "great course but be prepared to commit a lot of time," "the learning curve is enormous," and "a hard class, but one of the best classes I have taken at Hopkins." |
 
-**Biggest implication for the sprint:** the early HWs test **hand derivation of gradients** (sigmoid/softmax/KL, matrix backprop `dL/dW = dL/dP · Xᵀ`, vanishing gradients). The middle HWs test **from-scratch NumPy MLPs that pass a gradient check** and a **PyTorch CNN with an ablation study**. If you can do those three cold before Day 1 of the semester, you will be ahead. Generative models and transformers come later in the term and in the project.
+**Biggest implication for the sprint:** the early HWs test **hand derivation of gradients** (sigmoid/softmax/KL, matrix backprop `dL/dW = dL/dP · Xᵀ`, vanishing gradients). The middle HWs test **from-scratch NumPy MLPs that pass a gradient check** and a **PyTorch CNN with an ablation study**. If you can do those three cold before Project 1 of the semester, you will be ahead. Generative models and transformers come later in the term and in the project.
 
 **Robotics link:** **Hands-on Robot Learning (EN.601.498/698, course 04 in this repo) lists 601.482/682 (or Intro ML) as a prerequisite.** It expects you to already train transformers and diffusion models. This course is the gateway to it.
 
@@ -315,7 +315,7 @@ Tick each box when you can **derive it on paper and implement it in under 30 lin
 
 **Tips derived from the actual HWs:**
 1. **Matrix calculus fluency is the #1 differentiator.** HW1–3 are pure derivations: practice `∂(softmax CE)/∂W`, `∂L/∂W = (∂L/∂P)Xᵀ`, and sigmoid saturation numbers by hand. Typeset in LaTeX quickly (learn Overleaf now).
-2. **Gradient checks pass or you get nothing.** Write the gradient-check utility first (see §9 Day 1).
+2. **Gradient checks pass or you get nothing.** Write the gradient-check utility first (see §9 Project 1).
 3. **HW4-style ablations:** keep a fixed seed, change one thing at a time, log every run (W&B or a CSV), and **write the report with tables**. Grading is on analysis depth, not accuracy.
 4. **Start GPU HWs early.** Colab sessions time out, and Kaggle does not accept late submissions.
 5. **Front-loaded workload:** HWs pile up in the first ~10 weeks (F2023), so the project and the late midterm (F2023) overlap at the end. Form your project team in week 1–2.
@@ -361,15 +361,15 @@ Ranked by how much each one costs you in this course:
 7. **PyTorch fluency:** `Dataset/DataLoader`, `nn.Module`, `train()`/`eval()`, `torch.no_grad()`, optimizers/schedulers, `.to(device)` (MPS on your Mac), seeding, checkpointing, custom `autograd.Function`.
 8. **Tooling:** LaTeX/Overleaf (every HW report), Colab + Kaggle CLI, Weights & Biases or TensorBoard, git.
 
-**Quick self-test, before Day 1:** can you, without notes, (a) write stable softmax-CE and its gradient in NumPy, (b) state He init, (c) compute a conv output shape, and (d) write the ELBO? If any is shaky, schedule the matching drill from §9.
+**Quick self-test, before Project 1:** can you, without notes, (a) write stable softmax-CE and its gradient in NumPy, (b) state He init, (c) compute a conv output shape, and (d) write the ELBO? If any is shaky, schedule the matching drill from §9.
 
 ---
 
-## 9. Compressed APPLICATION-FIRST self-study plan (~6 study days inside the 30-day sprint)
+## 9. Build-first project sequence (do in order; you write all code)
 
-Each day is about 14–16 focused hours (per your profile). The pattern is **build first (morning) → read the theory for what you just built (afternoon) → hand-derive and write it up in LaTeX like a HW (evening)**. All code goes in `~/dl-sprint/` with one folder per day. Use the `mps` device on the M1 Max and Colab only if something is slow.
+Each project is a long focused block. The pattern is **build first (morning) → read the theory for what you just built (afternoon) → hand-derive and write it up in LaTeX like a HW (evening)**. All code goes in `~/dl-sprint/` with one folder per day. Use the `mps` device on the M1 Max and Colab only if something is slow.
 
-### Day 1 — Autograd from scratch + the HW1/HW3 math
+### Project 1: Autograd from scratch + the HW1/HW3 math
 - **Build:** a micrograd-style scalar autograd `Value` class (`+ * ** exp log tanh relu`, topological-sort backward), then a tiny MLP on the two-moons dataset (follow Karpathy lecture 1).
 - **Extend:** a **tensor version** in NumPy with `Linear`, `ReLU`, `Sigmoid`, `SoftmaxCE` modules, each with `forward/backward`, plus a **generic gradient checker** (centered differences, relative error).
 - **Reproduce HW2-Q1:** `f = σ(w₁x₁+w₂x₂) + 0.5‖w‖²`. Draw the graph with intermediate values, run 30 GD steps at lr 0.01, and plot `w₁, w₂`.
@@ -377,7 +377,7 @@ Each day is about 14–16 focused hours (per your profile). The pattern is **bui
 - **Read:** UDL Ch 5 & 7; CS231n optimization-2 notes; Karpathy "backprop ninja" (lecture 5) for practice.
 - ✅ **Milestone:** all gradient checks < 1e-6, and a 1-page LaTeX "HW" with the derivations.
 
-### Day 2 — NumPy MLP on MNIST (= HW2-Q3) + optimization & regularization
+### Project 2: NumPy MLP on MNIST (= HW2-Q3) + optimization & regularization
 - **Build:** load MNIST and normalize with train-set statistics only. Implement `linear_classifier`, a 1-hidden-layer MLP (hidden N/2, ReLU), and a **2-hidden-layer MLP with a skip connection**, all with hand-written backward passes that pass your grad check. Train with batch 50, lr 0.005, 20 epochs, and plot dev accuracy for all three.
 - **Add (from scratch):** SGD+momentum, Adam, L2 weight decay, inverted dropout, He vs naive init. Compare activation histograms per layer.
 - **Do it properly:** tune on dev, then report test accuracy once. Expect ~92% (linear) and ~98% (MLP).
@@ -385,7 +385,7 @@ Each day is about 14–16 focused hours (per your profile). The pattern is **bui
 - **Read:** UDL Ch 6, 9; DLB Ch 7–8 skim; BatchNorm paper abstract and Karpathy lecture 4 (activations, gradients, BN).
 - ✅ **Milestone:** a plot of three models' dev curves plus an optimizer/regularizer comparison table.
 
-### Day 3 — PyTorch CNNs on CIFAR (= HW4) + architectures + robotics perception
+### Project 3: PyTorch CNNs on CIFAR (= HW4) + architectures + robotics perception
 - **Build:** a CIFAR-10 pipeline (or a CIFAR-100 subset to mimic HW4) with augmentation (random crop + flip), a **simple CNN → +BN → +dropout → ResNet-18-style net (write the BasicBlock yourself)**, and **transfer learning** (torchvision ResNet-18 pretrained, linear probe vs fine-tune). Use AdamW or SGD+momentum with a cosine schedule.
 - **Ablation table:** 5+ tricks, fixed seed, one change at a time, with a **≤2-page report in LaTeX** using HW4's exact deliverable format.
 - **Conv arithmetic drills:** output sizes, parameter counts, MACs and receptive field for your network (compute them by hand, then verify with `torchinfo`).
@@ -393,14 +393,14 @@ Each day is about 14–16 focused hours (per your profile). The pattern is **bui
 - **Read:** UDL Ch 10–11; d2l Ch 7–8; ResNet paper (§3); Grad-CAM paper skim. Run Grad-CAM on your model.
 - ✅ **Milestone:** ResNet-18 from scratch ≥ 90% on CIFAR-10 (≈ 30–60 min on MPS/Colab), plus an ablation report.
 
-### Day 4 — Sequences: RNN/LSTM → attention → mini-GPT
+### Project 4: Sequences: RNN/LSTM → attention → mini-GPT
 - **Morning:** a character-level **vanilla RNN in NumPy with BPTT** (min-char-rnn style) on a small text. Watch the gradient norms and add clipping. Then an `nn.LSTM` char-model in PyTorch, and write the **LSTM cell equations yourself** (a manual `LSTMCell`) and match the PyTorch outputs.
 - **Afternoon:** a **nanoGPT-style transformer from scratch** (Karpathy lecture 7): token + position embeddings, **causal multi-head self-attention** (write the mask and `√d_k` scaling yourself), Pre-LN blocks, FFN, and a weight-tied head, trained on tiny-shakespeare. Report perplexity and samples.
 - **Evening:** word2vec CBOW with negative sampling (the Lab 2 equivalent, 1 h). Then derive **attention shapes, the parameter count (~12d² per block) and the O(n²) cost** on paper. Compare a **ViT-tiny** on CIFAR-10 with your ResNet if time allows.
 - **Read:** DLB Ch 10 (RNN/LSTM); UDL Ch 12; Annotated Transformer; Bishop Ch 12.
 - ✅ **Milestone:** a mini-GPT that generates plausible text, and a manual LSTM cell that matches `nn.LSTM`.
 
-### Day 5 — Generative & self-supervised: VAE, GAN, DDPM, SimCLR
+### Project 5: Generative & self-supervised: VAE, GAN, DDPM, SimCLR
 - **VAE on MNIST** (2 h): MLP or conv encoder → `(μ, log σ²)` → reparameterize → decoder. Loss = BCE recon + analytic KL. Visualize the 2-D latent space and interpolations. **Derive the ELBO and the Gaussian KL on paper.**
 - **DCGAN on MNIST / Fashion-MNIST** (2 h): use the non-saturating loss and observe instability and mode collapse. Write out `D*` and the JSD result.
 - **Tiny DDPM on MNIST** (4 h): a small U-Net with a time embedding, linear β schedule (T=1000), `ε`-prediction MSE, then ancestral sampling and **DDIM** sampling with 50 steps. Add **class-conditioning + classifier-free guidance**. This is the core of Diffusion Policy.
@@ -408,7 +408,7 @@ Each day is about 14–16 focused hours (per your profile). The pattern is **bui
 - **Read:** UDL Ch 14, 15, 17, 18; Lilian Weng's diffusion & contrastive posts; Bishop Ch 20.
 - ✅ **Milestone:** a grid of samples from VAE/GAN/DDPM plus a linear-probe accuracy number.
 
-### Day 6 — Robotics capstone (project rehearsal) + midterm drill
+### Project 6: Robotics capstone (project rehearsal) + midterm drill
 - **Mini project, in the course's report format** (Intro/Background/Related Work → Methods → Results → Discussion, 2–3 pages LaTeX):
   - **Option A — Behavior cloning from images:** collect or download demos (e.g. **PushT** or ALOHA-sim via **LeRobot**, or a gymnasium/MuJoCo task). Train a **CNN encoder + MLP policy (BC)** and then a **small Diffusion Policy** (1-D temporal U-Net or transformer over action chunks, conditioned on image features), and compare success rates. This bridges directly to course 04 (Hands-on Robot Learning).
   - **Option B — Perception for manipulation:** grasp-point or keypoint heatmap prediction, or segmentation of objects/tools (e.g. surgical tools for an ARCADE/LCSR-flavored project), with an ablation table and failure-case analysis (domain shift, calibration).

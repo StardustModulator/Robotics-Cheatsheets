@@ -1,6 +1,6 @@
 # 02 — Computer Vision (for Robotics) at JHU
 
-> Study guide for an incoming JHU **MSE in Robotics** student. You have a 30-day sprint and about **5 study days** for this course.
+> Study guide for an incoming JHU **MSE in Robotics** student.
 >
 > **Conventions:** Anything marked **(unverified)** could not be confirmed from a primary source during research. Section numbers marked **(TOC from memory)** should be checked against the free PDF at <https://szeliski.org/Book>. During research, `lcsr.jhu.edu` and `e-catalogue.jhu.edu` could not be fetched directly from the research sandbox, so facts from those sites come from search-engine snippets of those pages.
 
@@ -359,17 +359,17 @@ Notation: homogeneous image point **x** = (u, v, 1)^T. World point **X** = (X, Y
 | Projective geometry intuition (homogeneous coords, points at infinity, lines as 3-vectors, `l = x1 × x2`) | Homographies, epipolar lines, vanishing points | H&Z Ch. 2 (first 15 pages) |
 | Nonlinear least squares (Gauss-Newton, LM, Jacobians) | Calibration refinement, BA | Szeliski App. A.3; Stachniss BA lecture |
 | Probability: Gaussians, robust estimation | RANSAC analysis, noise models | — |
-| **Python/NumPy fluency** (broadcasting, vectorization), OpenCV I/O, Matplotlib | All homework | Do Day 0 warm-up |
+| **Python/NumPy fluency** (broadcasting, vectorization), OpenCV I/O, Matplotlib | All homework | Do Project 0 warm-up |
 | Signals: convolution, Fourier, sampling/aliasing | Filtering, pyramids | FPCV "Image Processing" monographs |
 | ML/DL basics (backprop, CNNs, PyTorch training loop) | Last third of the course + project. Overlaps with course 03 in this repo | CS231n modules 1-2 |
 
 ---
 
-## 9. Application-first self-study plan (5 study days)
+## 9. Build-first project sequence (do in order; you write all code)
 
-**Philosophy:** each day is one **working mini-project**, with theory pulled in only as needed. The time budget is roughly 6-8 h/day: about 1.5 h video/reading, 4-5 h coding, 30 min writing a one-page "equations + gotchas" note into this folder.
+**Philosophy:** each step is one **working mini-project**, with theory pulled in only as needed. Rough budget per project: about 1.5 h video/reading, 4-5 h coding, 30 min writing a one-page "equations + gotchas" note into this folder.
 
-**Setup (do it before Day 1, about 30 min):**
+**Setup (do it before Project 1, about 30 min):**
 
 ```bash
 python -m venv cv && source cv/bin/activate
@@ -378,9 +378,9 @@ pip install numpy scipy matplotlib opencv-contrib-python jupyter torch torchvisi
 
 Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) and tape it flat to a rigid board.
 
-**Golden rule for all days:** implement the core math **yourself in NumPy first**, then compare against the OpenCV built-in.
+**Golden rule for every project:** implement the core math **yourself in NumPy first**, then compare against the OpenCV built-in.
 
-### Day 1: Image formation + calibrate your phone camera
+### Project 1: Image formation + calibrate your phone camera
 - **Watch/read (about 1.5 h):**
   - Stachniss "camera parameters / DLT / Zhang" videos, or FPCV "Image Formation" + "Camera Calibration".
   - Szeliski §2.1, §11.1.
@@ -400,7 +400,7 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
   - What is `C` in terms of R, t?
   - What does a big k1 do to straight lines?
 
-### Day 2: Filtering, features, RANSAC → panorama stitcher
+### Project 2: Filtering, features, RANSAC → panorama stitcher
 - **Watch/read:**
   - FPCV "Image Processing" + "Edge Detection" + "SIFT".
   - Szeliski §3.2, §7.1, §8.1-8.2.
@@ -411,13 +411,13 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
   3. SIFT/ORB via OpenCV, plus BFMatcher + ratio test.
   4. **Homography by DLT** (normalized) **+ your own RANSAC loop**. Compute N from the formula. Compare with `cv2.findHomography(..., cv2.RANSAC)`.
   5. **Stitch 3 phone photos** (rotate about the camera center). Inverse-warp with `cv2.warpPerspective` onto a common canvas, then simple feather blending.
-  6. Stretch: **cylindrical warp** using your Day-1 K. Explain why `H = K R K^{-1}` for pure rotation.
+  6. Stretch: **cylindrical warp** using your Project 1 K. Explain why `H = K R K^{-1}` for pure rotation.
 - **Self-check:**
   - Minimum matches for H?
   - RANSAC iterations needed for 50% inliers at 99%?
   - Why normalize?
 
-### Day 3: Two-view geometry → two-view SfM
+### Project 3: Two-view geometry → two-view SfM
 - **Watch/read:**
   - Stachniss "epipolar geometry / F / E / 8-point / triangulation".
   - CS231A notes "Epipolar Geometry".
@@ -434,7 +434,7 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
   - What is the rank of F and why?
   - Where are the epipoles?
 
-### Day 4: Stereo depth + optical flow
+### Project 4: Stereo depth + optical flow
 - **Watch/read:**
   - FPCV "Stereo" + "Optical Flow".
   - Szeliski §12.1-12.4, §9.1, §9.3.
@@ -446,20 +446,20 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
      - Convert to depth with `Z = f B / d`. Plot the error vs range intuition.
   2. Add a left-right consistency check. Visualize the occlusion holes.
   3. **Lucas-Kanade from scratch** (single level, then pyramidal) on corners from your Harris detector. Compare with `cv2.calcOpticalFlowPyrLK`.
-  4. **KLT tracker on a phone video:** detect `goodFeaturesToTrack`, track frame-to-frame, re-detect when the count drops. Draw tracks. This is the front end for Day 5.
+  4. **KLT tracker on a phone video:** detect `goodFeaturesToTrack`, track frame-to-frame, re-detect when the count drops. Draw tracks. This is the front end for Project 5.
   5. Stretch: Farnebäck dense flow, HSV-coded visualization. Rectify your own phone stereo pair with `stereoRectify`.
 - **Self-check:**
   - Derive the optical-flow constraint equation.
   - When is LK ill-conditioned? (Hint: Harris.)
   - Why does depth error grow as Z²?
 
-### Day 5: Monocular visual odometry on KITTI + PnP + DL refresher
+### Project 5: Monocular visual odometry on KITTI + PnP + DL refresher
 - **Watch/read:**
   - Scaramuzza & Fraundorfer VO tutorial Part I.
   - Szeliski §11.2, §11.4-11.5.
   - Stachniss "Bundle Adjustment".
 - **Build (morning, about 4 h): monocular VO** on KITTI Odometry sequence 00, grayscale left camera (`P0` from `calib.txt` gives K):
-  1. FAST/ORB detection → KLT tracking (from Day 4).
+  1. FAST/ORB detection → KLT tracking (from Project 4).
   2. `findEssentialMat` (RANSAC) → `recoverPose` → **scale from ground-truth poses** (the standard teaching trick; state it explicitly).
   3. Chain `T_k = T_{k-1} · T_{k,k-1}`.
   4. Plot the x-z trajectory vs ground truth. Compute the drift.
@@ -474,10 +474,10 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
   - Write a one-page sheet of every equation in §5 from memory.
   - Revisit whatever you could not derive.
 
-### Optional micro-sessions (during the remaining 25 days, 20-30 min each)
+### Optional micro-sessions (20–30 min each, any time later)
 - AprilTag/ArUco pose estimation (`cv2.aruco`). Directly useful for robot arms (links to RDKDC/ASBR).
-- Run COLMAP on 30 photos of an object. Compare with your Day-3 pipeline.
-- Read a SuperPoint/LightGlue README and try the demo on your Day-2 images.
+- Run COLMAP on 30 photos of an object. Compare with your Project 3 pipeline.
+- Read a SuperPoint/LightGlue README and try the demo on your Project 2 images.
 - Hand-solve 5 exam-style problems (§4 list).
 
 ### Deliverables to keep in this folder (suggested)

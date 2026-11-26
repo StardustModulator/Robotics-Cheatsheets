@@ -19,11 +19,11 @@
 | 11 | **Feedback control** | F4 pendulum PD | **PD, computed torque, resolved-rate** | — | — | PID servos (SO-101) | resolved-rate | virtual fixtures |
 | 12 | **Dynamics / simulation (ODEs)** | F4 | **Lagrangian M(q)q̈ + C q̇ + g = τ** | — | — | sim rollouts | motion models in KF | — |
 
-## Recommended "engine-first" order (already built into the 30-day plan)
+## Recommended "engine-first" order (built into STUDY_PLAN.md)
 1 → 4 → 3 → 2 → 7 → 6 → 5 → 8 → 11/12 → 9 → 10
 
 ## Convention traps (write these on your cheat sheets)
-- **Twist ordering:** MLS + Cowan-era code: ξ = (v, ω). Modern Robotics: V = (ω, v). **Fall 2026 RDKDC Lab 1 handout: [ω; v].** Confirm on day one of class.
+- **Twist ordering:** MLS + Cowan-era code: ξ = (v, ω). Modern Robotics: V = (ω, v). **Fall 2026 RDKDC Lab 1 handout: [ω; v].** Confirm in the first lecture.
 - **DH:** RDKDC's UR5 IK handout (Keating) uses **standard (Spong-style) DH**, not Craig's modified DH. Modern Robotics covers DH only in Appendix C; MLS uses PoE throughout.
 - **Space vs body Jacobian:** J_b = Ad_{g⁻¹} J_s. Lab 3 uses the **body** Jacobian.
 - **Frame notation:** CIS writes F_AB / F = [R, p]; RDKDC writes g_ab ∈ SE(3); CV writes world→camera [R | t]. Same objects, different names.

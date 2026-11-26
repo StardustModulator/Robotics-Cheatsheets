@@ -193,7 +193,7 @@ T_0^n = A_1 A_2 ... A_n
   2. The twist axis is ωᵢ = z-column of T₀^{i−1}(0), and the point is qᵢ = origin of T₀^{i−1}(0).
   3. Then g_st(0) = T₀ⁿ(0), with base and tool offsets added if needed.
 
-  I implemented this for the UR5 table above and checked that PoE equals DH to **3.9×10⁻¹⁶ over 100 random configurations** (script in §10, Day 2). The resulting space-frame axes are:
+  I implemented this for the UR5 table above and checked that PoE equals DH to **3.9×10⁻¹⁶ over 100 random configurations** (script in §10, Project 2). The resulting space-frame axes are:
   - ω₁ = (0,0,1); ω₂ = ω₃ = ω₄ = (0,−1,0); ω₅ = (0,0,−1); ω₆ = (0,−1,0)
   - M = g_st(0) has position (−0.81725, −0.19145, −0.00549)
 
@@ -425,17 +425,17 @@ Paid but standard references (no free PDF):
 
 ---
 
-## 10. Application-first self-study plan (5 study days inside the 30-day sprint)
+## 10. Build-first project sequence (do in order; you write all code)
 
 **Setup**
 - Python 3 with `numpy`, `scipy`, `matplotlib`, `sympy` and `modern_robotics` (`roboticstoolbox-python` is optional).
 - Code everything yourself first. Use the MR library **only as a test oracle**.
-- Each day is ~6–8 h: **~1.5 h theory** (MR videos + skim the MLS sections), **~5 h build**, **~0.5 h recall** (write the day's equations from memory on one page).
+- Each project is ~6–8 h: **~1.5 h theory** (MR videos + skim the MLS sections), **~5 h build**, **~0.5 h recall** (write the project's equations from memory on one page).
 
 **Suggested layout:** `rdkdc_selfstudy/{so3.py, se3.py, ur5.py, jacobian.py, ik.py, dyn.py, tests/}`.
 Write pytest tests as you go: they become your Lab 1/Lab 3 tests later.
 
-### Day 1: SO(3)/SE(3) toolkit (= JHU Lab 1 in Python)
+### Project 1: SO(3)/SE(3) toolkit (= JHU Lab 1 in Python)
 - **Watch:** MR Ch. 3 videos (3.1–3.3.3). **Skim:** MLS §2.1–2.3.
 - **Build:**
   - `rotx/roty/rotz`, `eulerxyz` and `eulerxyz_inv`. Detect pitch = ±π/2 and warn, and show that `eulerxyz_inv(eulerxyz([4π,0,0])) ≠ [4π,0,0]`.
@@ -447,7 +447,7 @@ Write pytest tests as you go: they become your Lab 1/Lab 3 tests later.
   - Check `adjoint(g) @ xi == vee(g @ hat(xi) @ inv(g))`.
 - **Visualize:** a matplotlib 3-D `plot_frame(g)`. Animate e^{ξ̂θ} for θ ∈ [0, 2π] for a screw with pitch 0.1 and watch the helix.
 
-### Day 2: UR5 forward kinematics, DH vs. PoE
+### Project 2: UR5 forward kinematics, DH vs. PoE
 - **Watch:** MR Ch. 4 videos and MR Appendix C. **Read:** MLS §3.2, Keating handout p.1–2 (DH table), and a DH explainer (Corke).
 - **Build:**
   - `fk_dh(q)` from the Keating/UR table (standard DH).
@@ -471,7 +471,7 @@ Write pytest tests as you go: they become your Lab 1/Lab 3 tests later.
   ```
 - **Stretch:** install ROS 2 Jazzy, clone `rdkdc_jazzy`, run `ros2 launch rdkdc ur5_simulation.launch.py`, and compare your FK with TF `base_link → tool0`.
 
-### Day 3: Jacobians, singularities, manipulability (= JHU Lab 3, part 1)
+### Project 3: Jacobians, singularities, manipulability (= JHU Lab 3, part 1)
 - **Watch:** MR Ch. 5 videos. **Read:** MLS §3.4.
 - **Build:**
   - `jacobian_space(q)` and `jacobian_body(q)` via adjoints (both MLS formulas); check `J_s == Ad(g) @ J_b`.
@@ -482,7 +482,7 @@ Write pytest tests as you go: they become your Lab 1/Lab 3 tests later.
   2. Find the wrist singularity (θ5 = 0) and the shoulder singularity numerically by plotting σ_min.
   3. Draw the linear-velocity manipulability ellipsoid at a few poses.
 
-### Day 4: Inverse kinematics + resolved-rate control (= JHU Lab 3, part 2 + final project, in sim)
+### Project 4: Inverse kinematics + resolved-rate control (= JHU Lab 3, part 2 + final project, in sim)
 - **Watch:** MR Ch. 6 videos. **Read:** MLS §3.3 (Paden–Kahan) and Keating IK p.2–end.
 - **Build:**
   - Paden–Kahan SP1 and SP3, with unit tests on random rotations.
@@ -495,7 +495,7 @@ Write pytest tests as you go: they become your Lab 1/Lab 3 tests later.
   3. Plot the tool path, joint trajectories and error vs. iteration.
   4. Compare convergence speed and singularity behaviour of J⁻¹, Jᵀ and DLS.
 
-### Day 5: Dynamics and control
+### Project 5: Dynamics and control
 - **Watch:** MR Ch. 8.1 and 11.4 videos (Ch. 9 time-scaling if time allows). **Read:** MLS §4.2–4.5.
 - **Build:**
   - With **SymPy**, derive the 2-link planar arm: T, V, M(θ), C(θ, θ̇) via Christoffel symbols, and g(θ). Check numerically that **Ṁ − 2C is skew-symmetric**.
@@ -506,11 +506,11 @@ Write pytest tests as you go: they become your Lab 1/Lab 3 tests later.
     4. computed torque with a 20 % mass error (robustness).
   - Plot tracking error and torque.
 - **Bridge to the UR5:** use `mr.MassMatrix`, `mr.InverseDynamics` and `mr.ComputedTorque` with UR5 inertial parameters (from `mr_urdf_loader` or the MR Coursera capstone files) and confirm your 2-link code against `mr.InverseDynamics` on a 2-link model.
-- **Close-out:** cubic and quintic time scaling (MR Ch. 9) to feed smooth trajectories to Day 4's controllers.
+- **Close-out:** cubic and quintic time scaling (MR Ch. 9) to feed smooth trajectories to Project 4's controllers.
 
-**Spaced review in the remaining sprint days** (15–30 min each, no new material):
-- Redo the §6 equations from memory on days +2, +7 and +14.
-- Before term: (re)install Ubuntu 24.04 + ROS 2 Jazzy + MATLAB (with the ROS and Robotics System Toolboxes), and port the Day 1 functions to MATLAB with the exact Lab 1 names (`ROTX`, `EULERXYZINV`, `SKEW3`, `EXPCR`, `SKEW6`, `EXPCF`, `FINV`).
+**Spaced review** (15–30 min each, no new material):
+- Redo the §6 equations from memory 2, 7 and 14 days after finishing.
+- Before term: (re)install Ubuntu 24.04 + ROS 2 Jazzy + MATLAB (with the ROS and Robotics System Toolboxes), and port the Project 1 functions to MATLAB with the exact Lab 1 names (`ROTX`, `EULERXYZINV`, `SKEW3`, `EXPCR`, `SKEW6`, `EXPCF`, `FINV`).
 
 ---
 

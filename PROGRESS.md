@@ -20,6 +20,7 @@
 - **Research interests:** deferred until the six courses are done.
 
 ## Standing rules
+- **No day-based schedules, no clutter.** Plans are organized by subject: what to learn, how, where. Keep messages short and clean.
 - **Student writes all implementation code.** Claude explains, designs with, debugs with and reviews the student's code,
   but does not write the solutions. Reason: CIS I (2025 handouts) forbids AI-generated code in the PAs and forbids
   prior-year solutions; the same discipline also builds real skill for every other course.
@@ -39,6 +40,6 @@
 - Profile update: CS engineering graduate + Associate SWE; start-from-zero is for completeness, not because of zero knowledge. Phase 0 rebalanced: faster programming, deeper math.
 - Created `knowledge-base` branch, README entry point, Phase 0 foundations plan (`courses/00-foundations/`).
 - Research complete for all six courses → `courses/0X-*/README.md` (sources cited; uncertain facts marked "(unverified)").
-- Wrote `STUDY_PLAN_30_DAYS.md` (Days 1–30, two-track days) and `CROSS_COURSE_MAP.md` (12 shared engines, convention traps, GenAI policies).
+- Wrote `STUDY_PLAN.md` (by subject; day schedule removed at student's request) and `CROSS_COURSE_MAP.md` (12 shared engines, convention traps, GenAI policies).
 - Decision: curated MIT 18.06/18.02 path instead of full lecture series (see foundations file).
-- **Next: Day 1 (Nov 27): F1, Mac setup + Python end-to-end + Git + start 3B1B linear algebra.**
+- **Next: Foundations → Mac setup, Python, Git, 3Blue1Brown linear algebra.**
