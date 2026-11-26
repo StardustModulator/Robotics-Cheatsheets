@@ -11,6 +11,37 @@
 
 ---
 
+## 0. Verified: Spring 2026 syllabus (Cowan), student's copy
+
+Source: `~/Downloads/syllabus.pdf` (4 pp., read in full 2026-11-26). It is the **Spring 2026** RDKDC syllabus by **Noah Cowan**, not the Fall 2026 (Kim) one, so check the grading split on day 1. It replaces the "(unverified)" grading guess in §1.
+
+| Item | Spring 2026 (Cowan) |
+|---|---|
+| Meetings | TTh 12:00–1:15, Hodson 311; 4 credits (EQ). Materials on Canvas. TA office hours Mon 4–6 pm, Malone 228. |
+| Required text | **MLS only.** Optional: Spong–Hutchinson–Vidyasagar *Robot Modeling and Control*; Spong–Vidyasagar *Robot Dynamics and Control*; Craig *Introduction to Robotics*. Modern Robotics is not listed (still the best second text). |
+| Topics (in order) | 1 rigid-body motion: points, velocities, frame transforms, rotational/translational velocity · 2 FK and IK of arms · 3 analytical arm dynamics · 4 **joint-space and Cartesian trajectory generation** · 5 rudimentary ROS programming on a UR5 · 6 (time permitting) actuation, design, control. Note: control is "as time permits" here, while trajectory generation is a core topic. |
+| Grading | **Homework 5%**: completion credit, ~12 problem sets, full 5% for turning in ≥ 75% on time (so 3 can be missed); no late HW ever; solutions are published before the due date. **Quizzes 20%**: 5–6, drawn **directly from past homework problems**, lowest dropped. **Two midterms, 15% each.** **Lab project 20%**: final project + demo on the real UR5 (team). **Final exam 25%**, comprehensive. |
+| Exams | Closed book, closed notes, photo ID. No make-ups without documentation or > 1 week notice. |
+| Dates (S2026) | Midterm I Feb 19 · Midterm II Apr 2 · last class Apr 23 · final May 12, 2–5 pm. That is roughly midterm I after rigid-body motion + FK, midterm II after IK/Jacobians. |
+| Labs | MATLAB computational labs; individual ROS labs submitted on **GitHub**; team hardware labs with one report. |
+| AI policy | Don't paste problem sets or labs into AI tools; LLMs only to explain basic concepts. Cowan: "Human TAs and the professor are better than LLMs 99% of the time." |
+| Workload | "It is not unreasonable to spend 15–20 hours in some weeks." |
+
+**What this means for prep:** 45% of the grade is closed-book exams + quizzes built from homework. Do every MLS Ch. 2–4 exercise by hand, timed, and re-do them from memory a week later. Add MR Ch. 9 trajectory generation (cubic/quintic, trapezoidal, straight-line in SE(3)) to the core list, not the optional list.
+
+### 0.1 Evidence from the student's RDKDC folder (`~/Downloads/RobotDevicesKinematicsDynamicsAndControl/`)
+- `murray-li-sastry-94-complete.pdf`: same edition as the library notes (PDF = book + 18).
+- `MR-largefont-v2.pdf`: **Dec 2019 updated preprint, not the 2017 one** used for `library/mr-part*.md`. PDF = book + 20; how to convert page numbers and which errata are fixed: `library/mr-2019-edition.md`.
+- `robot-devices.pdf` (105 pp.): **a past student's handwritten notes from Cowan's Fall 2017 lectures**. They run up to Lyapunov definitions; DH, UR5 IK, M/C/N and control laws are not in them. Walk-through, 27 errata, gaps: `library/rdkdc-handwritten-notes.md`. What they show about the real lecture order (Cowan 2017):
+  - Week 1 = vector spaces, norms, bases + a preview of the whole course on a 2R arm; resolved-rate first appears in lecture 2.
+  - Groups, group actions and the **semidirect product** SE(3) = R³ ⋊ SO(3) are core early material, not an optional appendix.
+  - Euler angles and quaternions took under one lecture.
+  - **Jacobian → singularities → resolved-rate → statics → manipulability (SVD) → Jacobian-transpose control came before IK**; IK was short (Paden–Kahan SP1–3 only).
+  - No DH lecture (one line); DH came from the Keating handout.
+  - Dynamics began with state space → constrained particles and Lagrange multipliers → least action → Euler–Lagrange → Lyapunov definitions, before any $M, C, N$.
+  - PS1 included proving $R(v\times w)=(Rv)\times(Rw)$; PS4 was planar 2R IK.
+- `../External_Resources/RDKDCFinalProject.pdf`: **a team's final-project report** (compiled 2020-09-27, probably the Fall 2019 demo), not the handout. Notes and its errors: `library/rdkdc-final-project.md`.
+
 ## 1. Course identity
 
 | Field | Value | Source / confidence |
@@ -23,7 +54,7 @@
 | Recent / upcoming terms | Spring 2026: Cowan, TTh 12:00–1:15. **Fall 2026: Kim, TTh 10:30–11:45, labs TBA.** Spring 2027 (anticipated): Kim, TTh 12:00–1:15. Coursicle lists Spring 2027 sections at 10:30, 12:00 and 18:00. | ME graduate course-schedule page and Coursicle (from search snippet) [5][6] |
 | Offered | Historically in the fall. The course now appears in **both fall and spring**. A TA page also mentions a Summer 2025 term **(unverified)**. | [5][7] |
 | Prerequisites | Recommended rather than formally required: multivariable calculus, classical physics, linear algebra, ODEs. One catalog note also mentions dynamics and feedback control. | Semester.ly, advising manual, catalog (from search snippet) [2][8] |
-| Grading | Weekly homework, MATLAB labs on a UR5, a midterm, a final exam and a final project. Homework, exams and labs+project are roughly equal shares. No late work without prior approval. | JHU public syllabus on HelioCampus (from search snippet; exact percentages **unverified**) [9] |
+| Grading | **Spring 2026 (syllabus read, §0):** HW 5% (completion) · quizzes from HW 20% · two midterms 15% each · UR5 lab project 20% · final 25%. Fall 2026 (Kim) split not yet seen. No late work without prior approval. | Student's copy of the S2026 syllabus; [9] |
 | AI policy (Fall 2026) | The lab handouts say LLM/GenAI tools are **not permitted unless stated otherwise**. | Lab 1 Fall 2026 PDF (first-hand) [10] |
 | Downstream | EN.530.707 *Robot System Programming* requires EN.530.646 and EN.601.463/663 (or instructor permission). | ME MSE manuals 2023–25 (from search snippet) [12] |
 | Scheduling caution | Older ME manuals and the ME tracks page **strongly recommend not taking EN.530.646 and EN.601.663 (ASBR) in the same semester**. The 2026–27 manual has a section titled "Recommendation on EN.530.646 RDKDC and EN.601.463/663 ASBR" whose text I could not read. **Check it before you register.** | [12][13] |
@@ -67,7 +98,7 @@ The schedule assumes about 14 weeks of TTh lectures, weekly homework and one mid
 | 13 | Open-chain dynamics M(θ), C(θ,θ̇), N(θ); Lyapunov stability | 4.3–4.4 | 8.1.2–8.1.3, 8.3–8.5 | HW |
 | 14 | Control: PD + gravity, computed torque, workspace control; trajectory generation (if time); review | 4.5 | 9.1–9.3, 11.1–11.4 | Final exam; **final project demo** |
 
-Midterm: probably after kinematics, around weeks 7–8 **(unverified)**. Final exam: cumulative, with heavy
+Midterms: Spring 2026 had **two** (Feb 19 ≈ week 6, Apr 2 ≈ week 10; §0). Fall 2026 timing unknown. Final exam: cumulative, with heavy
 dynamics content **(unverified)**.
 
 ---
@@ -264,11 +295,12 @@ Lab 3 requirements, from a public 2025 student README that paraphrases the hando
   3. **Gradient / Jacobian-transpose (JT):** use Jᵀ instead of J⁻¹.
 
   Teaching should use a manipulability measure to pick a good configuration. The minimum task earns roughly a B/B+; an "extra" (a creative task, hybrid control, etc.) is needed for an A.
+- **By 2019–20 (team report in the student's folder):** the task was already a marker **"place-and-mark with intention"**: an approach/retreat through an "above the mark" pose, plus an "intention" move; writing "RDKDC" was the extra credit. So the cube→pen switch happened before 2022. Pitfalls from that report: `ur5.home` is a singular configuration (move off it before RR/JT); their RR stopping thresholds were 0.35 cm and 7.5°. **Don't copy its math:** the PoE product is written in reversed order and one singularity condition is wrong (`library/rdkdc-final-project.md`).
 - **~2022–2025 version: "place-and-draw".** Teach start and end points with the pendant, then draw lines or shapes with a pen tool (the pen-tip offset is a constant g_6T), again with IK, RR and JT. Extras included writing "RDKDC" and tic-tac-toe [16][31].
 - **Deliverables:** a single repo with main script `ur5_project.m` that lets the user choose the control mode; a PDF report covering workflow, new math (e.g. the JT/gradient derivation) and workload split; and a 2–4 min YouTube video [14b].
 
 ### 5.4 Exams
-A midterm and a final [9]. Expect hand derivations: twists, exponentials, adjoints, PoE FK, Jacobians,
+Spring 2026: biweekly quizzes taken from homework (20%), **two midterms** (15% each) and a comprehensive final (25%), all closed book (§0). Expect hand derivations: twists, exponentials, adjoints, PoE FK, Jacobians,
 Paden–Kahan, Lagrangian dynamics of 2–3-link arms, stability and control laws. Format details **(unverified)**.
 
 ---
@@ -303,6 +335,7 @@ Paden–Kahan, Lagrangian dynamics of 2–3-link arms, stability and control law
 **Velocities and the adjoint**
 - [ ] Spatial velocity V^s = (ġ g⁻¹)^∨; body velocity V^b = (g⁻¹ ġ)^∨; V^s = Ad_g V^b.
 - [ ] **Adjoint** (MLS): Ad_g = [R p̂R; 0 R], Ad_g⁻¹ = [Rᵀ −Rᵀp̂; 0 Rᵀ], and g ξ̂ g⁻¹ = (Ad_g ξ)^.
+- [ ] **Velocity composition** (MLS Prop. 2.14): V^s_ac = V^s_ab + Ad_{g_ab} V^s_bc and V^b_ac = Ad_{g_bc⁻¹} V^b_ab + V^b_bc. (Cowan 2017 lectures, `library/rdkdc-handwritten-notes.md`.)
   MR (ω first): [Ad_T] = [R 0; [p]R R].
 - [ ] Wrenches F = (f, τ) transform by Ad_gᵀ (power pairing VᵀF is invariant).
 
@@ -332,7 +365,7 @@ Paden–Kahan, Lagrangian dynamics of 2–3-link arms, stability and control law
   3. **SP3** — rotate p about ξ to a distance δ from q: θ = θ₀ ± arccos((‖u′‖² + ‖v′‖² − δ′²)/(2‖u′‖‖v′‖)), where δ′² = δ² − |ωᵀ(p − q)|².
 - [ ] UR5 analytic IK (Keating): 2 (shoulder) × 2 (wrist) × 2 (elbow) = **8 solutions**. Choose among them by joint limits, closeness to the current q, and manipulability.
 - [ ] **Newton–Raphson IK** (MR §6.2): θ ← θ + J_b†(θ) V_b, where [V_b] = log(T_sb(θ)⁻¹ T_sd). Iterate until ‖ω_b‖ < ε_ω and ‖v_b‖ < ε_v.
-- [ ] **Resolved-rate (JHU Lab 3):** q_{k+1} = q_k − K T_step J_b(q_k)⁻¹ ξ_k, with ξ_k = log(g_d⁻¹ g_st(q_k))^∨.
+- [ ] **Resolved-rate (JHU Lab 3):** q_{k+1} = q_k − K T_step J_b(q_k)⁻¹ ξ_k, with ξ_k = log(g_d⁻¹ g_st(q_k))^∨. Speed-limited variant from the 2017 lectures: command V = −k ξ/(‖ξ‖ + ε), so the tool moves at a near-constant speed far from the goal and slows only near it.
 - [ ] **Jacobian transpose / gradient:** q_{k+1} = q_k − K T_step J_bᵀ ξ_k. This is gradient descent on ½‖ξ‖², so it is robust near singularities but slow.
 - [ ] **Damped least squares:** Δq = Jᵀ(JJᵀ + λ²I)⁻¹ e. Redundant arms: q̇ = J†V + (I − J†J) q̇₀.
 

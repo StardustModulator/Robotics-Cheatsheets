@@ -46,6 +46,14 @@
 
 ## Log
 
+### 2026-11-26: resource audit (local folders)
+- Read every file in `~/Downloads/Algorithms_For_Sensor_Based_Robotics/`, `~/Downloads/RobotDevicesKinematicsDynamicsAndControl/`, `~/Downloads/682 MLDL/`, `~/Downloads/syllabus.pdf` and `~/Downloads/External_Resources/RDKDCFinalProject.pdf`.
+- `syllabus.pdf` is the **RDKDC Spring 2026 (Cowan)** syllabus, not DL → RDKDC README §0 (real grading: HW 5 / quizzes 20 / 2×15 midterms / project 20 / final 25, closed book). The DL syllabus is `682 MLDL/Syllabus_DL_Fall20_no_hyperlinks.pdf` → DL README §2.1 (full L-1…L-24 schedule; the unknown 10% = quizzes) + §5.13 missing topics.
+- New library notes: `lavalle-part1.md`, `lavalle-part2.md`, `asbr-papers.md`, `mr-2019-edition.md`, `rdkdc-handwritten-notes.md`, `rdkdc-final-project.md`. New errata merged into `library/README.md`.
+- Corrections: Park–Martin least squares needs ≥3 motions with non-coplanar axes (ASBR README); the student's MR copy is the 2019 edition (8 of the listed MR errata are fixed there); the RDKDC project was already "place-and-mark" by 2019–20.
+- CV README filled against the student's CV spec: image calculus, Zhang/Canny/photometric stereo from scratch, Project 6 (ResNet/U-Net/ViT/detection/segmentation), CS231A + CS231n + Szeliski spine map.
+- Not yet mirrored to Notion.
+
 ### 2026-11-26: planning
 - Profile update: CS engineering graduate + Associate SWE; start-from-zero is for completeness, not because of zero knowledge. Phase 0 rebalanced: faster programming, deeper math.
 - Created `knowledge-base` branch, README entry point, Phase 0 foundations plan (`courses/00-foundations/`).

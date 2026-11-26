@@ -193,6 +193,12 @@ Notation: homogeneous image point **x** = (u, v, 1)^T. World point **X** = (X, Y
 - [ ] **Convolution:** `(f * h)[m,n] = Σ_k Σ_l f[k,l] h[m-k, n-l]`. Correlation omits the flip. Linear and shift-invariant.
 - [ ] **Gaussian:** `G_σ(x,y) = (1/2πσ²) exp(-(x²+y²)/2σ²)`. Separable, so it costs O(k) instead of O(k²) per pixel.
 - [ ] Derivative filters (Sobel). Gradient magnitude/orientation. **Laplacian of Gaussian / DoG**.
+- [ ] **Image calculus** (the math under Canny, Harris, LK, KLT, photometric alignment):
+  - Image as a function `I(x,y)`; gradient `∇I = (I_x, I_y)`, magnitude `‖∇I‖`, direction `atan2(I_y, I_x)`; directional derivative `∇I·u`.
+  - Differentiate after smoothing: `∂(G_σ * I)/∂x = (∂G_σ/∂x) * I` (derivative of Gaussian, DoG filter); finite differences amplify noise.
+  - Hessian `H = [[I_xx, I_xy],[I_xy, I_yy]]` (Hessian/DoH blob detector, edge rejection in SIFT); Laplacian `∇²I = I_xx + I_yy` = trace of H.
+  - First-order Taylor `I(x+Δ) ≈ I(x) + ∇I(x)ᵀΔ` gives the Harris structure tensor (SSD of a shifted window ≈ `Δᵀ M Δ`) and the LK equations; chain rule through a warp `W(x;p)`: `∂I(W(x;p))/∂p = ∇I · ∂W/∂p` (Lucas–Kanade / inverse-compositional alignment).
+  - Zero crossings of the second derivative = edges (Marr–Hildreth); Canny = maxima of the first derivative along the gradient direction.
 - [ ] Fourier: the convolution theorem `F{f*h} = F·H`. Aliasing and the reason to blur before downsampling. Gaussian/Laplacian pyramids.
 - [ ] Nonlinear filters: median, bilateral. Morphology (erode/dilate).
 - [ ] **Canny:** smooth, gradient, non-max suppression, hysteresis thresholding.
@@ -271,6 +277,10 @@ Notation: homogeneous image point **x** = (u, v, 1)^T. World point **X** = (X, Y
 
 ### 5.11 Photometric
 - [ ] Lambertian: `I = ρ n · s`. **Photometric stereo:** ≥ 3 known lights give `n` and ρ via least squares.
+  - Per pixel, stack `I = S g` with `S` (k×3) the light directions and `g = ρ n`; solve `g = (SᵀS)⁻¹SᵀI` (k ≥ 3, lights not coplanar). Albedo `ρ = ‖g‖`, normal `n = g/‖g‖`.
+  - Drop shadowed/saturated pixels (or weight them) before solving; specular highlights break the Lambertian model.
+  - Depth from normals: `z_x = −n_x/n_z`, `z_y = −n_y/n_z`; integrate by least squares (Poisson) or **Frankot–Chellappa** (FFT projection onto integrable surfaces).
+  - Uncalibrated lights → generalized bas-relief ambiguity (awareness only). Related: shape from shading (one image, ill-posed).
 
 ### 5.12 Recognition and deep learning
 - [ ] Classical: bag of visual words, HOG + SVM, Viola-Jones (Haar + integral image + AdaBoost cascade) for faces. k-means / mean-shift / graph-cut segmentation.
@@ -350,6 +360,26 @@ Notation: homogeneous image point **x** = (u, v, 1)^T. World point **X** = (X, Y
 
 ---
 
+### Student's chosen coursework spine: CS231A + CS231n + Szeliski 2e
+The student plans to cover CV with **Stanford CS231A** (3D/geometry), **Stanford CS231n** (deep learning for vision) and **Szeliski 2e**, implementing classical methods from scratch in NumPy and deep models in PyTorch. Map:
+
+| Topic | CS231A | CS231n | Szeliski 2e | Build here |
+|---|---|---|---|---|
+| Linear algebra (SVD, homogeneous coords, rotations/quaternions) | linear algebra review; camera models | — | App. A; §2.1 | Foundations F3; Project 1 |
+| Filtering, image calculus, Canny, Harris | (feature detection lectures) | — | §3.2, §7.1–7.2 | Project 2 |
+| RANSAC homographies, stitching | fitting & matching | — | §8.1–8.2 | Project 2 |
+| Camera calibration (DLT, Zhang) | camera models, calibration notes | — | §11.1 | Project 1 |
+| Single-view metrology, vanishing points | single-view metrology notes | — | §11.1.1 | §5.1 checklist |
+| Epipolar geometry, 8-point, triangulation, SfM | epipolar geometry, SfM notes | — | §11.2–11.4 | Project 3 |
+| Dense stereo | stereo systems notes | — | Ch. 12 | Project 4 |
+| Photometric stereo | active/volumetric stereo (light-based methods) | — | §13.1 | Project 4 item 6 |
+| Optical flow (Lucas–Kanade) | optical flow lecture | — | §9.1, §9.3 | Project 4 |
+| CNNs, ResNet | — | CNN + architectures lectures; A1–A2 | §5.3–5.4 | DL Project 3; Project 6 |
+| U-Net, segmentation, detection | — | detection & segmentation lecture | §6.3–6.4 | Project 6 |
+| ViTs | — | attention & transformers lecture; A3 | §5.5 | Project 6 |
+
+Use the current CS231A/CS231n pages for exact lecture and problem-set numbers; they change by year. Do their problem sets as practice (CS231A PS1–PS4, CS231n A1–A3); never look up public solutions.
+
 ## 8. Gaps and prerequisites to fill
 
 | Prereq | Why it matters | Quick fix |
@@ -393,7 +423,7 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
      - `findChessboardCorners` + `cornerSubPix` → `calibrateCamera`.
      - Report `K`, distortion coeffs and RMS reprojection error.
      - `undistort` a photo with straight lines and compare side by side.
-  4. Stretch: implement **Zhang's closed-form K** from homographies yourself (the `v_ij` constraint matrix), then compare with OpenCV.
+  4. **Zhang's method from scratch (required, not a stretch):** DLT homography per view → build the `v_ij` rows → SVD for `b` (ω) → closed-form `K` → per-view `[r1 r2 t]` (re-orthonormalize R by SVD) → estimate `k1, k2` linearly → refine all parameters with `scipy.optimize.least_squares` on reprojection error. Compare `K`, distortion and RMS with OpenCV.
   5. Stretch: draw a 3D cube on the checkerboard (`solvePnP` + `projectPoints`). This is your first AR and PnP demo.
 - **Self-check:**
   - Why does Zhang need ≥ 3 views?
@@ -407,11 +437,12 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
   - CMU 16-385 homography lecture.
 - **Build:**
   1. NumPy `conv2d` (correlate vs convolve), Gaussian kernel, Sobel. Verify against `cv2.filter2D`.
-  2. **Harris detector** from scratch (structure tensor → R → NMS). Overlay on an image.
-  3. SIFT/ORB via OpenCV, plus BFMatcher + ratio test.
-  4. **Homography by DLT** (normalized) **+ your own RANSAC loop**. Compute N from the formula. Compare with `cv2.findHomography(..., cv2.RANSAC)`.
-  5. **Stitch 3 phone photos** (rotate about the camera center). Inverse-warp with `cv2.warpPerspective` onto a common canvas, then simple feather blending.
-  6. Stretch: **cylindrical warp** using your Project 1 K. Explain why `H = K R K^{-1}` for pure rotation.
+  2. **Canny from scratch:** derivative-of-Gaussian gradients → non-max suppression along the quantized gradient direction → double threshold → hysteresis (connected components or BFS). Compare with `cv2.Canny`.
+  3. **Harris detector** from scratch (structure tensor → R → NMS). Overlay on an image.
+  4. SIFT/ORB via OpenCV, plus BFMatcher + ratio test.
+  5. **Homography by DLT** (normalized) **+ your own RANSAC loop**. Compute N from the formula. Compare with `cv2.findHomography(..., cv2.RANSAC)`.
+  6. **Stitch 3 phone photos** (rotate about the camera center). Inverse-warp with `cv2.warpPerspective` onto a common canvas, then simple feather blending.
+  7. Stretch: **cylindrical warp** using your Project 1 K. Explain why `H = K R K^{-1}` for pure rotation.
 - **Self-check:**
   - Minimum matches for H?
   - RANSAC iterations needed for 50% inliers at 99%?
@@ -448,6 +479,7 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
   3. **Lucas-Kanade from scratch** (single level, then pyramidal) on corners from your Harris detector. Compare with `cv2.calcOpticalFlowPyrLK`.
   4. **KLT tracker on a phone video:** detect `goodFeaturesToTrack`, track frame-to-frame, re-detect when the count drops. Draw tracks. This is the front end for Project 5.
   5. Stretch: Farnebäck dense flow, HSV-coded visualization. Rectify your own phone stereo pair with `stereoRectify`.
+  6. **Photometric stereo in NumPy:** render a synthetic Lambertian sphere under 4–8 known lights first (exact answer known), then use a real dataset (e.g. DiLiGenT, or the classic CMU/Harvard photometric-stereo image sets). Recover albedo and normal maps by per-pixel least squares with a shadow mask, then integrate depth with Frankot–Chellappa. Report the mean angular normal error on the sphere.
 - **Self-check:**
   - Derive the optical-flow constraint equation.
   - When is LK ill-conditioned? (Hint: Harris.)
@@ -474,6 +506,17 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
   - Write a one-page sheet of every equation in §5 from memory.
   - Revisit whatever you could not derive.
 
+### Project 6: Deep learning for vision in PyTorch (ResNet, U-Net, ViT, detection, segmentation)
+Prerequisite: DL course Project 3 (`courses/03-ml-deep-learning/README.md` §9), which covers the training loop, CNN basics and CIFAR ablations. Do not repeat those; this project is about vision architectures and dense/structured outputs.
+- **Watch/read:** CS231n lectures on CNN architectures, detection & segmentation, attention/transformers; Szeliski §5.3–5.5, §6.3–6.4; papers: ResNet (He 2016), U-Net (Ronneberger 2015), ViT (Dosovitskiy 2021), Faster R-CNN (Ren 2015), Mask R-CNN (He 2017), DETR (Carion 2020) skim.
+- **Build:**
+  1. **ResNet-18 from scratch** (BasicBlock, downsampling shortcut, BN); match the parameter count of `torchvision.models.resnet18`; train on CIFAR-10.
+  2. **U-Net from scratch** for semantic segmentation (e.g. Oxford-IIIT Pets trimaps or a small tabletop/robot dataset): encoder–decoder with skip concatenation, CE + Dice loss, report mIoU.
+  3. **ViT from scratch** (patch embedding as a strided conv, [CLS] token, learned position embeddings, Pre-LN transformer blocks); train a tiny ViT on CIFAR-10 and compare with ResNet-18 at equal compute; note the data-hunger without augmentation.
+  4. **Detection:** implement IoU, NMS and mAP@0.5 yourself; fine-tune `torchvision` Faster R-CNN on a small dataset (e.g. Penn-Fudan pedestrians); evaluate with your own mAP and check against `torchmetrics`.
+  5. **Instance segmentation:** fine-tune Mask R-CNN on the same data; compare semantic (U-Net) vs instance masks.
+- **Self-check:** why do residual connections help (gradient of `x + F(x)`)? Why does U-Net need skips? Parameter count of a ViT block? What does NMS do to recall when objects overlap? Anchor-based vs DETR set prediction?
+
 ### Optional micro-sessions (20–30 min each, any time later)
 - AprilTag/ArUco pose estimation (`cv2.aruco`). Directly useful for robot arms (links to RDKDC/ASBR).
 - Run COLMAP on 30 photos of an object. Compare with your Project 3 pipeline.
@@ -489,7 +532,9 @@ Print a checkerboard (e.g. 9×6 inner corners, measure the square size in mm) an
   day2_panorama/       harris.py, ransac_homography.py, panorama.jpg
   day3_two_view/       eight_point.py, triangulate.py, cloud.ply
   day4_stereo_flow/    block_match.py, lk.py, klt_tracks.mp4
+  day4_stereo_flow/    + photometric_stereo.py, normals.png, depth.png
   day5_vo/             mono_vo.py, traj_vs_gt.png
+  day6_dl_vision/      resnet18.py, unet.py, vit.py, detection_eval.py
 ```
 
 ---

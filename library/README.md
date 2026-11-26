@@ -1,6 +1,6 @@
 # Library: notes from the student's own textbooks and slides
 
-Every page of every uploaded file was read (2026-11-26). Each note file is chapter by chapter, with:
+Every page of every uploaded file was read (2026-11-26). A second pass the same day added the student's local folders (`~/Downloads/Algorithms_For_Sensor_Based_Robotics/`, `~/Downloads/RobotDevicesKinematicsDynamicsAndControl/`): LaValle, four ASBR papers, past-student RDKDC notes, a past team's RDKDC project report, and an MR 2019-edition concordance. Each note file is chapter by chapter, with:
 - the big idea of each chapter;
 - definitions and equations with page numbers;
 - algorithms, worked examples and exercises worth doing;
@@ -23,6 +23,12 @@ Every page of every uploaded file was read (2026-11-26). Each note file is chapt
 | `choset-part3.md` | Choset ch. 11–12, App. A–J (+ deep dive on ch. 8–9) | 411–616 | PDF = book + 14 | ASBR |
 | `probrob-part1.md` | Thrun *Probabilistic Robotics* **early draft** ch. 1–9 | 1–245 | PDF = book + 12 | ASBR |
 | `probrob-part2.md` | Thrun draft ch. 9–16 (+ deep dive on ch. 7–8 localization) | 246–492 | PDF = book + 12 | ASBR |
+| `lavalle-part1.md` | LaValle *Planning Algorithms* ch. 1–7 (discrete planning, C-space, sampling, combinatorial, extensions) | 1–192 | **2-up**: PDF = ⌊(book + 17)/2⌋ | ASBR |
+| `lavalle-part2.md` | LaValle ch. 8–15 (feedback plans, decision theory, information spaces, sensing uncertainty, differential models, kinodynamic planning, system theory) | 193–470 | 2-up, same rule | ASBR, Robot Learning, RDKDC |
+| `asbr-papers.md` | Park & Martin 1994 (AX=XB); Davison MonoSLAM 2007; Lozano-Pérez 1983 *Spatial Planning*; Kavraki et al. 1996 PRM (`prmbasic_01.pdf`, image scan) | all | — | ASBR |
+| `mr-2019-edition.md` | Student's local MR = **Dec 2019** preprint: chapter concordance with the 2017 notes, §8.7 rewrite, every MR erratum re-checked | — | PDF = book + 20 | RDKDC, ASBR |
+| `rdkdc-handwritten-notes.md` | `robot-devices.pdf`: a past student's handwritten notes of Cowan's **Fall 2017** RDKDC lectures (17 lectures, up to Lyapunov) | 1–105 | — | RDKDC |
+| `rdkdc-final-project.md` | `RDKDCFinalProject.pdf`: a past team's final-project **report** (~2019–20), not the handout | 1–11 | — | RDKDC |
 
 **Choset chapter starts (PDF pages):**
 - Ch. 1 → 20 · Ch. 2 → 35 · Ch. 3 → 57 · Ch. 4 → 94 · Ch. 5 → 124 · Ch. 6 → 177
@@ -49,28 +55,29 @@ ROS and SciPy store quaternions scalar last. Choset's roll-pitch-yaw names diffe
 
 ## Errata found in the student's copies (do not copy these into code)
 
-**Modern Robotics (2017 preprint), book pages:**
+**Modern Robotics (2017 preprint), book pages.** The student's local copy is the **Dec 2019 preprint** (`~/Downloads/RobotDevicesKinematicsDynamicsAndControl/MR-largefont-v2.pdf`); each item is re-checked there in `mr-2019-edition.md`. Items marked *(fixed in 2019)* are correct in that copy; the rest are still wrong in 2019.
 - p. 221: $x^2+y^2$ → $\sqrt{x^2+y^2}$.
 - p. 234: null-space term sign → $-(I-GJ)M^{-1}\nabla h$.
 - p. 235: $\dot\theta^{i+1}$ → $\theta^{i+1}$.
 - p. 257: four-bar inequality reversed.
-- p. 287: eigenvalues → eigenvectors.
-- p. 302: equality → inequality constraint.
+- p. 287: eigenvalues → eigenvectors. *(fixed in 2019)*
+- p. 302: equality → inequality constraint. *(fixed in 2019)*
 - Eq. 9.36: $c,g$ → $c_i,g_i$.
-- Eq. 10.4 / §10.6.4: damping $u=F-B\dot q$.
+- Eq. 10.4 / §10.6.4: damping $u=F-B\dot q$. *(fixed in 2019)*
 - p. 390: Jacobian applied twice.
 - p. 408: "negative definite" → Hurwitz.
-- Eq. 11.18: $R^T(d)$ → $R^T(t)$.
+- Eq. 11.18: $R^T(d)$ → $R^T(t)$. *(fixed in 2019)*
 - Ch. 11 summary: PD+gravity sign.
 - B.11: $r_{21}-r_{12}$.
 - B.13: $q_2+iq_3$.
 - B.17/18: Cayley sign, use $R=(I+[r])(I-[r])^{-1}$.
 - B.19/20: invalid as printed.
-- C.5: $\phi_{i-1}$ → $\phi_i$.
-- C.12: index → $\mathrm{Ad}_{M_1\cdots M_i}$.
+- C.5: $\phi_{i-1}$ → $\phi_i$. *(fixed in 2019)*
+- C.12: index → $\mathrm{Ad}_{M_1\cdots M_i}$. *(fixed in 2019)*
 - App. D QP: $x=Gb-(I-GA)Q^{-1}c$, $\lambda=-(Bb+BAQ^{-1}c)$.
-- Ex. 4.1 table: $v_3$ sign.
-- PDF p. 110: $T_{bc}$ wording.
+- New in the 2019 check: App. D p. 599 least-squares expansion missing parentheses; p. 435 "Proposition 8.1.2" → Proposition 8.1; the "(B.18)" reference before B.21 and $T_{i,i-1}$ in App. C are still wrong.
+- Ex. 4.1 table: $v_3$ sign. *(fixed in 2019)*
+- PDF p. 110: $T_{bc}$ wording. *(fixed in 2019)*
 
 **Murray–Li–Sastry:**
 - Eq. 3.41: $g_{st}^{-1}(0)$.
@@ -132,3 +139,28 @@ ROS and SciPy store quaternions scalar last. Choset's roll-pitch-yaw names diffe
 - week08 p. 33: $WQW^T$.
 - review p. 9: atan2.
 - review p. 17: missing $P(x_k)$.
+
+**LaValle *Planning Algorithms* (2006), Ch. 1–7** (details in `lavalle-part1.md`):
+- Eq. 4.38 (p. 159): the convolution as written computes $O\oplus A$; it needs $g(\tau-x)$.
+- Eqs. 4.70–4.73 (p. 175): the three-link polynomials are wrong (they give reach 4 at $\theta=0$).
+- Fig. 4.25 caption: the point is at $f_1=3$, not 0.
+- p. 153: the list of failure cases for matrix → quaternion conversion is wrong.
+- p. 199: $n=4$ → $n=3$.
+- Fig. 5.25 BUILD_ROADMAP (p. 238): wrong loop index (infinite loop; connects the next sample).
+- Eq. 6.7 conchoid: $x^2-y^2$ → $x^2+y^2$.
+- Example 6.3: $z>1$ → $z\ge1$. Example 6.5: $\ge$ → $\le$.
+- §7.4.1 (p. 342): Jacobian rank should be $n-m$.
+- DH text (pp. 105, 107): $a_i$ → $a_{i-1}$; a prismatic joint varies $d_i$.
+
+**LaValle, Ch. 8–15** (about 40 items in `lavalle-part2.md`; main ones):
+- Eq. 11.68 should use $\Sigma^{-1}$; eqs. 11.79/11.83: the second $H$ needs a transpose.
+- Eq. 10.104: $Q^*$ → $Q_\pi$. Eq. 8.58: the $\alpha$ term.
+- Eq. 13.198: sign error in Hamilton's equation. Eqs. 13.103/13.105: quaternion kinematics are missing the ½ factor and the scalar-part terms. Example 13.13 (two-link arm) is largely wrong.
+- Eq. 14.45: the gravity term should not carry $\dot s$. Eq. 15.125: CBHD sign. Eq. 15.161: chained-form sinusoids.
+- Exercise 11.5: matrices are row-stochastic, against the stated convention. D\* step 6 (Fig. 12.18) probably tests the wrong state (unconfirmed).
+
+**Papers** (details in `asbr-papers.md`):
+- Park & Martin 1994 p. 720: $B_2(1,3)$ printed 0.997612, should be 0.977612; the η metric on p. 721 is mis-typed.
+- MonoSLAM 2007: eq. 3 $\alpha^W$ → $\alpha^R$; text $q^{RW}$ vs eq. 2 $q^{WR}$; z sign flip in the ground-truth table (p. 1064).
+- Lozano-Pérez 1983 App. I: `angle[0]` should be `angle[size]−2π`, and the loop ends early and drops vertices.
+- Kavraki et al. 1996: text says C3 failed where the Fig. 3 table shows C2; "III-B-1" → "III-A-1".

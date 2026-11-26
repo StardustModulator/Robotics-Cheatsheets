@@ -5,6 +5,8 @@
 > **How this was researched:** `deep.cs.jhu.edu`, `www.cs.jhu.edu`, `arcade.cs.jhu.edu`, `courses.jhu.edu`, `semester.ly`, `coursicle.com` and `e-catalogue.jhu.edu` could **not** be fetched directly from the research sandbox. Facts from those sites come from **search-engine snippets** of those pages and are cited by URL.
 > The strongest primary evidence is **a past student's public repo** (`github.com/mosquitozm100/JHU-EN.601.682-01-Deep-Learning`, graded "A"). It holds the actual **HW1–HW4 handouts (LaTeX/PDF), lab notebooks and a backprop lecture deck** from the Unberath-era course, and I read all of them. Other primary evidence is the 2018 public starter repo (`deep-learning-jhu/deep-learning-jhu-cs-482-682`) and 2023–2025 final-project repos.
 > Anything I could not confirm from a primary source is marked **(unverified)**.
+>
+> **Upgraded 2026-11-26 from the student's own copy of the Fall 2020 syllabus** (`Downloads/682 MLDL/Syllabus_DL_Fall20_no_hyperlinks.pdf`, 7 pp., read in full). It fixes the F2020 grading split (the unknown 10% = weekly quizzes), gives the full L-1…L-24 lecture list with weeks and HW dates (§2.1), and adds four topics the checklist lacked (§5.13).
 
 ---
 
@@ -17,7 +19,7 @@
 | **Other instructors** | **Fall 2025:** Unberath **+ Murat Kocaoglu**, per the ARCADE Lab page. **Spring 2025 (unverified) and Spring 2026:** **Eric Nalisnick**, per courses.jhu.edu and his CV. **Spring 2018:** Greg Hager & Robert DiPietro (older 600.482/682). **Fall 2026:** Unberath is listed, but the department page and the course search disagree on meeting times. |
 | **Format (Unberath)** | MWF: two 75-min lectures plus a 50-min Friday slot used for recitations. Fall 2023/2025 met MW 4:30–5:45 and F 4:30–5:20. Piazza for materials, Gradescope for submissions, **Google Colab** notebooks. |
 | **Language / framework** | **Python**. **NumPy** for from-scratch work (computation graphs, MLP forward/backward), then **PyTorch** for CNNs and everything after. Kaggle in-class competition in HW4. |
-| **Grading (varies by year)** | **F2019:** HW 45 / **Midterm 20** / Project 35. **F2020:** HW 50 / Project 40 / remaining 10% unknown. **F2023:** **HW 50 / Midterm 25 / Project 25**. |
+| **Grading (varies by year)** | **F2019:** HW 45 / **Midterm 20** / Project 35. **F2020 (syllabus read):** Quizzes 10 / HW 50 / Project 40, worst quiz dropped, bonus via HW7, **no midterm**. **F2023:** **HW 50 / Midterm 25 / Project 25**. |
 | **Homework** | About **6–7 HWs**: a mix of **written derivations (LaTeX)** and **programming (Colab)**. In F2020 that meant 7 HWs, 3 written and 4 programming. In F2023, HW1–6 were **front-loaded into the first ~2/3 of the term** so the project could take the rest. |
 | **Exam** | In-class **midterm** in F2019 and F2023; the F2023 midterm was **late in the term** (Week 14, after Thanksgiving). |
 | **Project** | Team project of **3–4 students** on a problem you choose: proposal, then report, then poster/demo or pitch. Reports are short (2–3 pages) with *Introduction / Methods / Results / Discussion* sections. **No late days on the project.** |
@@ -85,6 +87,30 @@ No complete current schedule was reachable. The outline below merges fragments o
 | 13 | L-21 *NLP and Transformers*; L-22 *Deep Reinforcement Learning* | Attention, self-attention, transformer block, BERT/GPT; DQN / policy gradient overview | S2021 Week 13: "L-21 Natural Language Processing and Transformers, L-22 Deep Reinforcement Learning" |
 | 14 | L-23 **Midterm Exam** + *Healthcare Applications* | Closed-format in-class exam (F2023) | F2023: "Week 14 (Nov 27): Midterm and Healthcare Applications"; "Recitation: Midterm Q/A" in the week of Oct 23 |
 | 15 / finals | Project pitch / poster & demo | F2019 "Final Projects: Demo and Digital Poster Session"; F2020/S2021 "Synchronous project pitch" with breakout rooms | syllabi |
+
+### 2.1 Verified: the complete Fall 2020 schedule (student's copy of the syllabus)
+
+Format in F2020: asynchronous recorded lectures + one synchronous Q/A or flipped-classroom session per week (Zoom), Piazza, Gradescope, quizzes on Google Forms during the sync session. HWs are released and due on Fridays, 11:59 pm. Prereqs as printed: (AS.110.201 or AS.110.212 or EN.553.291) and (EN.553.310/311 or EN.553.420 or EN.560.348) and (EN.601.475 or equivalent); Calc III and numerical optimization recommended; recommended co-req EN.601.382.
+
+| Wk | Lectures | HW events |
+|---|---|---|
+| 1 | L-1 Overview · L-2 Basics I: **image features**, regression, classification | HW1 out (Sep 4) |
+| 2 | L-3 Basics II: regularization & optimization · L-4 Computational graphs & backprop I | HW1 due, HW2 out |
+| 3 | L-5 History of / intro to neural networks · L-6 CNNs | HW2 due, HW3 out |
+| 4 | L-7 Training I: activation, initialization, preprocessing, dropout, batch norm · L-8 Training II: update rules (momentum), augmentation, transfer learning | HW3 due, HW4 out |
+| 5 | L-9 *Inverse classroom: "It's not working! Help!"* (debugging training) · L-10 Architectures: AlexNet, VGG, ResNet, **U-Net** | — |
+| 6 | L-11 *Inverse classroom: "What does this network do?"* (interpreting/visualizing networks) · form project groups | HW4 due, HW5 out |
+| 7 | L-12 RNNs and LSTM | HW5 due, HW6 out |
+| 8 | L-13 Unsupervised & self-supervised learning · L-14 Autoencoders, VAEs and **disentanglement** | — |
+| 9 | L-15 GANs · L-16 *Inverse classroom: "Labeling? Ain't nobody got time for that."* (label-efficient learning) | HW6 due, HW7 out |
+| 10 | L-17 Generalization, domain gaps, explainable AI · L-18 Domain gaps and black boxes | **project proposal due** |
+| 11 | L-19 DL4Health · L-20 NLP and Transformers | — |
+| 12 | L-21 Character and word embeddings · L-22 Deep reinforcement learning | — |
+| 13 | Thanksgiving | — |
+| 14 | L-23 Human-centered AI, ethics · L-24 Wrap-up | HW7 due (Dec 4; includes the bonus assignments) |
+| Finals | Project report due a few days before the exam slot; synchronous project pitch in the 3 h exam slot | — |
+
+**What this corrects in the reconstructed table above (for F2020):** U-Net is taught with the architectures in Week 5, not in a separate "CV applications" week. Word embeddings (L-21) and deep RL (L-22) come near the end (Week 12), not in Weeks 6–7. Transformers come in Week 11. There was no midterm in F2020; the F2019/F2023 midterms are the exception to plan for, not the rule. HWs 1–6 all fall in Weeks 1–9, so the first two-thirds of the term are the heavy part.
 
 **Recitations / labs** (Friday slot) seen in the student repo:
 - **Lab 1 — tools:** Python, NumPy, Matplotlib, Jupyter (taken from the LxMLS 2018 guide); install Anaconda + PyTorch.
@@ -191,7 +217,7 @@ This is excellent practice, because it forces you to know exactly what `nn.Linea
 
 | Item | Detail | Source |
 |---|---|---|
-| Teams | Groups of **4** (F2019) / **3** (F2020, S2021); formed early in the term | syllabus snippets |
+| Teams | Groups of **4** (F2019) / **3–4** (F2020: the grading text says groups of four, the Week 6 schedule says "form project groups of 3") / **3** (S2021); formed around Week 6 | syllabi (F2020 read in full) |
 | Topic | Teams "implement a deep learning model on a problem of their choosing"; design → implement → **validate** | CS news 2020 |
 | Milestones | **Proposal** (S2021: due Apr 9), **preliminary report** (2019/2020 repo has a "Preliminary Report" doc), **final report** (S2021: due May 7), **poster/demo** (F2019: "Demo and Digital Poster Session") or **synchronous pitch** (F2020/S2021) | syllabus snippets; student repo |
 | Report format | LaTeX, about **2–3 pages**, titled "CS482/682 Final Project Report Group N". Sections: **Introduction (Background, Related Work) → Methods (Dataset; Setup, Training & Evaluation) → Results → Discussion**, plus references. (F2024 reports: 2–3 pages.) | `acheng41/MLDLFA24-CXR`, `RongkunZ/JHU-DL-Final` reports |
@@ -297,6 +323,13 @@ Tick each box when you can **derive it on paper and implement it in under 30 lin
 
 ### 5.12 Deep RL overview (one lecture)
 - [ ] MDP `(S, A, P, R, γ)`. Q-learning target `r + γ max_a' Q(s',a')`. DQN = replay buffer + target network. Policy gradient `∇J = E[∇ log π_θ(a|s) Â]`. Concept level only.
+
+### 5.13 Topics named in the F2020 syllabus that were missing above
+- [ ] **Image features before deep learning (L-2):** color histograms, HOG, bag of visual words; a linear classifier on hand-crafted features vs on raw pixels (CS231n A1 "features" notebook).
+- [ ] **Disentanglement (L-14):** β-VAE, `E_q[log p(x|z)] − β·KL(q(z|x)‖p(z))` with β > 1 trades reconstruction for factorized latents; latent traversals as the evaluation.
+- [ ] **Label-efficient learning (L-16):** semi-supervised (pseudo-labels, consistency regularization such as FixMatch), weak supervision, active learning (uncertainty sampling), synthetic/simulated data and sim-to-real. Very relevant to robotics data.
+- [ ] **Domain adaptation (L-17/18):** covariate vs label shift; fine-tuning, DANN (gradient-reversal layer, domain classifier), style randomization / domain randomization.
+- [ ] **Interpreting networks (L-11):** filter and activation visualization, occlusion sensitivity, saliency, Grad-CAM, t-SNE of embeddings.
 
 ---
 
@@ -434,6 +467,7 @@ Each project is a long focused block. The pattern is **build first (morning) →
 
 **Course pages and syllabi (via search-engine snippets; not directly fetchable from the sandbox):**
 - Course home: https://deep.cs.jhu.edu/deeplearning.html · https://deep.cs.jhu.edu/
+- **Student's local copy (read in full):** `~/Downloads/682 MLDL/Syllabus_DL_Fall20_no_hyperlinks.pdf`.
 - Syllabi: https://deep.cs.jhu.edu/files/Syllabus_DL_Fall19_v1.pdf · https://deep.cs.jhu.edu/files/Syllabus_DL_Fall20_no_hyperlinks.pdf · https://deep.cs.jhu.edu/files/Syllabus_DL_Fall20_ABET_website.pdf · https://deep.cs.jhu.edu/files/Syllabus_DL_Spring_2021_ABET_homepage.pdf · https://deep.cs.jhu.edu/files/Syllabus_DL_Fall_2023_Homepage.pdf
 - ARCADE Lab course page (Fall 2025): https://www.arcade.cs.jhu.edu/teaching/machine-learning-deep-learning · https://www.arcade.cs.jhu.edu/teaching
 - JHU course search: https://courses.jhu.edu/?query=en.601.482
@@ -455,7 +489,7 @@ Each project is a long focused block. The pattern is **build first (morning) →
 - The current (Fall 2026) full lecture list.
 - HW5–HW7 content in recent years (likely RNN/transformer, generative/diffusion, self-supervised).
 - Midterm format and allowed materials.
-- What the 10% in F2020 grading covered.
+- ~~What the 10% in F2020 grading covered.~~ Resolved: weekly quizzes (F2020 syllabus).
 - The exact current catalog prerequisite line.
 - Whether the Spring (Nalisnick) offering uses different HWs.
 - The Fall 2026 meeting time conflict.

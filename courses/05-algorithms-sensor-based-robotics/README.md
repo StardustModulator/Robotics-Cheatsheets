@@ -33,6 +33,25 @@ All 10 uploaded ASBR decks, the course page, Choset (primary text), Thrun's *Pro
 - **Not in this course's slides:** RRT* (MR §10.5 only), UKF, KLD sampling, FastSLAM (none of these are in the student's Thrun draft either; use the 2005 edition or Stachniss's lectures).
 - **Thrun draft warning:** its EKF localization/SLAM tables have sign errors in $G_t$ and $H_t$; EKF localization is §7.5 there. Use the corrected forms in `library/probrob-part2.md`.
 - **Assignment 3 (2026):** EST with node weight $1/(1+\deg q)$ per the handout; Choset's EST uses inverse local density.
+- **LaValle *Planning Algorithms* Ch. 1–7 read in full (2026-11-26) → `library/lavalle-part1.md`** (PDF is 2-up: PDF page = ⌊(book page + 17)/2⌋). Additions:
+  - [A4] Wavefront = unit-cost value iteration; Dijkstra = its lazy form; Bellman $G^*(x)=\min_u\{l(x,u)+G^*(f(x,u))\}$ (book pp. 43–57). A* with a closed list needs a consistent heuristic.
+  - [A4] Shortest-path roadmap from reflex vertices + bitangent edges (with a trig-free determinant test); vertical decomposition in $O(n\lg n)$.
+  - [A5] RDT form of RRT: any dense sequence, connect to the nearest point anywhere on the tree's edges, balanced bidirectional growth (Fig. 5.24).
+  - [A5/A1] Uniform SO(3) sampling with Shoemake's quaternion formula (eq. 5.15); quaternion metric $\min\|h_1\mp h_2\|$; uniform Euler angles are biased.
+  - [A5/A3] Guaranteed-safe edge checking from clearance + per-joint motion bounds (eqs. 5.30–5.34), checked in bisection order. This is what the Assignment 3 `is_local_path_collision_free` TODO needs.
+  - [A3] Collision detection internals (broad/narrow phase, bounding-volume hierarchies, Lin–Canny): what FCL does inside MoveIt 2.
+  - [A8] Complexity facts for exams: generalized mover's problem PSPACE-complete; warehouseman's problem PSPACE-hard; 3-D shortest paths NP-hard; cylindrical decomposition doubly exponential, Canny's roadmap singly exponential.
+- **LaValle Ch. 8–15 read in full → `library/lavalle-part2.md`.** Additions:
+  - [A3] The optimal navigation function is Dijkstra run backward from the goal; greedy descent on it is the plan, with no local minima. NF2 gives maximum clearance (book pp. 375–380).
+  - [A4] Value iteration with interpolation on a continuous C-space, close to fast marching (pp. 418–429). **D\*** as an algorithm (pp. 662–667); this README names D\* but never gives it.
+  - [A5] Kinodynamic RRT adds the *reached* state, not the sample. Exact steering (two-point BVP) is needed only for bidirectional trees and PRM edges (pp. 818–836).
+  - [A5] Dubins (6 words) and Reeds–Shepp (48 words, 46 after reduction) curves as local planners and metrics; the Dubins metric is discontinuous (pp. 880–886). The car family is defined by its action set; integrate motion models with RK4, not Euler, when steps are large (pp. 722–744, 813–816).
+  - [A6/A7] One frame for all filters: Bayes, KF and PF each update an **information state**; the EKF is a moment approximation (pp. 574–580, 615–619). Also set-membership (nondeterministic) filtering, active vs passive localization, and a sensor catalog (pp. 598–605, 640–655).
+  - Robot Learning (H-track): value/policy iteration and Q-learning in cost form (Ch. 10), POMDP as a belief MDP (§12.1), HJB/LQR/Pontryagin (§15.2). RDKDC: Lagrangian dynamics (Ch. 13, R7), Lie brackets / CBHD formula (R2).
+- **Papers read in full (2026-11-26) → `library/asbr-papers.md`:** Park & Martin 1994, Davison et al. MonoSLAM 2007, Lozano-Pérez 1983 *Spatial Planning*, and `prmbasic_01.pdf` = **Kavraki, Švestka, Latombe & Overmars 1996** (the original PRM paper). Additions:
+  - [A3] The C-obstacle $B\oplus(-A_0)$ depends on the robot's reference point; containers use $CI_A(R)$. Costs: convex–convex $O(n+m)$ by sorted edge-normal merge, non-convex $O(nm)$; rotation handled by conservative θ-slices.
+  - [A5] Kavraki PRM details the slides skip: forest construction (don't connect nodes already in the same component), `maxdist` + ~30 neighbours, an **expansion step** that resamples around nodes with a high failure ratio $f/(n+1)$ using random-bounce walks, roughly a 2:1 construction:expansion time split, and edge checks with the robot grown by ε. The slides' completeness bound comes from Kavraki–Kolountzakis–Latombe, not this paper.
+  - [A6] MonoSLAM: 13-D camera state $[r^W,q^{WR},v^W,\omega^R]$ + 3-D points; constant-velocity model driven by acceleration noise; pinhole + one-parameter radial distortion; active search in 3σ innovation ellipses, measuring the 10–12 most informative features; new features initialized with a 1-D particle set over depth 0.5–5 m (inverse depth is the later Montiel et al. method); a known target fixes the scale; ~100 features at 30 Hz.
 - **Student's handwritten notes:** cover weeks 2–9 up to the likelihood field. Strengths, errors and gaps are listed in `library/asbr-slides-part2.md` and summarized in the Notion ASBR page.
 
 
@@ -136,13 +155,13 @@ Planning and Control* / Springer Handbook.
 | Bug algorithms | **Ch. 2** | — | Ch. 12.3 | — | — |
 | Potential functions, navigation functions, wavefront | **Ch. 4** | — | Ch. 8.4 | **Ch. 10.4 (wavefront), 10.6** | Khatib 1986 |
 | Roadmaps (visibility, GVD), cell decomposition | **Ch. 5, 6** | — | **Ch. 6** | Ch. 10.3–10.4 | de Berg Ch. 6, 15 |
-| Graph search (Dijkstra, A*) | App. H | — | **Ch. 2** | **Ch. 10.2.4** | Russell & Norvig Ch. 3 |
-| Sampling-based (PRM, RRT, EST, RRT*) | **Ch. 7** | — | **Ch. 5** | **Ch. 10.5** | Karaman & Frazzoli 2011 (RRT*) |
+| Graph search (Dijkstra, A*) | App. H | — | **Ch. 2** (also value iteration; LaValle's $G$ = cost-to-go, not cost-so-far) | **Ch. 10.2.4** | Russell & Norvig Ch. 3 |
+| Sampling-based (PRM, RRT, EST, RRT*) | **Ch. 7** | — | **Ch. 5** (RDT/RRT, PRM, sampling theory; EST only as a one-paragraph "expansive-space planner"; **no RRT\***) | **Ch. 10.5** | Kavraki et al. 1996 (PRM); Karaman & Frazzoli 2011 (RRT*) |
 | Optimization-based planning | — | — | Ch. 8 (feedback), 14 | Ch. 10.7 (nonlinear opt.) | CHOMP / TrajOpt papers |
 | Bayes filter | Ch. 9 | **Ch. 2** | Ch. 11 | — | — |
-| KF / EKF / UKF | **Ch. 8** | **Ch. 3** | — | — | Labbe, *Kalman and Bayesian Filters in Python* |
-| Particle filter, MCL | **Ch. 9** | **Ch. 4, 8.3** | — | — | — |
-| Motion and sensor models (odometry, beam, likelihood field) | Ch. 8–9 | **Ch. 5, 6** (likelihood field §6.4) | — | Ch. 13 (wheeled kinematics) | — |
+| KF / EKF / UKF | **Ch. 8** | **Ch. 3** | §11.6 (KF as a Gaussian information state) | — | Labbe, *Kalman and Bayesian Filters in Python* |
+| Particle filter, MCL | **Ch. 9** | **Ch. 4, 8.3** | §11.6, Ch. 12 (localization as filtering in an I-space) | — | — |
+| Motion and sensor models (odometry, beam, likelihood field) | Ch. 8–9 | **Ch. 5, 6** (likelihood field §6.4) | §11.5 sensor catalog; §13.1 car/unicycle models | Ch. 13 (wheeled kinematics) | — |
 | Occupancy grids, SLAM (EKF / graph / FastSLAM) | Ch. 8.4, 9 | **Ch. 9, 10, 11, 13** | — | — | Stachniss *Robot Mapping* course |
 | Point registration, ICP | — | — | — | — | Arun et al. 1987; Horn 1987; Besl & McKay 1992 (overlap with **CIS I**) |
 | Sensors (lidar, cameras, IMU, GPS) | Ch. 8 | Ch. 6 | — | — | Sic Ch. 5 |
@@ -205,7 +224,7 @@ Tick each item only after you can **derive it on paper and code it in under 30 m
 ### 5.2 Calibration and registration
 - [ ] **Hand-eye** $AX=XB$, with $A_i$ = relative robot (hand) motion and $B_i$ = relative sensor motion. The convention used in A2: $A_i=E_1^{-1}E_{i+1}$, $B_i=S_1S_{i+1}^{-1}$.
   Rotation: $R_AR_X=R_XR_B$ ⇒ $\alpha_i=R_X\beta_i$ with $\alpha=\log(R_A)^\vee$, $\beta=\log(R_B)^\vee$. Translation: $(R_A-I)\,t_X=R_Xt_B-t_A$.
-- [ ] **Park–Martin (1994)** least squares: $M=\sum_i\beta_i\alpha_i^T$, $R_X=(M^TM)^{-1/2}M^T$. Then stack $C=[I-R_{A_i}]$, $d=[t_{A_i}-R_Xt_{B_i}]$ and solve $t_X=C^{\dagger}d$. Needs **≥2 motions with non-parallel rotation axes**.
+- [ ] **Park–Martin (1994)** least squares: $M=\sum_i\beta_i\alpha_i^T$, $R_X=(M^TM)^{-1/2}M^T$. Then stack $C=[I-R_{A_i}]$, $d=[t_{A_i}-R_Xt_{B_i}]$ and solve $t_X=C^{\dagger}d$. **Correction (paper read, `library/asbr-papers.md`):** "≥2 motions with non-parallel axes" is only the *uniqueness* condition. The least-squares formula needs $M$ to be rank 3, so **≥3 motions whose rotation axes are not coplanar**. With exactly 2 motions use the closed form $R_X=[\alpha_1\ \alpha_2\ \alpha_1{\times}\alpha_2][\beta_1\ \beta_2\ \beta_1{\times}\beta_2]^{-1}$. A pair is consistent only if $\|\alpha_i\|=\|\beta_i\|$ (equal rotation angles, Lemma 5), so use that as a data-quality check, and drop pairs with $\theta\approx0$ or $\theta\approx\pi$.
 - [ ] **Tsai–Lenz (1989)**: modified Rodrigues $P=2\sin\frac\theta2\,n$. Solve $\mathrm{skew}(P_{A_i}+P_{B_i})\,P'_X=P_{B_i}-P_{A_i}$ by LS, then $P_X=\frac{2P'_X}{\sqrt{1+\|P'_X\|^2}}$, then translation LS as above. Other families: dual-quaternion (Daniilidis 1999), Horaud–Dornaika, nonlinear joint refinement. OpenCV `cv2.calibrateHandEye` implements TSAI, PARK, HORAUD, ANDREFF, DANIILIDIS.
 - [ ] **Point registration (Arun 1987 / SVD)**: $\bar a,\bar b$ centroids, $H=\sum(a_i-\bar a)(b_i-\bar b)^T=U\Sigma V^T$, $R=V\,\mathrm{diag}(1,1,\det(VU^T))\,U^T$, $t=\bar b-R\bar a$. **Horn (1987)**: $R$ comes from the max-eigenvalue eigenvector (unit quaternion) of a 4×4 symmetric $N(H)$.
 - [ ] **ICP (Besl & McKay 1992)**: repeat {nearest-neighbour correspondences (k-d tree) → Arun → apply → check Δerror} until convergence. It finds only a local minimum, so it needs a good initial guess. Variants: point-to-plane, outlier trimming.
