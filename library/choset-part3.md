@@ -143,7 +143,7 @@ Source: cb2bd4a2-Robot_Motion_Theory_and_Algorithms.pdf, PDF pages 411–616 (bo
 - p. 557: "chapter 8, section 12.3" → chapter 12, §12.3.
 - p. 558 state-feedback example: $A-BK$ has $(2,1)$ entry $-(k+k_1)/m$, so the eigenvalues are $\frac{-(\gamma+k_2)\pm\sqrt{(\gamma+k_2)^2-4(k+k_1)m}}{2m}$ (book prints $k-k_1$); stability needs $\gamma+k_2>0$ **and** $k+k_1>0$.
 - p. 561 observer example: with $C=[0\ 1]$, $\det(A-KC)=\frac{k}{m}(1-k_1)$, so the discriminant term is $4mk(1-k_1)$, not $4m(k-k_1)$; the numerical example ($k_1=0$) is unaffected.
-- p. 562 (J.10) has a stray dot: "$\dot x(k+1)$" → $x(k+1)$. Also note $F=I+TA$ is only first-order accurate; the exact zero-order-hold discretisation is $F=e^{AT}$, $G=\int_0^Te^{A\tau}d\tau\,B$ — use the exact form (or at least small $T$) when building the A4 EKF process model from IMU rates.
+- p. 562 (J.10) has a stray dot: "$\dot x(k+1)$" → $x(k+1)$. Also note $F=I+TA$ is only first-order accurate; the exact zero-order-hold discretisation is $F=e^{AT}$, $G=\int_0^Te^{A\tau}d\tau\,B$ — use the exact form (or at least small $T$) when building the ASBR Assignment-4 EKF process model from IMU rates.
 
 ## Bibliography & Index (PDF pp. 578–616, book pp. 565–603)
 Reference list (≈ 430 entries) and index; skimmed only. Useful pointers for this course plan: Thrun–Burgard–Fox *Probabilistic Robotics* lineage for Ch 9; Murray–Li–Sastry [330] for Lie brackets/nonholonomic steering (R-course overlap); Laumond [266] for car planning; Stentz [397] for D*; Gilbert–Johnson–Keerthi [163] for GJK; Reeds–Shepp [360].
@@ -202,7 +202,7 @@ $$\hat x(k+1|k+1)=\hat x(k+1|k)+R\nu,\qquad P(k+1|k+1)=P(k+1|k)-RH(k+1)P(k+1|k)$
 
 **Exercises worth doing (book pp. 297–300):**
 - **P9 (do this first — it is a miniature of ASBR Assignment 4):** unicycle with $T=0.25$, $\hat x(1|1)=[1,0.5,\pi/4]$, $u=[3,\pi]$, $P=I$, scalar measurement $y=x_1+w$ with variance 0.5, $y(2)=1.7$. My NumPy check (taking $V=0$ since the problem only specifies one variance, and $W=0.5$): $\hat x(2|1)=[1.5303,1.0303,1.5708]$, $P(2|1)=\begin{bmatrix}1.2812&-0.2812&-0.5303\\-0.2812&1.2812&0.5303\\-0.5303&0.5303&1\end{bmatrix}$, $S=1.7812$, $R=[0.7193,-0.1579,-0.2977]^T$, $\hat x(2|2)=[1.6524,1.0035,1.5203]$, $P(2|2)_{11}=0.3596$. (If you also take $V=0.5I$: $\hat x(2|2)=[1.6628,1.0094,1.5314]$.) Note how a measurement of $x_1$ alone corrects $\theta$ through the off-diagonal covariance.
-- **P10:** input noise $s_1,s_2$ ⇒ $P^-=FPF^T+G_uMG_u^T$ with $G_u=\partial f/\partial u$, $M=\mathrm{diag}(\sigma_1^2,\sigma_2^2)$ — exactly how IMU noise enters the A4 EKF.
+- **P10:** input noise $s_1,s_2$ ⇒ $P^-=FPF^T+G_uMG_u^T$ with $G_u=\partial f/\partial u$, $M=\mathrm{diag}(\sigma_1^2,\sigma_2^2)$ — exactly how IMU noise enters the Assignment-4 EKF.
 - **P7 / P8:** derive $P^+=P^--RHP^-$ and prove Thm 8.2.1 (product of Gaussians) — F8 core.
 - **P2:** Euler-discretise the mass–spring–damper (links to App J).
 - **P3–P6:** geometry of $\Omega$, null space ⟂ row space (F4).
@@ -226,3 +226,58 @@ $$\hat x(k+1|k+1)=\hat x(k+1|k)+R\nu,\qquad P(k+1|k+1)=P(k+1|k)-RH(k+1)P(k+1|k)$
 6. **p. 298 Problem 7:** uses $P_k$ for the *updated* covariance $P(k+1|k+1)$ and a non-symmetric "$-2R\nu(\cdot)^T$" cross term; it is the noise-free derivation (no $+RWR^T$ term).
 
 ## Ch 9 Bayesian Methods
+(PDF pp. 315–362, book pp. 301–348) — Lessons: A6 (primary), A5, F8, C6 (ICP in scan matching)
+
+**Big idea:** Drop the Gaussian assumption. Keep the same predict/update recursion but represent the belief non-parametrically — as a histogram over a grid or as a weighted particle set — so it can be multimodal (global localisation, kidnapped robot, unknown data association). Then flip the problem: with known poses, mapping is a per-cell Bayes filter in log-odds; with unknown poses (SLAM), sample robot *paths* with a particle filter and compute each particle's map analytically (Rao-Blackwellisation).
+
+**Key definitions:** position tracking vs **global localisation** vs **kidnapped-robot** problem (§9.1); data-association problem (why doors that look alike defeat a single Gaussian, Fig 9.1); posterior/belief $P(x(k)\mid u(0{:}k-1),y(1{:}k))$; prior; **motion model** $P(x(k)\mid u(k-1),x(k-1))$ (transition probability); **observation model** $P(y(k)\mid x(k))$; normaliser $\eta(k)$. Synchronised data order $u(0),y(1),u(1),y(2),\dots$; $u$ may be commands, odometry, or a fused estimate. The map $m$ is implicit background knowledge.
+
+**Key results & equations:**
+- **Recursive Bayes filter** (9.1 discrete, 9.2 continuous):
+  $$P(x_k\mid u_{0:k-1},y_{1:k})=\eta_k\,P(y_k\mid x_k)\int P(x_k\mid u_{k-1},x_{k-1})\,P(x_{k-1}\mid u_{0:k-2},y_{1:k-1})\,dx_{k-1}$$
+  **Prediction** (9.3) = the sum/integral (convolution with the motion model); **update** (9.4) multiply by likelihood and normalise with $\eta_k=\big[\sum_{x}P(y_k\mid x)P(x\mid\cdot)\big]^{-1}$ (9.5–9.6, law of total probability). The KF is the special case with linear-Gaussian models (Problem 2).
+- **Derivation (§9.1.3, Eqs 9.7–9.15)** — the three assumptions to be able to state on an exam: (i) Bayes' rule with background knowledge (9.7); (ii) **Markov/conditional independence of measurements**: given $x_k$, $y_k$ is independent of past $y,u$ (9.8); (iii) **Markov motion**: $x_k$ depends only on $x_{k-1},u_{k-1}$ (9.11); (iv) the "future control carries no information about the past state" step $P(x_{k-1}\mid u_{0:k-1},\dots)=P(x_{k-1}\mid u_{0:k-2},\dots)$ (9.13) — the book's two-rooms counter-example shows it is an approximation that holds for small steps.
+- **Initial belief:** uniform for global localisation, narrow Gaussian for tracking.
+
+**Representations of the posterior (§9.1.4):**
+1. **Kalman/EKF** — unimodal, efficient, high-dim OK, needs known start or unique landmarks; Gaussian mixtures as an extension.
+2. **Grid (Markov) localisation** — topological (junctions, doors, GVD) or fine metric grid over $(x,y,\theta)$, 10–30 cm and 2–10° cells (Fig 9.2). **Algorithm 16**: for each step, $P'(x)=\sum_{x'}P(x\mid u,x')P(x')$; $P(x)\leftarrow P(y\mid x)P'(x)$; normalise. Naive prediction is $O(N^2)$; Fox–Burgard–Thrun trick: **shift** each θ-slice by the odometry $(\Delta x,\Delta y)$ (depends on θ) then **convolve** with a separable kernel, e.g. $[0.25,0.5,0.25]$ per axis (9.16), boundary weights $2/3,1/3$, repeated to match motion noise. Statistics: mean by weighted sums, **circular mean** for angle $\hat\phi=\mathrm{atan2}(\sum P_i\sin\phi_i,\sum P_i\cos\phi_i)$ (9.17); mode by argmax (mean of a bimodal belief may be inside an obstacle). AAAI'94 arena demo (Figs 9.3–9.4: 31×22 m, 15 cm/3°, 80 s on a PII; unique peak with 99 % mass after 24 sonar sweeps). Downsides: exponential in dimension; wasted cells → selective updating, tree-based grids.
+3. **Particle filter / Monte Carlo localisation** — belief = $N$ samples $(x_j,\omega_j)$. **Algorithm 17 (SIR):** for each step: sample $x_j\sim P(x\mid u,x_j)$; weight $w_j=P(y\mid x_j)$; normalise; **resample**. **Algorithm 18 (low-variance/systematic resampling, O(N)):** draw one $\Delta\sim U(0,1/N]$, pointers $u_j=\Delta+j/N$, walk the cumulative weight sum $c$; every selected particle gets weight $1/N$ (vs O(N log N) binary-search resampling of Isard–Blake).
+   - **Odometry motion model** (Fig 9.5, Eqs 9.18–9.21): motion = rotate α, translate d, rotate β; perturb each with Gaussian noise whose std scales with the motion: $\alpha'=\alpha+\alpha\,\mathcal N(\sigma_1)+d\,\mathcal N(\sigma_2)$, $\beta'=\beta+\beta\,\mathcal N(\sigma_3)+d\,\mathcal N(\sigma_4)$, $d'=d+d\,\mathcal N(\sigma_5)+(\alpha+\beta)\,\mathcal N(\sigma_6)$; new pose $[x+d'\cos(\theta+\alpha'),\ y+d'\sin(\theta+\alpha'),\ \theta+\alpha'+\beta']$. Without sensing the cloud grows and bends ("banana", Fig 9.6). Map knowledge: reject samples that pass through obstacles.
+   - Mean = weighted average (use circular mean for θ); mode = max weight *before* resampling, or kd-tree / coarse histogram after.
+   - Demos: global localisation with 10 000 particles (Fig 9.7: converged after 65 steps), tracking with the Fig 8.1 odometry (Fig 9.8).
+   - **Failure recovery / kidnapping:** inject a fraction of uniformly random particles; or monitor $\tilde p=\frac1N\sum_jP(y\mid x_j)$ and re-initialise / adapt the number of random particles (Lenser–Veloso) / smooth $\tilde p$ (Gutmann–Fox — the idea behind augmented MCL).
+- **Beam sensor model (§9.1.5):** $P(y\mid x)=P(y\mid d(x))$ with $d(x)$ the ray-cast expected range (9.22). Four effects (Fig 9.9 B21 sonar scan): (1) hit — Gaussian $\mathcal N(y;d,\sigma)$; (2) unmapped object/crosstalk — exponential $\lambda e^{-\lambda y}$ (short readings); (3) random — uniform $\gamma$; (4) max-range — point mass $\delta$. Discretised histogram per expected distance $d_i$ (9.23): $h_{i,j}=\int_{d_j-\Delta/2}^{d_j+\Delta/2}(\alpha_i\mathcal N+\beta_i\lambda_ie^{-\lambda_iy}+\gamma_i)\,dy$ for $j<n-1$, $h_{i,n-1}=\delta_i$, with $\sum_jh_{i,j}=1$ (9.24); parameters by **maximum likelihood** (Figs 9.10–9.11: laser ≪ sonar variance; σ also absorbs map uncertainty). Multiple beams assumed independent, $P(y_{1:m}\mid x)=\prod P(y_i\mid x)$ (9.25) — overconfident, so subsample beams (60 of 181). Speed-ups: precomputed expected-distance lookup table (1 byte/entry, 256×256 histograms); handle non-smooth likelihood near doorways/grazing walls by modelling the variance of the expected distance. Alternatives: endpoint/likelihood-field models (Konolige, Thrun) avoid ray casting.
+
+**Mapping (§9.2):**
+- **Occupancy grids with known poses (§9.2.1, Eqs 9.26–9.39, Alg 19):** each cell $m_l$ is a binary variable, cells independent (9.40). Bayes twice + odds ratio ⇒
+  $$\mathrm{Odds}(m\mid x_{1:k},y_{1:k})=\frac{\mathrm{Odds}(m\mid x_k,y_k)\ \mathrm{Odds}(m\mid x_{1:k-1},y_{1:k-1})}{\mathrm{Odds}(m)}\quad(9.34)$$
+  i.e. **log-odds add** (9.35): $l_k=\log\mathrm{Odds}(m\mid x_k,y_k)-\log\mathrm{Odds}(m)+l_{k-1}$; with prior 0.5 the prior term vanishes (9.36). Recover $P=1-1/(1+e^{l})$ (9.37–9.39). Alg 19 iterates (9.39). **Inverse sensor model** $P(m_l\mid x_k,y_k)$ for a sonar cone (9.41–9.42, Figs 9.12–9.16): prior minus $s(y,\theta)$ for cells well before the return ($d<y-d_1$), linear ramp up through $y\pm d_1$, plateau prior $+s$ until $y+d_2$, linear decay to prior by $y+d_3$, prior beyond; $s(y,\theta)=g(y)\,\mathcal N(\theta;0,\sigma_\theta)$, cone ±π/24 (15° opening), $s\approx0.16$ at 2 m on-axis. Corridor demo (Figs 9.17–9.18), ML map by thresholding at 0.5. Limitations: cell independence, binary cells, beam independence ⇒ overconfidence.
+- **Bayesian SLAM (§9.2.2):** families: EKF-SLAM (Ch 8), global optimisation (Lu–Milios spring network = graph SLAM; EM, batch). Full posterior (9.43) $P(x_{1:k},m\mid u,y)=\alpha P(y_k\mid x_k,m)\int P(x_k\mid u_{k-1},x_{k-1})P(x_{1:k-1},m\mid\dots)$. **Incremental scan matching** (9.44): $\hat x_k=\arg\max_x P(y_k\mid x,\hat m_{k-1})P(x\mid u_{k-1},\hat x_{k-1})$ — e.g. **ICP** (C6!) — locally excellent, globally inconsistent because past poses are never revised (Figs 9.19–9.20, 28×28 m, 491 m travelled). **Rao-Blackwellised PF (Murphy; FastSLAM lineage):** factor (9.45–9.47) $P(x_{1:k},m\mid y,u)=P(m\mid x_{1:k},y_{1:k})\,P(x_{1:k}\mid y,u)$; particles = path hypotheses, each with its own map computed analytically (9.48) by §9.2.1; weight = $P(y_k\mid x_j,m^{(j)})$. **Algorithm 20.** Engineering: share map history in trees (Montemerlo; Parr–Eliazar), local-map approximation for constant time per particle, scan-matching-corrected odometry to need fewer particles (Hähnel). Loop closure makes inconsistent particles die out (Figs 9.22–9.23). Graphical model Fig 9.21.
+
+**Algorithms:** 16 (grid localisation), 17 (MCL/SIR), 18 (low-variance resampling), 19 (occupancy-grid update), 20 (RBPF SLAM).
+
+**Worked examples worth redoing:** Fig 9.1 1-D door world (do it as a 1-D histogram filter in NumPy); the low-variance resampler on 5 hand-picked weights; the inverse sonar model plot Fig 9.15.
+
+**Exercises worth doing (book pp. 345–347) — the A6 set:**
+- **P6 (histogram filter by hand):** 10-place ring, landmarks at 0, 3, 6, $P(\text{see}\mid\text{landmark})=0.8$, else 0.4; sequence see → +3 → see → +4 → no-see. My NumPy answer (uniform prior, deterministic motion): $P=[0.10,0.075,0.075,0.05,0.15,0.075,0.025,\mathbf{0.30},0.075,0.075]$ — most likely place 7 (start at 0 → 3 → 7). **P7** (nondeterministic motion, 0.8 move / 0.2 stay): belief flattens, max ≈0.15 at place 9 (0.149 at 7). **P11** same with particles.
+- **P4–P5:** implement the (9.19–9.21) motion model and full MCL (Algs 17–18) — essentially ASBR Assignment 5.
+- **P3:** build the beam-model histograms (9.23).
+- **P9:** near-perfect sensors make $P(y\mid x)$ spiky ⇒ particle depletion; need more particles or an inflated sensor σ — classic MCL pitfall.
+- **P13:** log-odds arithmetic: $\log\frac{0.8}{0.2}+2\log\frac{1/3}{2/3}=\log4-\log4=0$ per triple ⇒ the cell stays at its prior 0.5 (bounded oscillation).
+- **P1, P8:** Bayes with background knowledge; why $y_k\perp y_{1:k-1}\mid x_k,m$ but not without $m$.
+- **P2:** rederive the KF from (9.2).
+
+**Conventions / pitfalls:**
+- Choset indexes controls from 0 and measurements from 1: $u(k-1)$ moves $x(k-1)\to x(k)$, then $y(k)$ is taken.
+- Weights in Alg 17 are *not* multiplied by previous weights because resampling every step resets them to $1/N$; if you resample only when $N_{\text{eff}}=1/\sum w_j^2$ is low, you must use $w_j\leftarrow w_jP(y\mid x_j)$.
+- Alg 18 requires *normalised* weights and stays O(N); it keeps all particles when weights are equal (low variance).
+- Always average θ with the circular mean; never arithmetic-average angles.
+- Multiplying many beam likelihoods underflows — work in log-likelihoods and subtract the max before exponentiating.
+
+**Book errata found in Ch 9:**
+1. **p. 319, (9.18):** printed as $x^i:=x^i+[x_r^i+d'\cos(\theta_r^i+\alpha'),\dots]$ — this would add the pose twice. Correct: $x^i:=[x_r^i+d'\cos(\theta_r^i+\alpha'),\ y_r^i+d'\sin(\theta_r^i+\alpha'),\ \theta_r^i+\alpha'+\beta']^T$.
+2. **p. 304:** "$P(x(k)\mid u(1{:}k-1),y(1{:}k))$ is usually called the posterior" — index should be $u(0{:}k-1)$; **p. 306:** "different ways to represent the posterior $P(x(k)\mid u(k-1),x(k-1))$" — that is the motion model, not the posterior.
+3. **p. 329, (9.30):** "posterior probability that **all cells** of $m$ are free" — the derivation is per cell ($\neg m_l$), not for the whole map.
+4. **p. 324:** "$\mathcal N(y,d,\sigma)$ … the variance σ" — σ is the standard deviation.
+

@@ -419,7 +419,7 @@ $x^i\leftarrow x^i+[d'\cos(\theta^i+\alpha'),\ d'\sin(\theta^i+\alpha'),\ \alpha
 
 **Key results & equations:**
 - **Euler–Lagrange (10.1):** $L=K-V$, $\frac{d}{dt}\frac{\partial L}{\partial\dot q}-\frac{\partial L}{\partial q}=u$.
-- Ex. 10.1.1 planar body: $u_1=m\ddot q_1$, $u_2=m\ddot q_2+mag$, $u_3=I\ddot q_3$ (10.2–10.4; book prints "$m\ddot q_2-ma_g$" in the middle step but the sign of the gravity term should be $+ma_g$: $\partial L/\partial q_2=-ma_g$, so $-\partial L/\partial q_2=+ma_g$ — see corrections).
+- Ex. 10.1.1 planar body, $L=\tfrac12m(\dot q_1^2+\dot q_2^2)+\tfrac12I\dot q_3^2-ma_gq_2$: $u_1=m\ddot q_1$, $u_2=m\ddot q_2+ma_g$, $u_3=I\ddot q_3$. **Book (10.3) prints $u_2=m\ddot q_2-ma_g$ — sign error**: $\partial L/\partial q_2=-ma_g$, so $-\partial L/\partial q_2=+ma_g$ (holding the body still needs an *upward* force; compare the $+a_g$ terms in the RP arm, 10.6).
 - **Ex. 10.1.2 RP arm (book pp. 351–353, redo it):** $L=\tfrac12(I_1+I_2+m_1r_1^2+m_2q_2^2)\dot q_1^2+\tfrac12m_2\dot q_2^2-a_g\sin q_1(m_1r_1+m_2q_2)$ (10.5);
   $u_1=(I_1+I_2+m_1r_1^2+m_2q_2^2)\ddot q_1+2m_2q_2\dot q_1\dot q_2+a_g(m_1r_1+m_2q_2)\cos q_1$, $u_2=m_2\ddot q_2-m_2q_2\dot q_1^2+a_gm_2\sin q_1$ (10.6).
 - **Standard form (10.7):** $u=M(q)\ddot q+C(q,\dot q)\dot q+g(q)$, $M$ symmetric positive definite. With friction: $+\,b(q,\dot q)$.
@@ -432,6 +432,7 @@ $x^i\leftarrow x^i+[d'\cos(\theta^i+\alpha'),\ d'\sin(\theta^i+\alpha'),\ \alpha
 **Exercises worth doing (book pp. 370–372):** **P2 + P3** (2R arm in a vertical plane: Lagrange → standard form → 8 Christoffel symbols — exactly the RDKDC R7 homework), P1 (polar point mass, Christoffels), P4 (PR arm), P6 (inertia transform with given $R_1$, $r_1$ — R1/R2 practice), P7 (barbell inertia), P8 (prove 10.46), P9 (derive Euler-angle rates), P10 (simulate tumbling — intermediate-axis instability), P11–P13 (point on sphere: Pfaffian constraint, projection $P$, reduced coordinates).
 
 **Conventions / pitfalls (ch. 10):**
+- Book Eq. (10.3) gravity sign error (see above).
 - Book: "positive definite iff determinant and trace positive" (p. 353) — **true only for 2×2**. For $n\times n$ use Sylvester (all leading principal minors > 0) or all eigenvalues > 0.
 - Book: holonomic example integrates to "$x^2+y^2=R$" (p. 361) — should be $R^2$.
 - Choset uses $V$ for potential energy here but $V$ for process-noise covariance in ch. 8, and $u$ for generalized forces (MLS uses $\tau$). $\hat\omega$ = skew matrix (book uses a tilde/hat).
