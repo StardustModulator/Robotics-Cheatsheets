@@ -354,3 +354,52 @@ and the model ignores that, every practical model deliberately *under-trusts* it
 
 **Conventions / pitfalls:** $\varepsilon_{\sigma^2}$ is variance-parameterized; Thrun's measurement noise matrix later is $Q_t=\text{diag}(\sigma_r^2,\sigma_\phi^2,\sigma_s^2)$. Bearing is relative to robot heading (subtract θ) and must be wrapped. Skip max-range beams in the likelihood field.
 
+## Ch 7 Mobile Robot Localization (PDF pp. 169–198, book pp. 157–186) — Lessons: A5 (EKF localization, data association), A6 (problem taxonomy), "multiple hypotheses" week
+**Big idea:** Localization = estimating the map→robot coordinate transform (the pose) from data; a single
+scan is rarely enough, so evidence is integrated over time with a Bayes filter ("Markov localization"). With
+point landmarks, the EKF gives a fast, elegant tracker — but it only works while uncertainty is small and data
+association is right. Multiple hypotheses (Gaussian mixtures / MHT) buy robustness to ambiguous
+correspondences; true global localization needs grids or particles (Ch 8).
+
+**Taxonomy (§7.2, pp. 158–162) — standard exam material:**
+- *Local vs global:* **position tracking** (known start, small unimodal error) ⊂ **global localization** (unknown start, unbounded error, multimodal) ⊂ **kidnapped robot** (robot may *believe* it knows where it is while wrong; tests recovery from failure).
+- *Static vs dynamic* environments (people, doors, furniture, daylight). Options: put dynamics in the state (becomes mapping) or filter the sensor data (§8.4).
+- *Passive vs active* localization (active moves the robot to disambiguate, e.g. into a room off a symmetric corridor, Fig 7.2). This chapter: passive only.
+- *Single vs multi-robot* (robots detecting each other can share belief).
+
+**Markov localization (§7.3–7.4, pp. 162–166):** Bayes filter with a map $m$ in both models: $\overline{bel}(x_t)=\int p(x_t|u_t,x_{t-1},m)\,bel(x_{t-1})\,dx_{t-1}$, $bel(x_t)=\eta\,p(z_t|x_t,m)\,\overline{bel}(x_t)$ (Table 7.1). Initialization: point mass (7.1) or narrow Gaussian (7.2) for tracking; uniform $1/|X|$ over free poses (7.3) for global; structured priors otherwise ("next to a door"). Fig 7.3–7.4 = the 1-D three-door hallway (same as Fig 1.1).
+
+**EKF localization with known correspondences (§7.5, pp. 166–174; Table 7.2 PDF 181):**
+- Fig 7.5: 1-D hallway with *labelled* doors and a Gaussian belief; Fig 7.6: uncertainty ellipses grow along a straight path and shrink at a landmark sighting.
+- Motion: velocity model as $g$ (7.4)–(7.6): $\bar\mu_t=\mu_{t-1}+\big(-\tfrac v\omega\sin\mu_\theta+\tfrac v\omega\sin(\mu_\theta+\omega\Delta t),\;\tfrac v\omega\cos\mu_\theta-\tfrac v\omega\cos(\mu_\theta+\omega\Delta t),\;\omega\Delta t\big)^T$; $\bar\Sigma_t=G_t\Sigma_{t-1}G_t^T+R_t$.
+- **Jacobian $G_t$ — draft has a sign error (Table 7.2 Line 3 and Eq 7.8).** Correct derivative of (5.9) w.r.t. θ:
+  $$G_t=\begin{pmatrix}1&0&-\tfrac v\omega\cos\mu_\theta+\tfrac v\omega\cos(\mu_\theta+\omega\Delta t)\\0&1&-\tfrac v\omega\sin\mu_\theta+\tfrac v\omega\sin(\mu_\theta+\omega\Delta t)\\0&0&1\end{pmatrix}$$
+  (the draft prints the third column with the opposite sign; the 2005 book Table 7.2 has the correct form). Sanity check: ω→0 gives $\partial x'/\partial\theta\to-v\Delta t\sin\theta$ — only the corrected sign does that.
+- $R_t$ should depend on $(v,\omega)$ and θ (control-space noise mapped into state space); the draft leaves the design "to the reader" (p. 172). The 2005 book does it as $R_t=V_tM_tV_t^T$ with $M_t$ the control noise and $V_t=\partial g/\partial u$ — add this to A5.
+- Measurement (7.9)–(7.12): $z^i=(r,\phi,s)^T=h(x_t,j,m)+\mathcal N(0,Q_t)$ with $h=(\sqrt q,\ \text{atan2}(\delta_y,\delta_x)-\theta,\ m_{j,s})$, $\delta=(m_{j,x}-\bar\mu_x,\ m_{j,y}-\bar\mu_y)$, $q=\delta^T\delta$. The draft writes $Q_t=\text{diag}(\sigma_r,\sigma_\phi,\sigma_s)$ — it must be **variances** $\text{diag}(\sigma_r^2,\sigma_\phi^2,\sigma_s^2)$.
+- **Jacobian $H_t^i$ — draft has sign errors (Table 7.2 Line 11 and Eq 7.15).** Correct:
+  $$H_t^i=\frac1q\begin{pmatrix}-\sqrt q\,\delta_x&-\sqrt q\,\delta_y&0\\ \delta_y&-\delta_x&-1\\0&0&0\end{pmatrix}$$
+  (range decreases when the robot moves toward the landmark ⇒ negative ∂r/∂x for δx>0). Signature row is zero ⇒ with known correspondence the signature carries no information (p. 170).
+- **Multi-feature update — draft method is questionable.** The draft computes each $K_t^i$ from the same $\bar\Sigma_t$ and then *adds* the corrections: $\mu_t=\bar\mu_t+\sum_iK_t^i(z^i-\hat z^i)$, $\Sigma_t=(I-\sum_iK_t^iH_t^i)\bar\Sigma_t$, justified on p. 174 as "addition in information space". That is only exact in information form (sum of $H^TQ^{-1}H$ and $H^TQ^{-1}(\cdot)$), not with moment-form gains. Correct options: (a) **sequential** updates — update $\bar\mu,\bar\Sigma$ after each feature (2005 book Table 7.2), or (b) **stack** all features into one big $z$, $h$, $H$, block-diagonal $Q$. Use (a) or (b) in Assignment 4.
+- Wrap the bearing innovation $\phi-\hat\phi$ to (−π, π].
+
+**Unknown correspondences — maximum-likelihood data association (§7.6, pp. 174–179; Table 7.3 PDF 187):**
+- Strategy: pick the most likely correspondence, then treat it as truth. Brittle when several hypotheses are similar; mitigate with distinctive, well-separated landmarks *and* small pose uncertainty (conflicting goals).
+- For each map landmark k compute $\hat z^k$, $H^k$, and the **innovation covariance** $\Psi_k=H^k\bar\Sigma_tH^{kT}+Q_t$; for each observed feature choose $j(i)=\arg\min_k (z^i-\hat z^k)^T\Psi_k^{-1}(z^i-\hat z^k)$ (**Mahalanobis distance**), gain $K^i=\bar\Sigma_tH^{j(i)T}\Psi_{j(i)}^{-1}$.
+- Derivation (7.17)–(7.29): ML correspondence maximizes $\int p(z_t|c_t,x_t,m)\,bel(x_t)dx_t$ (7.19)/(7.20); exponential search over correspondence vectors ⇒ per-feature maximization (7.21) under feature independence (7.22); linearization (7.24)–(7.26) gives the predictive distribution (7.27) $\mathcal N\big(h(\bar\mu_t),\,H_t\bar\Sigma_tH_t^T+Q_t\big)$ — compare Table 6.4, where the pose is known and only $Q_t$ appears. (Typo: (7.29) says argmax of the quadratic form; it is argmin — or argmax of the likelihood (7.28).) Strictly ML should also include the $\det\Psi_k^{-1/2}$ factor; the table drops it.
+- **Gating:** accept a match only if the Mahalanobis distance passes a threshold (χ² test) — single outliers wreck Gaussians (p. 176). Outlier class $c=N+1$ with prior $\pi_{N+1}$ (p. 182).
+
+**Multi-hypothesis tracking (§7.7, pp. 179–181):**
+- Belief = Gaussian mixture (7.30) $bel(x_t)=\frac1{\sum_l\psi_{t,l}}\sum_l\psi_{t,l}\,\mathcal N(x_t;\mu_{t,l},\Sigma_{t,l})$; each "track" l is conditioned on its own data-association history (7.31).
+- Full Bayesian version: split every track for every correspondence; new weight (7.32) = parent weight × measurement likelihood under that correspondence (the product of per-feature $\pi_k$ from Table 7.3). Exponential growth ⇒ **MHT prunes** tracks whose normalized weight (7.33) falls below $\psi_{min}$ ⇒ at most $1/\psi_{min}$ tracks.
+
+**Practical (§7.8, pp. 181–184):** prune candidate landmarks cheaply (gating by projected position); **mutual exclusion** (two features in one image cannot be the same landmark) — repair phase after per-feature ML; outlier handling. Gaussian methods are for **tracking only**: unimodality, false associations derail the EKF, and **linearization fails beyond ~±20° heading std-dev** (rule of thumb, p. 183) — so a wide initial Gaussian does not turn EKF/MHT into global localization. EKF cannot use **negative information** (not seeing an expected landmark) because that makes the belief non-Gaussian; MHT can decay weights of tracks that miss expected landmarks.
+
+**Summary (§7.9):** Markov localization = Bayes filter for localization; EKF localization for feature maps; ML data association; MHT for robustness; feature selection is an art; enforce mutual exclusion.
+
+**Worked examples worth redoing:** Fig 7.5 1-D KF localization with labelled doors; Fig 7.6 single-landmark EKF (simulate: straight line, one landmark, plot 3σ ellipses).
+
+**Exercises:** none printed. For Assignment 4 (EKF GPS+IMU): the structure is Table 7.2 with (i) $g$ = IMU kinematic integration, $G_t$ its Jacobian, (ii) GPS $h(x)=$ position (linear, $H=[I\ 0]$), no data association, (iii) $R_t$ from IMU noise via $V M V^T$. For the "multiple hypotheses" lecture: implement Table 7.3 with gating and a 2-track MHT in the symmetric corridor.
+
+**Conventions / pitfalls:** Thrun's $R$ (motion) / $Q$ (measurement); $Q$ must hold variances; heading wraps; signature row of $H$ is zero; sum-of-gains update in draft Table 7.2/7.3 is not the standard sequential update.
+
