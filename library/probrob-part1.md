@@ -2,10 +2,10 @@
 Source: acb9a9bc-ProbabilisticRobotics.pdf, PDF pages 1–245 (book pages i–xiii, 1–233)
 
 > **Edition warning.** This is the *early draft* ("EARLY DRAFT—NOT FOR DISTRIBUTION"), not the 2005 MIT Press book.
-> Chapter numbers, section numbers, table numbers and equation numbers differ from the published edition
-> (e.g. here motion is Ch 5 and measurement is Ch 6; in the 2005 book they are Ch 5 and Ch 6 too, but localization
-> is split into Ch 7 "Markov & Gaussian" + Ch 8 "Grid & MC", and there is **no UKF anywhere in this draft** — the
-> UKF (§3.4 of the 2005 book) was added later; the draft's §3.4 is the *Information Filter*).
+> Chapter titles for Ch 1–9 match the 2005 book closely (motion = Ch 5, measurement = Ch 6, localization = Ch 7–8,
+> occupancy grids = Ch 9), but section, table and equation numbers differ, and **there is no UKF in this draft** —
+> the draft's §3.4 is the Information Filter (UKF is §3.4 of the 2005 book). Ch 10+ (EIF/SEIF/EM mapping, MDPs)
+> are organised differently from the 2005 book (no FastSLAM/GraphSLAM chapters here).
 > When citing for the student, prefer section *names*; table/equation numbers below are the draft's.
 
 **Page offset:** PDF page = book page + 12 (front matter = PDF 1–12; book p.1 = PDF 13; checked at book p.480 = PDF 492).
@@ -446,3 +446,46 @@ SLAM solution (poses) into a map fit for planning and localization.
 
 **Conventions / pitfalls:** subtract $l_0$ every update or the prior is counted repeatedly; clamp log odds to avoid over-confidence in dynamic scenes; occupancy grid probability ≠ likelihood field value (one is P(occupied), the other a distance-based sensor likelihood).
 
+---
+
+## Corrections & upgrades for the knowledge base
+*(Notion F8, A5, A6 checked on 2026-11-26 against this draft; page numbers are book pp. / PDF pp.)*
+
+**Errors or risky statements in Notion**
+- [A5] KF block uses $Q$ = process noise and $R$ = measurement noise ($\bar P=APA^T+Q$, $K=\bar PH^T(H\bar PH^T+R)^{-1}$) while "Learn from" points to *Probabilistic Robotics*, which uses the **opposite** convention ($R_t$ = motion, $Q_t$ = measurement; Table 3.1, p. 36 / PDF 48). The math is correct but the student will see the letters swapped in the book → add a one-line warning: "Thrun: R = motion noise, Q = measurement noise; Leonard/Notion: Q = process, R = measurement."
+- [A5] "The EKF linearizes … at the current estimate" is ambiguous → say exactly: $G_t=\partial g/\partial x$ at $(u_t,\mu_{t-1})$ (previous posterior) and $H_t=\partial h/\partial x$ at $\bar\mu_t$ (prediction) (Eqs 3.50, 3.52, p. 50 / PDF 62).
+- [A5] "Learn from: Probabilistic Robotics ch. 2–3" is incomplete for Assignment 4 → add ch. 5 (motion models, velocity model eq 5.9) and the EKF-localization chapter (draft §7.5, pp. 166–174 / PDF 178–186; 2005 book §7.4). Warn: in this draft, Table 7.2's $G_t$ (third column) and $H_t$ (entries (1,1) and (2,2)) have **sign errors**, $Q_t$ lists σ instead of σ², and multiple features are fused by summing gains computed from the same $\bar\Sigma$ — use the 2005 book's sequential update (see Ch 7 notes above).
+- [A5] Build says "IMU (yaw rate)" without saying how it enters → in Thrun's framework high-rate proprioceptive signals (odometry, IMU) are normally treated as **controls $u_t$** in $g$ (p. 20, §5.4 p. 108); GPS is the measurement $z_t$. Say which one the assignment expects; if IMU is a control, its noise enters as $R_t=V_tM_tV_t^T$ (2005 book; the draft leaves it to the reader, p. 172).
+- [A6] "Learn from: Probabilistic Robotics ch. 4 & 6–8" omits **ch. 5** (sampling motion models — the prediction step of MCL; Table 5.6 sample_motion_model_odometry, p. 110 / PDF 122) → add ch. 5.
+- [A6] "show recovery from a global (unknown) start" — plain MCL handles global localization but **not** recovery from failure/kidnapping; that needs random-particle injection / Augmented MCL ($w_{slow}$, $w_{fast}$; Table 8.3, p. 206 / PDF 218) → add to Lecture and Build ("kidnap the robot mid-run").
+- [A6] Likelihood-field description is right but incomplete → add: per-beam likelihood $z_{hit}\,\mathcal N(\text{dist};0,\sigma_{hit}^2)+z_{rand}/z_{max}$, **max-range beams are skipped**, distances are precomputed as a 2-D distance transform, beams are treated as independent (product), and in practice one subsamples/tempers beams (§6.4, Table 6.3, pp. 139–143 / PDF 151–155; §6.3.4).
+- [F8] Content is correct (Gaussian (2.4), Bayes (2.13)). Upgrades: add total probability (2.12) and conditional independence (2.24)–(2.27) (the two facts the Bayes-filter derivation rests on), the normalizer-η trick (2.15)–(2.18), log odds (4.13) and the door example numbers (0.75 → 0.983, pp. 26–27) as a self-test; and "MLE of a mixture via EM" with the beam-model example (§6.3.2–6.3.3, pp. 129–138).
+
+**Missing topics worth adding**
+- [A5] Bayes-filter derivation steps and its two assumptions (complete state + controls independent of the past) (§2.4.3, pp. 28–29).
+- [A5] KF as "minimize two Mahalanobis quadratics; covariance = inverse Hessian" + matrix inversion lemma (Table 3.2, p. 44) — links to F4/F6.
+- [A5] Information filter / canonical form $(\Omega,\xi)$ and its duality with the KF (§3.4); note the draft's EIF Table 3.5 sign error ($-H\bar\mu$ should be $+H\bar\mu$).
+- [A5] UKF is **not** in this draft (only mentioned, p. 54) — if A5 should cover UKF, cite the 2005 book §3.4 or Julier–Uhlmann.
+- [A5 / "multiple hypotheses" week] ML data association with Mahalanobis distance and innovation covariance $\Psi=H\bar\Sigma H^T+Q$, gating, mutual exclusion, MHT with pruning threshold $\psi_{min}$ (§7.6–7.8, pp. 174–184). Not currently in Notion at all.
+- [A5] EKF failure rule of thumb: heading std > ~20° ⇒ linearization breaks; EKF cannot use negative information (p. 183).
+- [A6] Particle-filter error sources and fixes (§4.2.4): finite-M bias, diversity loss (don't resample when stationary; resample on weight variance / $N_{eff}$), proposal mismatch (inflate sensor noise; mixture MCL), particle deprivation (random particles).
+- [A6] Low-variance resampler is O(M) and loses nothing when weights are equal (Table 4.4, p. 86) — Notion names it but not why.
+- [A6] Beam model (4-component mixture + EM learning) as the physical alternative to the likelihood field, and its outlier-rejection filter for crowds (§6.3, §8.4).
+- [A6] Grid (histogram) localization and Table 8.5 comparison of EKF / MHT / grids / MCL (p. 217).
+
+**Errors found in the source itself (so the student is not misled)**
+- (3.63) gain uses $\bar\Sigma_{t-1}$ → $\bar\Sigma_t$. Table 3.5 / (3.97)–(3.100): $-H_t\bar\mu_t$ → $+H_t\bar\mu_t$.
+- (4.21) initial log odds inverted → $l_0=\log\frac{p(x)}{1-p(x)}$.
+- Table 5.4 samplers do not have variance b as claimed (use 2005 versions or `rng.normal`).
+- Table 6.3 prob(dist², σ²) → Gaussian in dist; Table 6.4 bearing missing "−θ"; Table 6.2 E-step lacks mixture weights.
+- Table 7.2/7.3: $G_t$ third column sign, $H_t$ signs, $Q_t$ must hold variances, summed-gain multi-feature update; (7.29) argmax → argmin.
+- Table 8.4 numerator $z_{hit}p_{hit}$ → $z_{short}p_{short}$.
+- Table 9.2 Line 8 $|r-z_{max}|$ → $|r-z_t^k|$.
+
+## Best-reference map
+- [F8] §2.2 Basic concepts (pp. 10–15 / PDF 22–27); §2.4.2 door example (pp. 24–28 / PDF 36–40); §4.1.4 log odds (pp. 74–77 / PDF 86–89); §6.3.2–6.3.3 MLE & EM for the beam model (pp. 129–138 / PDF 141–150).
+- [F4/F5] Table 3.2 inversion lemma (p. 44 / PDF 56); KF derivation §3.2.4 (pp. 39–48 / PDF 51–60); Jacobians of motion/measurement models (7.8), (7.14)–(7.15) (pp. 171–173 / PDF 183–185, with sign fixes).
+- [F3] planar pose conventions §5.2 (pp. 92–93 / PDF 104–105); endpoint transform (6.33) (p. 140 / PDF 152).
+- [A5] Ch 2 Bayes filter (pp. 9–32 / PDF 21–44, esp. §2.4 pp. 23–30); Ch 3 KF/EKF/IF (pp. 33–66 / PDF 45–78, Tables 3.1, 3.3, 3.4, 3.5); §5.3 velocity model (pp. 95–107 / PDF 107–119); §7.5 EKF localization (pp. 166–174 / PDF 178–186); §7.6–7.8 data association, MHT (pp. 174–184 / PDF 186–196).
+- [A6] §4.2 particle filter, importance sampling, error sources, low-variance resampling (pp. 77–89 / PDF 89–101); §5.4 odometry model incl. sampling (pp. 107–114 / PDF 119–126); §6.3 beam model (pp. 124–139 / PDF 136–151); **§6.4 likelihood field (pp. 139–145 / PDF 151–157) — Assignment 5 sensor model**; §6.6 landmark model and pose sampling (pp. 147–153 / PDF 159–165); Ch 8 grid localization & MCL, Augmented MCL, Mixture MCL, dynamic environments (pp. 187–220 / PDF 199–232).
+- [A3] §5.5 map-aware motion model and C-space obstacle growth (pp. 114–117 / PDF 126–129); §9.2 occupancy grids for planning (pp. 224–231 / PDF 236–243).
