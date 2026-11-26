@@ -116,3 +116,32 @@
 ## Ongoing (during Phases 1–3)
 - Keep a `math-gaps.md` list; patch gaps just-in-time (≤ 45 min each) rather than up front.
 - Later, when the courses need them: C++ basics (for ROS 2 / performance), MATLAB Onramp (2 h, for RDKDC labs), ROS 2 tutorials.
+
+## Decision (Day 0): do NOT watch all of MIT 18.06 + 18.02 — curated path instead
+Full 18.06 (34 lectures) + 18.02 (35 lectures) ≈ 57 h of video, 100 h+ with problem sets ≈ 20% of the
+whole 480 h sprint, and most of 18.02 (multiple integrals, line integrals, Green/Stokes/divergence theorems)
+is **never used** in these six courses. Rule: **visual intuition first → targeted rigorous lectures →
+immediately implement in NumPy** (watching ≠ learning; coding the idea is the test).
+
+### Linear algebra (~10 h video at 1.25–1.5× + ~10 h practice)
+1. 3Blue1Brown *Essence of Linear Algebra*, all 16 chapters (~3.5 h): intuition.
+2. Strang **MIT 18.06SC** (https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/), only these topics:
+   geometry of linear equations · matrix multiplication & inverses · independence/basis/dimension ·
+   four fundamental subspaces · orthogonality · **projections & least squares** · orthogonal matrices & Gram–Schmidt ·
+   determinants (one lecture) · **eigenvalues/eigenvectors** · diagonalization & powers · **differential equations & e^{At}** ·
+   **symmetric & positive-definite matrices** · **SVD**. (~14 lectures)
+3. For each: do 3–5 problems from the 18.06SC recitation/problem sets **and** verify numerically in NumPy.
+4. Skip for now: Markov matrices, Fourier series, complex matrices/FFT, linear transformations lecture (covered by 3B1B), pseudo-inverse lecture (covered in practice).
+
+### Calculus (~6 h video + ~4 h matrix calculus + ~6 h practice)
+1. 3Blue1Brown *Essence of Calculus* (~3 h): single-variable intuition, chain rule, Taylor.
+2. MIT **18.02SC** (Auroux) / Khan Academy multivariable (Grant Sanderson), only:
+   vectors, dot & **cross product** · partial derivatives · gradient & directional derivative · **chain rule** ·
+   linearization/Taylor · max-min & second-derivative test · **Lagrange multipliers**. (~8 lectures)
+   Skip: double/triple integrals, line integrals, Green/Stokes/divergence, Kepler, parametric curves beyond basics.
+3. **Matrix calculus** (what backprop, EKF and IK actually use): MIT **18.S096 "Matrix Calculus for Machine Learning and Beyond"**
+   (Edelman & Johnson, OCW) first ~4 lectures + *Mathematics for Machine Learning* ch. 5.
+4. Practice: derive by hand and check with finite differences / `torch.autograd`.
+
+### Rule for the rest of the sprint
+If a course later needs a topic we skipped (e.g., integrals for probability densities), patch it just-in-time (≤ 45 min).
