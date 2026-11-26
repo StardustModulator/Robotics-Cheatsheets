@@ -78,7 +78,7 @@ Preface's suggested semester themes (p. xviii): *Path Planning* = ch. 3, 4, G, 5
 
 **Algorithms:**
 - *Bug1 (Alg 1, p. 19):* loop { from $q^L_{i-1}$ move to goal until goal or hit $q^H_i$; follow boundary all the way round back to $q^H_i$; go (by the shorter way) to the perimeter point $q^L_i$ closest to goal; if the step toward the goal hits this obstacle, report failure }.
-- *Bug2 (Alg 2, p. 22):* loop { move along m-line until goal or hit $q^H_i$; turn left (or right) and follow boundary until goal, or $q^H_i$ re-encountered (fail), or m-line re-met at a point m ≠ $q^H_i$ with $d(m,q_{goal})<d(q^H_i,q_{goal})$ and the step toward goal is free; set $q^L_{i+1}=m$ }. (The printed line 13 reads "d(m,q_goal) < d(m,q^H_i)" which is a typo; the text p. 20 says "closer to the goal than the initial point of contact".)
+- *Bug2 (Alg 2, p. 22):* loop { move along m-line until goal or hit $q^H_i$; turn left (or right) and follow boundary until goal, or $q^H_i$ re-encountered (fail), or m-line re-met at a point m ≠ $q^H_i$ with $d(m,q_{goal})<d(q^H_i,q_{goal})$ and the step toward goal is free; set $q^L_{i+1}=m$ }. (As extracted, line 13 reads "d(m,q_goal) < d(m,q^H_i)", which appears inconsistent with the text on p. 20: "closer to the goal than the initial point of contact"; use $d(m,q_{goal})<d(q^H_i,q_{goal})$.)
 - *Tangent Bug (Alg 3, p. 28):* motion-to-goal: move continuously toward $n\in\{T,O_i\}$ minimising heuristic $d(x,n)+d(n,q_{goal})$ until goal or this heuristic starts increasing (local minimum M of $d(\cdot,q_{goal})$ restricted to the path). Then boundary-following in the same direction as the last motion: keep moving toward the $O_i$ on the followed obstacle in that direction, updating $d_{reach},d_{followed}$; stop when goal reached, a full loop completed (fail), or $d_{reach}<d_{followed}$ (then resume motion-to-goal). With zero sensor range Tangent Bug ≈ Bug2-like but hitting an obstacle does *not* switch modes; with infinite range it never boundary-follows (fig 2.13).
 
 **Implementation (§2.3, pp. 30–37):**
@@ -300,3 +300,41 @@ $U(q)=U_{att}(q)+U_{rep}(q)$.
 **Conventions / pitfalls:** trapezoidal paths via midpoints/centroids are feasible, not optimal. Boustrophedon critical points need the extension to go *both* ways. In a Morse decomposition the slice $Q_\lambda$ itself never changes connectivity — $Q_{free_\lambda}$ does. Brushfire *decomposition* cells ≠ GVD Voronoi regions.
 
 ---
+## Corrections & upgrades for the knowledge base
+Checked against Notion ASBR page (fetched 2026-11-26) and `courses/05-algorithms-sensor-based-robotics/README.md`.
+
+- **[A3] "The C-space has one dimension per joint"** → Choset defines dim Q = DOF = *minimum number of parameters* to place every point of the robot (§3.1, p. 40; §3.3 pp. 47–50). "One per joint" holds only for serial open chains; a planar mobile robot has $SE(2)$ (3-D), a spacecraft $SE(3)$, closed chains follow Grübler (3.1) $M=N(k-n-1)+\sum f_i$. → Rewrite: "one dimension per independent configuration parameter (per joint for a serial arm; 3 for a planar rigid body; Grübler for closed chains)". Also add that Q is often non-Euclidean ($T^2$ for the 2R arm, wrap-around in the grid!).
+- **[A3] "foundation of motion planning (weeks 4–5)"** → the course readings put **Choset ch. 3 (C-space) in week 2**, ch. 4 (potentials) in week 4, ch. 5–6 (roadmaps, cell decompositions) in week 5. → Split the week tag: C-space = week 2, potentials = week 4, graph search/roadmaps/cells = week 5.
+- **[A3] "Learn from: Choset ch. 2–4"** → ch. 2 (Bug) is not an assigned ASBR reading, while ch. 5–6 (assigned, week 5) and **App H (A\*, Dijkstra, D\*: book pp. 521–546 = PDF 535–560)** are missing, and Minkowski sums live in **App F.3 (p. 507, PDF 521)**, not ch. 3. → Replace with: "Choset §3.1–3.4 & 3.7 (C-space, topology), App F.3 (Minkowski/star algorithm), ch. 4 (all; esp. eqs. 4.1–4.7, Alg 4, §4.3.2 Brushfire, §4.5 wavefront, §4.6 navigation fns, §4.7 $u=J^Tf$), ch. 5.1–5.2 (visibility graph, GVD), ch. 6.1–6.2.1 (trapezoidal, boustrophedon), App H (graph search). Ch. 2 optional."
+- **[A3] potential formulas** → $U_{att}$ and $U_{rep}$ shown match Choset (4.1) and (4.4) *up to notation*, but: (a) Choset uses $D(q)$/$d_i(q)$ for distance and $Q^*$ for the influence radius — **in Choset ρ is the raw range-sensor function (2.3)**, so writing ρ(q) for obstacle distance clashes with the textbook (ρ₀ is Khatib/Latombe notation); (b) add the gradients $\nabla U_{att}=\zeta(q-q_{goal})$ and $\nabla U_{rep}=\eta(\frac1{Q^*}-\frac1{D})\frac1{D^2}\nabla D$ (4.5); (c) add the combined quadratic/conic attractive (4.2–4.3) that bounds far-field speed (book recommends it); (d) add the per-obstacle $d_i$ version (4.6–4.7) that removes oscillation at equidistant points.
+- **[A3] gradient descent** → Choset Algorithm 4 (p. 85, PDF 102) prints $q(i+1)=q(i)+\alpha(i)\nabla U$ — a **sign typo**; correct is $-\alpha\nabla U$ (as our page says "follow $-\nabla U$" ✓). Add a pitfall note so the student doesn't copy the book's line. Stop on $\|\nabla U\|<\epsilon$.
+- **[A3] local-minimum fixes** → page lists only "trapped by local minima". Add the book's three remedies: wavefront planner (resolution complete, single minimum; §4.5), navigation functions (Def 4.6.1, eq. 4.13), randomized escape (RPP, §4.4). Note local minima occur even with two *convex* obstacles (fig 4.11), not just U-shapes.
+- **[A3] A\* claim** "optimal when the heuristic never overestimates (admissible)" → true for tree search / A\* with re-opening; for graph search with a closed list, optimality without re-expansion needs a **consistent** (monotone) heuristic. Add "consistent ⇒ admissible; octile/Manhattan on 8/4-grids are consistent". (Check against Choset App H.2.2, PDF 545, in part 3.)
+- **[A3] missing link to A1** → Choset §4.7 (PDF 116–121) lifts workspace forces to C-space with $u=J^T(q)f$ (virtual work, eq. 4.21) and sums over control points (4.26) — same Jacobian as A1's resolved-rate control. Add one line + Example 4.7.1 to A3's lecture.
+- **[A3] Build** → good (matches Choset Prob. 3.19). Upgrade: run the **wavefront** on the 2-link torus with wrap-around neighbours (Choset Prob. 4.5) and compare 4- vs 8-connectivity path lengths (wavefront is shortest only in the grid metric, Prob. 4.2).
+- **[A1] Learn from** → add Choset §3.5.1 (PDF 78–84: SO(n)/SE(n), frame vs transform, subscript cancelling, body-frame = post-multiply vs world-frame = pre-multiply, worked fig 3.17–3.19), §3.6 + App E (Euler/RPY/axis-angle/quaternions, PDF 503–512) and §3.8 (Jacobian, 2R singularity at $\sin\theta_2=0$). Choset has no twists/adjoint/body Jacobian, so MR ch. 3–5 (and MLS ch. 2–3) stay the primary A1 references. Formula $\dot\theta=J^{-1}V$ / DLS is consistent with the book's $\dot x=J\dot q$ (no error found).
+- **[courses/05 README, line 110] "Configuration space, Minkowski sums → PoRM Ch. 3"** → ch. 3 only shows obstacle "growing" (figs 3.4–3.5); the Minkowski difference (F.7) and star algorithm are in **App F.3–F.4** (PDF 521–523). Point there.
+- **[F6] / [A3]** → wherever gradient descent from Choset is cited, flag the Algorithm 4 sign typo; also note p. 102 typo in $U_{att,j}$ (missing square on $d^*_{goal}$).
+- **[F5]** → Choset App C.5 (PDF 497–500) and §2.3.3 / §5.2.4 give the "tangent space = null space of the Jacobian" and preimage-theorem view; good optional reading for implicit curves.
+
+## Best-reference map
+- **[A3] C-space definitions, DOF, holonomic constraints, Grübler** → §3.1–3.3, PDF 57–68 (book 39–50).
+- **[A3] C-obstacles / Minkowski** → §3.2 (PDF 61–65) + App F.3–F.4 star algorithm & SE(2) slices (PDF 521–523); exercises 3.4, 3.5, 3.18.
+- **[A3] 2R-arm C-space on the torus, grid C-space, wrap-around** → §3.1 fig 3.2 (PDF 58–60), §3.2.2 figs 3.6–3.8 (PDF 63–65); exercises 3.12, 3.19.
+- **[A3] Topology (manifolds, charts, atlas, connectedness, compactness)** → §3.4 (PDF 68–77).
+- **[A1]/[F3]/[R1–R2] SO(n), SE(n), frames vs transforms, body vs world composition** → §3.5.1 (PDF 78–84); Euler Z-Y-Z §3.6 (PDF 84–85); App E (PDF 503–512); exercises 3.16, 3.17, 3.23.
+- **[R5]/[A1]/[F5] Jacobian, singularity, $\dot x=J\dot q$** → §3.8 Examples 3.8.1–3.8.2 (PDF 87–89); exercises 3.20, 3.21, 3.22.
+- **[A3]/[F6] Attractive/repulsive potentials + gradient descent** → §4.1–4.2, eqs. 4.1–4.7, Alg 4 (PDF 97–102).
+- **[A3] Brushfire distance transform** → §4.3.2 fig 4.9 (PDF 103–106); GVD via Brushfire §5.2.5 (PDF 145–146).
+- **[A3] Local minima, RPP** → §4.4 (PDF 106–107).
+- **[A3] Wavefront planner** → §4.5 fig 4.12 (PDF 107–109); continuous version §6.2.3 (PDF 194–195); exercises 4.2, 4.3, 4.5.
+- **[A3] Navigation functions (sphere/star worlds)** → §4.6 eqs. 4.8–4.19 (PDF 110–116).
+- **[A3]/[R5] Workspace→C-space forces $u=J^Tf$, control points** → §4.7 eqs. 4.20–4.26 (PDF 116–121).
+- **[A3] Visibility graph + rotational plane sweep** → §5.1 Alg 5, Table 5.1 (PDF 127–134); exercise 5.5.
+- **[A3] GVD / deformation retracts / preimage theorem** → §5.2 (PDF 134–146).
+- **[A3] Canny roadmap / OPP (conceptual only)** → §5.5 (PDF 158–171).
+- **[A3] Trapezoidal & boustrophedon decompositions, coverage** → §6.1–6.2 (PDF 177–203).
+- **[A3] Graph search (A\*, Dijkstra, D\*)** → App H (PDF 535–560) — part 3 reader.
+- **[A4] Sampling-based (PRM/EST/RRT)** → ch. 7 (PDF 213–283) — part 2 reader.
+- **[A5] Kalman/EKF** → ch. 8 (PDF 284–314) + App I, J (PDF 561–577). **[A6] Bayes/particle filter, MCL, occupancy grids** → ch. 9 (PDF 316–362).
+- **[A3] Sensor-based planning (Bug1/Bug2/Tangent Bug)** → ch. 2 (PDF 35–56), optional for ASBR.

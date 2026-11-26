@@ -304,3 +304,82 @@ Full mixture (Eq 6.35): $z_{hit}p_{hit}+z_{rand}p_{rand}+z_{max}p_{max}$, with $
 - 3D mapping (§14.6): an upward-pointing laser plus a panoramic camera gives textured VRML models.
 - Projects (§14.9): 3D pose estimation, multi-robot mapping without a common start, semantic components.
 
+---
+
+## Ch 15 Markov Decision Processes (PDF pp. 433–448, book pp. 421–436), Lessons: A3 (navigation functions / value-function planners), H-track (RL background)
+**Big idea:** Planning must account for uncertainty. A *classical* plan is a fixed action sequence (no uncertainty). An *MDP* has stochastic actions but a fully observable state, so you need a **policy** over all states (a "universal plan" or navigation function). A *POMDP* adds partial observability, so you plan in **belief space**, which yields information-gathering behaviour (Fig 15.1: go look at the landmark before heading for goal or pit). The chapter text is "Markov Devision Processes" in the draft.
+
+**Key results & equations:**
+- Payoff $c(s)$, e.g. +100 at the goal and −1 per step (Eq 15.1). Expected cumulative discounted payoff $C^T=E[\sum_{\tau=1}^T\gamma^\tau c_{t+\tau}]$ (Eq 15.3).
+- Horizons: greedy (T=1), finite (usually γ=1), infinite (needs γ<1, since $C^\infty\le c_{max}/(1-\gamma)$, Eqs 15.4–15.5).
+- Finite-horizon recursion (Eqs 15.9–15.14) and the Bellman equation (Eq 15.15), $C(s)=\max_a\int[c(s')+\gamma C(s')]p(s'\mid a,s)\,ds'$. **The draft drops γ from Eqs 15.11–15.20 even though Eq 15.10 includes it, so put it back.** The greedy policy with respect to the converged value function is optimal (Eq 15.17).
+- **Table 15.1 MDP value iteration:** set $\hat C=0$, then repeat $\hat C(s)\leftarrow\max_a\sum_{s'}[c(s')+\gamma\hat C(s')]p(s'\mid a,s)$. The update order does not matter as long as every state is updated infinitely often.
+- Fig 15.2: value iteration over the C-space of a circular robot (obstacles grown by the robot radius). It gives a navigation function, i.e. a stochastic generalization of Dijkstra/wavefront planning, paired in practice with a reactive collision avoider.
+
+**Exercises worth doing:** Grid-world value iteration with an 80/10/10 slip model. Compare the result with an A* path, and watch the policy prefer wide corridors once motion noise is added (the narrow vs wide corridor discussion, p. 425).
+
+---
+
+## Ch 16 Partially Observable MDPs (PDF pp. 449–488, book pp. 437–476), Lessons: A6 (belief = particle filter), H-track, brief
+**Big idea:** Do value iteration over **beliefs**. Rather than integrating over the next belief, integrate over the next **observation**. Each $(b,a,o')$ gives a unique next belief $B(b,a,o')$ from the Bayes filter (Eqs 16.30–16.34). So $C^T(b)=\max_a\int\big[c(B(b,a,o'))+C^{T-1}(B(b,a,o'))\big]p(o'\mid a,b)\,do'$. For finite worlds the value function is **piecewise linear and convex** (PWLC). Convexity means knowing is never worse than not knowing (Eq 16.28).
+
+**Key results & equations:**
+- **Worked example (Fig 16.1, pp. 439–447):** states s1–s4, actions a1 (switch between s1 and s2, which also senses) and a2 (commit; s3 pays +100, s4 pays −100), observations o1/o2, γ=0.9.
+  - $C^1(b)=\max\{0;\ 72p_1-72p_2\}$ (Eq 16.11).
+  - $C^2(b)=\max\{0;\ -33.048p_1+7.776p_2;\ 72p_1-72p_2\}$ (Eq 16.27).
+  - Observation probabilities are the Bayes normalizers ($\eta_i^{-1}=p(o_i\mid a,b)$, Eq 16.20).
+  - *Caution:* Eq 16.15 swaps $p'_1$ and $p'_2$, and Eq 16.19 is mislabeled $o_1$. Redo the arithmetic yourself; it is a good Bayes-filter drill.
+- **Finite POMDP backup (Eqs 16.42–16.57):** $C^T(b,a)=\gamma\sum_{o'}\max_k\sum_i(c_i+C^{T-1}_{k,i})p(o'\mid s'_i)\sum_jp(s'_i\mid a,s_j)p_j$. The $p(o'\mid a,b)$ factor cancels. In the **Table 16.1 linear-programming form**, the constraint count grows as $|\Phi^T|=|A|\,|O|^{|\Phi^{T-1}|}$ (Eq 16.68): doubly exponential, so pruning dominated vectors is essential.
+- **Table 16.2 general POMDP** is in-principle only, since the value function over infinite-dimensional beliefs has no representation.
+- **MC-POMDP (§16.4):** particle-filter beliefs (Table 16.3 `particle_filter_2(b,a,o')`), Monte Carlo backups, Q over beliefs stored by **k-nearest-neighbour with KL divergence** between kernel-smoothed particle sets. Results: the heaven/hell "priest" task (about 25-step lookahead, solved after 17 episodes) and a simulated find-and-grasp task (>80% success after about 4000 iterations). *The draft's inner-loop line 10 accumulates into $C^T(b)$ where it should accumulate into $C^T(b,a)$.*
+- **Augmented MDP / coastal navigation (§16.5):** compress the belief to $\bar b=\langle\arg\max_s b(s),\ H[b]\rangle$ (Eqs 16.80–16.81), learn $p(\bar b'\mid a,\bar b)$ by stochastic simulation, and run MDP value iteration on that (Table 16.4). The planner hugs walls to stay localized (Fig 16.5), with lower goal entropy especially for short-range sensors (Fig 16.6). This is the concrete link between *localization quality* and *planning*.
+- **Exploration** has no chapter of its own in this draft. It is discussed only as information gathering (Ch 15 intro, POMDP), entropy thresholds (§14.5), and coastal navigation.
+
+**Exercises worth doing:** Re-derive Eqs 16.12–16.27 by hand. Implement the 2-state POMDP with α-vector pruning and plot $C^T(p_1)$ for T = 1…5.
+
+---
+
+## Corrections & upgrades for the knowledge base
+
+**Edition and chapter-number facts (affect "Learn from" pointers):**
+- [A5, A6, ASBR README] **This upload is the early draft, not the 2005 book.** Despite the "1999–2000" copyright line, its references go up to 2003 (FastSLAM 2.0). The localization and SLAM chapter numbers match 2005 (7 localization, 8 grid/MCL, 9 occupancy, 10 EKF SLAM, 11 GraphSLAM-as-"EIF", 12 SEIF). But **sections differ**: EKF localization is **§7.5** here (2005: §7.4). The README line "PR Ch. 3.3, 7.4" is right for 2005 but off by one section for this PDF. Suggest citing as "PR §7.4 (2005) / §7.5 (draft PDF p. 178)".
+- [A6] This draft contains **no KLD sampling** and **no FastSLAM chapter**; it mentions FastSLAM only in Fig 12.21 and Project 10.1. The ASBR README/plan items "KLD-sampling adapts M" and "FastSLAM: Rao-Blackwellized PF" must point to the 2005 edition (§8.3.7 and ch. 13), or to Stachniss's lectures, not to this PDF. The draft's augmented MCL is called "Random Particle MCL" (§8.3.3, Table 8.3).
+- [A6] Notion A6 "Learn from: *Probabilistic Robotics* ch. 4 & 6–8" is correct for this draft: likelihood field §6.4/Table 6.3 (PDF 151–155), MCL Table 8.2 (PDF 212), augmented MCL Table 8.3 (PDF 218). Suggest making it more precise: "§6.4 (likelihood field), §8.3 (MCL, Tables 8.2–8.3), §4.2 (particle filter/resampling)".
+
+**Notion A5 (Bayes / KF / EKF):**
+- [A5] **Noise-symbol clash.** Notion uses $Q$ for process noise and $R$ for measurement noise ($\bar P=APA^T+Q$, $K=\bar PH^T(H\bar PH^T+R)^{-1}$). Thrun uses the **opposite**: $R_t$ is motion noise and $Q_t$ is measurement noise (PR Tables 3.1, 7.2: $\bar\Sigma=G\Sigma G^T+R_t$, $K=\bar\Sigma H^T(H\bar\Sigma H^T+Q_t)^{-1}$). The Notion equations are internally correct, but since the lesson says "Learn from PR ch. 2–3", **add a one-line warning**: "PR swaps Q and R: R = process, Q = measurement." Also state the KF control model as Thrun does, $x_t=A_tx_{t-1}+B_tu_t+\varepsilon_t$.
+- [A5] The self-test "Kalman gain near $H^{-1}$" only makes sense when $H$ is square and invertible. Reword: "K→0 trusts the prediction; as R→0 (H invertible), $K\to H^{-1}$, i.e. trust the measurement."
+- [A5] Upgrade: add **EKF landmark localization (PR Table 7.2)** as the reference example, using the **correct Jacobians**. The draft PDF has sign errors that a student copying it would propagate:
+  - $G_t[0,2]=-\frac v\omega\cos\theta+\frac v\omega\cos(\theta+\omega\Delta t)$ and $G_t[1,2]=-\frac v\omega\sin\theta+\frac v\omega\sin(\theta+\omega\Delta t)$ (draft, PDF 181: opposite sign).
+  - $H=\big[-\delta_x/\sqrt q,\ -\delta_y/\sqrt q,\ 0;\ \ \delta_y/q,\ -\delta_x/q,\ -1\big]$ (draft PDF 181/185: $+\delta_x/\sqrt q$ and $+\delta_x/q$ are wrong).
+  - $Q=\mathrm{diag}(\sigma_r^2,\sigma_\phi^2)$, not $\sigma$.
+  - Update features **sequentially**, not by summing gains computed from the same $\bar\Sigma$ (draft lines 14–15).
+- [A5] Upgrade: add **ML data association with Mahalanobis gating**: $j=\arg\min_k(z-\hat z^k)^T\Psi_k^{-1}(z-\hat z^k)$ with $\Psi_k=H^k\bar\Sigma H^{kT}+Q$ (PR Table 7.3; the draft's Eq 7.29 wrongly says argmax). Add the ±20° heading-σ rule of thumb for when EKF linearization breaks (p. 183).
+
+**Notion A6 (PF / MCL):**
+- [A6] Notion says the likelihood field "scores a scan by the distance from each beam endpoint to the nearest obstacle". Correct (Table 6.3). Add the three details the assignment needs:
+  1. **max-range readings are skipped**;
+  2. the per-beam score is the mixture $z_{hit}\,\mathcal N(d;0,\sigma_{hit}^2)+z_{rand}/z_{max}$, multiplied over beams (work in logs);
+  3. the endpoint includes the **sensor mounting offset**, $x+x_s\cos\theta-y_s\sin\theta+z\cos(\theta+\theta_s)$.
+  Also note that it is smooth in pose, which is why it beats the beam model for MCL (p. 216).
+- [A6] Add **augmented MCL** for kidnapping, not just "recovery from a global start": track $w_{avg}=\frac1M\sum w$ with $w_{slow},w_{fast}$ ($0\le\alpha_{slow}\ll\alpha_{fast}$) and inject random particles with probability $\max(0,1-w_{fast}/w_{slow})$ (Table 8.3). The draft forgets to reset $w_{avg}=0$ each call; mention it.
+- [A6] Add the failure modes from §8.3.3–8.3.4: particle deprivation with small M, and "a too-accurate sensor breaks MCL". The fixes are to inflate $\sigma_{hit}$ or use mixture MCL with about 5% of particles drawn from $p(z\mid x)$.
+- [A6] Optional upgrade: the measurement-rejection filter for people/dynamic obstacles (Table 8.4; the draft's line 4 should accumulate $z_{short}p_{short}$, not $z_{hit}p_{hit}$), and the gradient of the likelihood field with respect to pose (Table 14.2) for scan-matching refinement.
+
+**Other errata in this draft worth knowing (for anyone using this PDF):**
+- Table 8.1 line 4 is missing the factor $\bar p_{k,t}$.
+- Table 9.2 line 8 should read $|r-z^k_t|<\alpha/2$.
+- EKF SLAM Table 10.1 and Eqs 10.13/10.22: $F_x$ needs $3N$ zero columns, and $F_{x,j}$ needs zero blocks of $3j-3$ and $3N-3j$. The $H$ row-2/row-3 scaling also needs fixing.
+- EIF/GraphSLAM: the information-vector updates need $-G\mu$ and $+H\mu$ (Eqs 11.18, 11.20, and SEIF 12.19). The conditional-Gaussian lemma needs $\xi_x-\Omega_{xy}y$ (Eq 11.24), so $\mu_j=\Omega_{jj}^{-1}(\xi_j-\Omega_{j\tau}\mu_\tau)$ (Eq 11.43). Eq 11.54 should use $\Omega_\Delta$ (not its inverse) in the exponent. Table 11.9 line 17 should use ">".
+- Ch 15 drops γ from the value-iteration equations.
+- Ch 13 contains unfinished author notes.
+
+## Best-reference map
+- [A5] EKF localization with landmarks: draft §7.5, Table 7.2 (PDF 181; use the corrected Jacobians above), derivation PDF 182–186. ML data association: Table 7.3 (PDF 187), derivation PDF 188–191. MHT: §7.7 (PDF 191–193). When Gaussians fail: §7.8 (PDF 193–196).
+- [A5] Information filter in practice (good for understanding $\Omega=\Sigma^{-1}$, Schur complements, additivity): marginal/conditional lemmas, Tables 11.6–11.7 (PDF 294–295); SEIF motion update with the inversion lemma, Eqs 12.8–12.15 (PDF 325–328).
+- [A6] **Assignment-5 core:** likelihood-field model, draft §6.4, Table 6.3 (PDF 151–155); MCL Table 8.2 and properties (PDF 212–216); augmented/random-particle MCL Table 8.3 (PDF 216–221); mixture MCL §8.3.4 (PDF 221–223); grid localization Table 8.1 and resolution effects (PDF 200–211); comparison Table 8.5 (PDF 229).
+- [A6] Building the map MCL runs on: occupancy grid mapping, Tables 9.1–9.2 (PDF 237–242).
+- [A6, C6] Scan matching / pose refinement with the likelihood field: §14.3, Table 14.2 (PDF 410–416); loop closure with an MCL posterior, Table 14.5 (PDF 419–424).
+- [A5/A6 extension, F4, F6] SLAM: EKF SLAM Tables 10.1–10.2 (PDF 261, 269); GraphSLAM-style least squares, Tables 11.1–11.5 (PDF 283–288); SEIF, Tables 12.1–12.6 (PDF 321–350).
+- [F8] Forward–backward smoothing and EM: §13.4.4, Eqs 13.45–13.71 (PDF 383–388).
+- [A3] Value-iteration navigation functions: §15.3, Table 15.1, Fig 15.2 (PDF 443–448). Coastal navigation (planning under localization uncertainty): §16.5 (PDF 480–486).

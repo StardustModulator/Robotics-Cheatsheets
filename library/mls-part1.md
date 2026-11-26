@@ -308,3 +308,92 @@ Summary (p. 143–144) is a perfect one-page R3/R5/R6 crib (PoE, workspaces, SP1
 7. Ex 3.14 says "the corresponding eigenvector"; it means the singular vector (right singular vector for joint direction, left for twist direction).
 8. Exercises 15–17 write revolute twists as $(q_i\times\omega_i,\omega_i)$ — identical to $(-\omega_i\times q_i,\omega_i)$.
 
+---
+
+## Chapter 4 — Robot Dynamics and Control (PDF pp. 173–228, book pp. 155–210) — Lessons: R7, R8 (also F7 for Lyapunov/ODEs)
+**Big idea:** Write kinetic energy link by link using the *body Jacobian of each link's centre-of-mass frame*: $T=\tfrac12\dot\theta^TM(\theta)\dot\theta$ with $M=\sum_iJ_i^T\mathcal M_iJ_i$. Lagrange's equations then give $M\ddot\theta+C\dot\theta+N=\tau$, where $C$ is built from Christoffel symbols so that $\dot M-2C$ is skew — the "passivity" property that makes energy-based Lyapunov proofs work. Control is then a story of two Lyapunov tricks: cancel the nonlinearities exactly (computed torque ⇒ linear error dynamics), or keep the physical structure and add a skew cross-term $\epsilon e^TM\dot e$ to the energy to prove exponential tracking for augmented PD.
+
+### §4.1–4.2 Lagrange's equations (PDF 173–186, book 155–168) — R7
+**Key definitions:**
+- Particles with **holonomic constraints** $g_j(r)=0$ (4.2); constraint forces $\sum_j\Gamma_j\lambda_j$ along constraint gradients (4.3), $\lambda_j$ = **Lagrange multipliers**. Generalized coordinates $q\in\mathbb R^m$, $m=3n-k$ (4.4); for robots, joint angles; generalized forces = joint torques.
+- **Lagrangian** $L(q,\dot q)=T(q,\dot q)-V(q)$.
+- Rigid body: mass $m=\int\rho\,dV$, centre of mass $\bar r=\frac1m\int\rho r\,dV$; **inertia tensor** (body frame at CoM) $\mathcal I=-\int\rho\,\hat r^2dV$, $I_{xx}=\int\rho(y^2+z^2)$, $I_{xy}=-\int\rho\,xy$.
+- **Kinetic energy (4.8)–(4.9):** with the body frame at the CoM the cross term vanishes: $T=\tfrac12m\|\dot p\|^2+\tfrac12\omega^{bT}\mathcal I\omega^b=\tfrac12(V^b)^T\mathcal M V^b$, **generalized inertia matrix $\mathcal M=\begin{bmatrix}mI&0\\0&\mathcal I\end{bmatrix}$** (symmetric PD; block-diagonal only at the CoM — Ex 3: $\mathcal M_c=\mathrm{Ad}^T_{g_{bc}}\mathcal M_b\mathrm{Ad}_{g_{bc}}$).
+
+**Key results & equations:**
+- **Theorem 4.1 (Lagrange's equations) (4.5):** $\frac{d}{dt}\frac{\partial L}{\partial\dot q_i}-\frac{\partial L}{\partial q_i}=\Upsilon_i$ — "d/dt(momentum) = applied force" in generalized coordinates.
+- **Ex 4.1 spherical pendulum (4.6)–(4.7):** $r=(l s_\theta c_\phi,\ l s_\theta s_\phi,\ -l c_\theta)$, $T=\tfrac12ml^2(\dot\theta^2+\sin^2\theta\,\dot\phi^2)$, $V=-mgl\cos\theta$; $M=\mathrm{diag}(ml^2,\ ml^2\sin^2\theta)$, Coriolis terms $(-ml^2s_\theta c_\theta\dot\phi^2,\ 2ml^2s_\theta c_\theta\dot\theta\dot\phi)$, gravity $(mgl\sin\theta,0)$.
+- **Ex 4.2 homogeneous bar** $l\times w\times h$: $\mathcal I=\frac{m}{12}\mathrm{diag}(w^2+h^2,\ l^2+h^2,\ l^2+w^2)$.
+- **§2.3 Two-link planar arm (4.10)–(4.11):** with $\alpha=I_{z1}+I_{z2}+m_1r_1^2+m_2(l_1^2+r_2^2)$, $\beta=m_2l_1r_2$, $\delta=I_{z2}+m_2r_2^2$:
+  $M=\begin{bmatrix}\alpha+2\beta c_2&\delta+\beta c_2\\\delta+\beta c_2&\delta\end{bmatrix}$, $C=\begin{bmatrix}-\beta s_2\dot\theta_2&-\beta s_2(\dot\theta_1+\dot\theta_2)\\\beta s_2\dot\theta_1&0\end{bmatrix}$ (no gravity — arm in the horizontal plane). **The** canonical R7 example; verify Lemma 4.2 on it (Ex 7).
+- **§2.4 Newton–Euler:** $f=m\ddot p$ (4.12); Euler in spatial frame $\mathcal I'\dot\omega^s+\omega^s\times\mathcal I'\omega^s=\tau$, $\mathcal I'=R\mathcal IR^T$ (4.13); in body coordinates $m\dot v^b+\omega^b\times mv^b=f^b$ (4.14), $\mathcal I\dot\omega^b+\omega^b\times\mathcal I\omega^b=\tau^b$ (4.15); **(4.16)** $\begin{bmatrix}mI&0\\0&\mathcal I\end{bmatrix}\begin{bmatrix}\dot v^b\\\dot\omega^b\end{bmatrix}+\begin{bmatrix}\omega^b\times mv^b\\\omega^b\times\mathcal I\omega^b\end{bmatrix}=F^b$ — global (no Euler-angle chart). Note $(f,\tau)$ at the CoM in inertial coordinates is *not* a wrench in the Ch. 2 sense, and $(\dot p,\omega^s)$ is not $V^s$ or $V^b$.
+
+### §4.3 Dynamics of open-chain manipulators (PDF 186–197, book 168–179) — R7
+- Link CoM frames $L_i$: $g_{sl_i}(\theta)=e^{\hat\xi_1\theta_1}\cdots e^{\hat\xi_i\theta_i}g_{sl_i}(0)$; **link body Jacobian** $J_i=J^b_{sl_i}=[\xi_1^\dagger\cdots\xi_i^\dagger\ 0\cdots0]$, $\xi_j^\dagger=\mathrm{Ad}^{-1}_{(e^{\hat\xi_j\theta_j}\cdots e^{\hat\xi_i\theta_i}g_{sl_i}(0))}\xi_j$.
+- **(4.17)–(4.19):** $T_i=\tfrac12\dot\theta^TJ_i^T\mathcal M_iJ_i\dot\theta$, **$M(\theta)=\sum_{i=1}^nJ_i^T(\theta)\mathcal M_iJ_i(\theta)$**; $V=\sum m_igh_i(\theta)$; $L=\tfrac12\dot\theta^TM\dot\theta-V$.
+- **(4.21)–(4.22):** $\sum_jM_{ij}\ddot\theta_j+\sum_{j,k}\Gamma_{ijk}\dot\theta_j\dot\theta_k+\partial V/\partial\theta_i=\Upsilon_i$, **Christoffel symbols $\Gamma_{ijk}=\tfrac12\big(\frac{\partial M_{ij}}{\partial\theta_k}+\frac{\partial M_{ik}}{\partial\theta_j}-\frac{\partial M_{kj}}{\partial\theta_i}\big)$**. $\dot\theta_i\dot\theta_j$ ($i\ne j$) = Coriolis, $\dot\theta_i^2$ = centrifugal.
+- **Coriolis matrix (4.23):** $C_{ij}=\sum_k\Gamma_{ijk}\dot\theta_k$. $N$ collects gravity, friction ($-N_i=-\partial V/\partial\theta_i-\beta\dot\theta_i$) and end-effector forces reflected via $J^T$.
+- **(4.24):** $\boxed{M(\theta)\ddot\theta+C(\theta,\dot\theta)\dot\theta+N(\theta,\dot\theta)=\tau}$.
+- **Lemma 4.2:** (1) $M$ symmetric PD; (2) **$\dot M-2C$ skew-symmetric** — *only for the Christoffel choice of C*; "passivity property" (energy conservation $\dot H=\dot\theta^T\tau$, Ex 8).
+- **Ex 4.3 three-link (elbow without wrist) (p. 172–175):** uses elbow twists from Ch. 3, CoM frames $g_{sl_1}(0)=(I,(0,0,r_0))$, $g_{sl_2}(0)=(I,(0,r_1,l_0))$, $g_{sl_3}(0)=(I,(0,l_1+r_2,l_0))$; link Jacobians $J_1,J_2,J_3$; $M_{11}=I_{y2}s_2^2+I_{y3}s_{23}^2+I_{z1}+I_{z2}c_2^2+I_{z3}c_{23}^2+m_2r_1^2c_2^2+m_3(l_1c_2+r_2c_{23})^2$, $M_{12}=M_{13}=0$, $M_{22}=I_{x2}+I_{x3}+m_3l_1^2+m_2r_1^2+m_3r_2^2+2m_3l_1r_2c_3$, $M_{23}=I_{x3}+m_3r_2^2+m_3l_1r_2c_3$, $M_{33}=I_{x3}+m_3r_2^2$; Christoffel list; gravity (4.25). **Best worked R7 example in 3D — redo it symbolically (sympy/MATLAB).**
+- **§3.3 PoE form (Brockett–Stokes–Park):** Lie bracket $[\xi_1,\xi_2]=(\hat\xi_1\hat\xi_2-\hat\xi_2\hat\xi_1)^\vee$ (4.26), generalizes the cross product ($[\cdot,\cdot]$ antisymmetric + Jacobi). $A_{ij}=\mathrm{Ad}^{-1}_{(e^{\hat\xi_{j+1}\theta_{j+1}}\cdots e^{\hat\xi_i\theta_i})}$ for $i>j$, $I$ for $i=j$, $0$ for $i<j$ (4.27); reflected link inertia $\mathcal M_i'=\mathrm{Ad}^T_{g^{-1}_{sl_i}(0)}\mathcal M_i\mathrm{Ad}_{g^{-1}_{sl_i}(0)}$ (4.28).
+  **Prop 4.3 (4.29)–(4.30):** $M_{ij}=\sum_{l=\max(i,j)}^n\xi_i^TA_{li}^T\mathcal M_l'A_{lj}\xi_j$; $\frac{\partial M_{ij}}{\partial\theta_k}=\sum_{l=\max(i,j)}^n\big([A_{ki}\xi_i,\xi_k]^TA_{lk}^T\mathcal M_l'A_{lj}\xi_j+\xi_i^TA_{li}^T\mathcal M_l'A_{lk}[A_{kj}\xi_j,\xi_k]\big)$; key lemma $\partial(A_{lj}\xi_j)/\partial\theta_k=A_{lk}[A_{kj}\xi_j,\xi_k]$ for $l\ge k\ge j$. Everything comes from $\xi_i$, $g_{sl_i}(0)$, $\mathcal M_i$ — closed-form, implementation-friendly.
+- **Ex 4.4 SCARA dynamics:** $M=\begin{bmatrix}\alpha+\beta+2\gamma c_2&\beta+\gamma c_2&\delta&0\\\beta+\gamma c_2&\beta&\delta&0\\\delta&\delta&\delta&0\\0&0&0&m_4\end{bmatrix}$ ($\alpha,\beta,\gamma,\delta$ on p. 178), $C$ only in the 2×2 block, $N=(0,0,0,m_4g)$.
+
+### §4.4 Lyapunov stability theory (PDF 197–207, book 179–189) — R8, F7
+- System $\dot x=f(x,t)$ (4.31), equilibrium $x^*=0$.
+- **Def 4.1 stable (i.s.L.):** ∀ε ∃δ(t₀,ε): $\|x(t_0)\|<\delta\Rightarrow\|x(t)\|<\epsilon$ ∀t (4.32); *uniform* if δ independent of t₀. **Def 4.2 asymptotic** = stable + locally attractive (4.33). **Def 4.3 exponential:** $\|x(t)\|\le me^{-\alpha(t-t_0)}\|x(t_0)\|$ (4.34), α = rate of convergence. Global versions; for time-invariant systems uniformity is automatic.
+- **Defs 4.4–4.6:** lpdf ($V(0,t)=0$, $V\ge\alpha(\|x\|)$ locally), pdf (plus $\alpha\to\infty$, radially unbounded), decrescent ($V\le\beta(\|x\|)$).
+- **Theorem 4.4 (Table 4.1):** lpdf & $-\dot V\ge0$ ⇒ stable; + decrescent ⇒ uniformly stable; lpdf, decrescent & $-\dot V$ lpdf ⇒ uniformly asymptotically stable; pdf, decrescent & $-\dot V$ pdf ⇒ globally UAS. Converse theorems exist but aren't constructive.
+- **Theorem 4.5 (exponential):** iff ∃V with $\alpha_1\|x\|^2\le V\le\alpha_2\|x\|^2$, $\dot V\le-\alpha_3\|x\|^2$, $\|\partial V/\partial x\|\le\alpha_4\|x\|$; then $m\le(\alpha_2/\alpha_1)^{1/2}$, $\alpha\ge\alpha_3/(2\alpha_2)$.
+- **Theorem 4.6 (indirect method):** uniform linearization $\dot z=A(t)z$, $A=\partial f/\partial x|_0$ (4.38)–(4.40); UAS of linearization ⇒ local UAS. Time-invariant: eigenvalues of A in open LHP ⇒ locally (exponentially) stable.
+- **Ex 4.5 damped oscillator** $M\ddot q+B\dot q+Kq=0$: energy $V=\tfrac12M\dot q^2+\tfrac12Kq^2$ gives only $\dot V=-B\dot q^2$ (semi-definite); **skewed** $V=\tfrac12\dot qM\dot q+\tfrac12qKq+\epsilon\dot qMq$ gives negative-definite $\dot V$ for small ε ⇒ exponential. **This trick is reused in Prop 4.10.**
+- Ex 4.6/4.7 nonlinear spring–damper with passive $f,g$: $V=x_2^2/2+\int_0^{x_1}g$; $\dot V=-x_2f(x_2)$.
+- **Theorem 4.7 (LaSalle, autonomous only):** on compact $\Omega_c=\{V\le c\}$ with $\dot V\le0$, trajectories approach the largest invariant set in $S=\{\dot V=0\}$; if that is $\{0\}$ ⇒ asymptotically stable. Defs 4.7 (ω-limit set), 4.8 (invariant set).
+
+### §4.5 Position control & trajectory tracking (PDF 207–218, book 189–200) — R8
+- Open-loop $\tau=M(\theta_d)\ddot\theta_d+C(\theta_d,\dot\theta_d)\dot\theta_d+N(\theta_d,\dot\theta_d)$ works only with perfect initial conditions — no robustness.
+- **Computed torque (4.49):** $\boxed{\tau=M(\theta)(\ddot\theta_d-K_v\dot e-K_pe)+C(\theta,\dot\theta)\dot\theta+N(\theta,\dot\theta)},\ e=\theta-\theta_d$ ⇒ **$\ddot e+K_v\dot e+K_pe=0$ (4.50)**. Split $\tau_{ff}=M\ddot\theta_d+C\dot\theta+N$, $\tau_{fb}=M(-K_v\dot e-K_pe)$. **Prop 4.8:** $K_p,K_v$ symmetric PD ⇒ exponential tracking (eigenvalue argument: $\lambda^2+(v_1^*K_vv_1)\lambda+v_1^*K_pv_1=0$). Instance of *feedback linearization*; diagonal gains ⇒ decoupled joint responses.
+- **PD (4.51):** $\tau=-K_v\dot e-K_pe$. **Prop 4.9:** setpoint ($\dot\theta_d\equiv0$) ⇒ globally asymptotically stable. Proof: $V=\tfrac12\dot\theta^TM\dot\theta+\tfrac12\theta^TK_p\theta$, $\dot V=-\dot\theta^TK_v\dot\theta+\tfrac12\dot\theta^T(\dot M-2C)\dot\theta=-\dot\theta^TK_v\dot\theta$ (skew-symmetry!), then LaSalle: $\dot\theta\equiv0$ ⇒ $K_p\theta=0$. (Closed loop (4.52) has no N term — the proof assumes no gravity, or that $N$ is compensated; see pitfalls.)
+- **Augmented PD (4.53):** $\boxed{\tau=M(\theta)\ddot\theta_d+C(\theta,\dot\theta)\dot\theta_d+N(\theta,\dot\theta)-K_v\dot e-K_pe}$ (note $C\dot\theta_d$, not $C\dot\theta$) ⇒ closed loop $M\ddot e+C\dot e+K_v\dot e+K_pe=0$ (4.54). **Prop 4.10:** exponential tracking for $K_v,K_p>0$, via skewed $V=\tfrac12\dot e^TM\dot e+\tfrac12e^TK_pe+\epsilon e^TM\dot e$ (LaSalle unavailable: time-varying). Original idea: Koditschek; skew-term trick: Wen–Bayard. Gain selection via linearization $M(\theta_0)\ddot e+K_v\dot e+K_pe=0$ mid-workspace.
+- **Workspace control (§5.4):** $x=f(\theta)$ local coordinates (n = p), $\dot x=J\dot\theta$ ($J=\partial f/\partial\theta$ — *analytic*, not manipulator Jacobian); **(4.55)** $\tilde M\ddot x+\tilde C\dot x+\tilde N=F$ with $\tilde M=J^{-T}MJ^{-1}$, $\tilde C=J^{-T}(CJ^{-1}+M\frac{d}{dt}J^{-1})$, $\tilde N=J^{-T}N$, $F=J^{-T}\tau$. **Lemma 4.11:** same two structural properties. Workspace computed torque $F=\tilde M(\ddot x_d-K_v\dot e-K_pe)+\tilde C\dot x+\tilde N$, $\tau=J^TF$ — no IK needed, gains are task-space; $\tilde M\to\infty$ near (parameterization) singularities. **Ex 4.8 (Figs. 4.10–4.11):** joint-space CT ⇒ straight lines in θ, curved in xy; workspace CT ⇒ straight line (incl. overshoot) in xy.
+
+### §4.6 Control of constrained manipulators (PDF 218–224, book 200–206) — R8 (hybrid force/position, preview of Ch. 6)
+- Constraint surface $h_j(\theta)=0$ (4.56), parameterized by $\theta=f(\phi)$ (4.57); normal torques $\tau_N=\sum\lambda_j\nabla h_j$ (4.58) do no work. Projected dynamics (4.59)–(4.62): $\tilde M=J^TMJ$, $\tilde C=J^T(CJ+M\dot J)$, $\tilde N=J^TN$, $F=J^T\tau$ with $J=\partial f/\partial\phi$.
+- **Hybrid control law (4.63):** $\tau=\tau_\phi+\sum_i\lambda_i(t)\nabla h_i$, $\tau_\phi=M\frac{\partial f}{\partial\phi}(\ddot\phi_d-K_v\dot e_\phi-K_pe_\phi)+(C\frac{\partial f}{\partial\phi}+M\frac{d}{dt}\frac{\partial f}{\partial\phi})\dot\phi+N$. Force part is open loop (no force feedback).
+- **Ex §6.3 two-link arm in a slot** (line through $(l,0)$ at angle α): $h(\theta)=-l_1\sin(\theta_1-\alpha)-l_2\sin(\theta_1+\theta_2-\alpha)-l\sin\alpha$, $\nabla h$, elbow-down $f(s)$ — messy in joint space; better in workspace coordinates (Ex 12).
+
+### §4.7–4.9 Summary / bibliography / exercises (PDF 224–228, book 206–210)
+**Exercises worth doing:**
+- **Ex 1** (pendulum on a sliding pivot; double pendulum) — R7 Lagrange drill.
+- Ex 2 (inertia of ellipsoid, cylinder), **Ex 3** (inertia under change of frame $\mathcal M_c=\mathrm{Ad}^T_{g_{bc}}\mathcal M_b\mathrm{Ad}_{g_{bc}}$; parallel-axis theorem in disguise) — R7.
+- Ex 4–6 (spatial Euler/Newton–Euler; $\mathcal M\dot V^b+C V^b=F^b$ with skew property).
+- **Ex 7** (verify $M>0$, $\dot M-2C$ skew for (4.11)) and **Ex 8** (passivity ⇒ $\dot H=\dot\theta\cdot\tau$) — R7 must-do.
+- **Ex 9** (workspace PD exponential tracking), **Ex 10** (Slotine–Li-type law $\tau=M(\ddot\theta_d+\lambda\dot e)+C(\dot\theta_d+\lambda e)+N+K_v\dot e+K_pe$ — note the book's sign convention here, see pitfalls), **Ex 11** (skewed-Lyapunov positivity lemma) — R8.
+- Ex 12 (hybrid control in workspace coordinates for the slot) — R8 optional.
+
+**Conventions / pitfalls (Ch. 4):**
+1. $e=\theta-\theta_d$ (actual minus desired) ⇒ feedback terms are $-K_v\dot e-K_pe$. **The chapter Summary (p. 207, PDF 225) prints both laws with $+K_v\dot e+K_pe$** — a sign typo relative to (4.49)/(4.53) (with $e=\theta-\theta_d$ the "+" versions are unstable). Ex 10 also prints "$+K_v\dot e+K_pe$" (same convention issue, presumably intended with $e=\theta_d-\theta$ or a sign slip).
+2. **Prop 4.9 (pure PD) assumes no gravity:** the closed loop (4.52) drops $N$. With gravity, pure PD has steady-state error; use PD + gravity compensation $\tau=-K_v\dot\theta-K_p(\theta-\theta_d)+N(\theta)$ (or an integral term).
+3. $\dot M-2C$ skew holds only for the Christoffel-symbol C (4.23); other factorizations with the same $C\dot\theta$ need not satisfy it.
+4. Augmented PD uses $C(\theta,\dot\theta)\dot\theta_d$ — using $C\dot\theta$ would break the error equation $M\ddot e+C\dot e+\dots$.
+5. Proof of Prop 4.8 (p. 192): with $\alpha=v_1^*K_pv_1$, $\beta=v_1^*K_vv_1$ the quadratic is actually $\lambda^2+\beta\lambda+\alpha=0$ (book writes $\lambda^2+\alpha\lambda+\beta$); conclusion unchanged.
+6. Eq. (4.25), second row: last term should be $-m_3g\,r_2\cos(\theta_2+\theta_3)$ (the $g$ is missing; also unbalanced parentheses in print). Workspace computed-torque law (p. 198) prints $C(\theta,\dot\theta)\dot x+N$ — should be $\tilde C\dot x+\tilde N$.
+7. §6.3 reuses the 2-link $M,C$ with $\beta=m_2l_1l_2$ and off-diagonals $\delta+\tfrac12\beta c_2$ — consistent with §2.3 only if $r_2=l_2/2$ (then $m_2l_1r_2=\tfrac12m_2l_1l_2$).
+8. Workspace control uses the **analytic Jacobian** of a local chart, so it inherits chart singularities (Euler angles) — unlike the geometric twist-based Jacobian of Ch. 3.
+
+---
+
+## Chapter 5 (first part) — Multifingered Hand Kinematics: grasp statics (PDF pp. 229–240, book pp. 211–222) — Lessons: (C8 surgical/grasping context; R5 statics generalisation)
+**Big idea:** A hand is a set of small robots attached to an arm; for analysis, idealize each finger as a point contact with a *wrench basis* $B_{c_i}$ and a *friction cone* $FC_{c_i}$. Moving every contact wrench to the object frame with $\mathrm{Ad}^T_{g^{-1}_{oc_i}}$ and stacking gives the **grasp map** $G$; a grasp is the pair $(G, FC)$. (Rest of Ch. 5 — force closure, grasp planning, rolling — lies beyond PDF 240.)
+
+**Key definitions & results:**
+- Motivation (§5.1): fine motion with a big arm is like writing with your whole arm; grippers fit few shapes; hands add complexity. Desired grasp properties: **force closure** (resist arbitrary external wrenches) and **manipulability** (accommodate arbitrary object motions). Assumptions: rigid object and links, accurate models.
+- Contact frame $C_i$: z-axis = **inward** surface normal; $g_{oc_i}=(p_{oc_i},R_{oc_i})$; object pose $x_o=g_{po}$ relative to palm.
+- Contact models (Table 5.2): **frictionless point** $F_{c_i}=(0,0,1,0,0,0)f_{c_i}$, $f\ge0$ (5.1); **point contact with friction** $B=[e_1\ e_2\ e_3]$, $FC=\{\sqrt{f_1^2+f_2^2}\le\mu f_3,\ f_3\ge0\}$ (5.3); **soft finger** adds $e_6$ (torsion) with $|f_4|\le\gamma f_3$ (5.4). Coulomb: slip when $|f^t|>\mu f^n$; cone half-angle $\alpha=\tan^{-1}\mu$ (5.2); Table 5.1 friction coefficients (steel/steel 0.58, rubber 1–4, …).
+- General contact: $F_{c_i}=B_{c_i}f_{c_i}$, $f_{c_i}\in FC_{c_i}$ (5.5); $FC$ closed, non-empty interior, convex cone.
+- **Contact map** $G_i=\mathrm{Ad}^T_{g^{-1}_{oc_i}}B_{c_i}$, with $\mathrm{Ad}^T_{g^{-1}_{oc_i}}=\begin{bmatrix}R_{oc_i}&0\\\hat p_{oc_i}R_{oc_i}&R_{oc_i}\end{bmatrix}$; **grasp map (5.6)** $G=[G_1\cdots G_k]$, $F_o=Gf_c$, $f_c\in FC=FC_{c_1}\times\dots\times FC_{c_k}$ (5.7). **Def 5.1:** a grasp = $(G,FC)$.
+- **Ex 5.1** frictionless: columns $(n_{c_i},\ p_{c_i}\times n_{c_i})$. **Ex 5.2** box with two soft fingers: explicit 6×8 G. **Ex 5.3** planar grasp of a rectangle in SE(2): wrench transform $\begin{bmatrix}R&0\\(-p_y,\ p_x)R&1\end{bmatrix}$, $G=\begin{bmatrix}0&1&0&-1\\-1&0&1&0\\r&0&r&0\end{bmatrix}$.
+
+**Pitfall:** the grasp map is just the Ch. 2 wrench transformation $F_o=\mathrm{Ad}^T_{g_{co}}F_c$ applied contact by contact (Ex 2.7) — same transpose-adjoint rule used for $\tau=J^TF$.
+
