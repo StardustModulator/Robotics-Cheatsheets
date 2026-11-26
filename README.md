@@ -18,6 +18,7 @@
 
 | # | Course | Folder | Main texts / sources |
 |---|--------|--------|----------------------|
+| 0 | Foundations: Python, NumPy, linear algebra, calculus, probability, PyTorch (from zero) | `courses/00-foundations/` | Phase 0, Days 1–5 |
 | 1 | Robot Devices, Kinematics, Dynamics & Control (RDKDC, EN.530.646) | `courses/01-rdkdc/` | Murray-Li-Sastry *A Mathematical Introduction to Robotic Manipulation*; Lynch & Park *Modern Robotics*; separate DH-parameter material |
 | 2 | Computer Vision for Robotics | `courses/02-computer-vision/` | Geometric vision (multi-view geometry) |
 | 3 | Machine Learning: Deep Learning (EN.601.482/682) | `courses/03-ml-deep-learning/` | Hands-on, implement models from scratch; rigorous |
