@@ -11,6 +11,31 @@
 
 ---
 
+## 0. Updates from the student's uploaded slides and textbooks (supersede anything below)
+
+All 10 uploaded ASBR decks, the course page, Choset (primary text), Thrun's *Probabilistic Robotics* (an early 1999–2000 draft) and the student's handwritten notes were read page by page. Notes: `library/asbr-slides-part1.md`, `library/asbr-slides-part2.md`, `library/choset-part*.md`, `library/probrob-part*.md`.
+
+| Week | Topic | Uploaded deck | Readings |
+|---|---|---|---|
+| 1 | Introduction, grading, tools | `lecture01.pdf` (24 pp.) | — |
+| 2 | Rigid motion, FK/IK, **spatial** Jacobian, resolved rate | `lecture02.pdf` (40 pp.) | Choset ch. 3, MLS ch. 2, Springer Handbook ch. 1 |
+| 3 | Hand-eye calibration AX=XB | `lecture03.pdf` (15 pp.) | Park & Martin 1994 |
+| 4 | Potential fields (the "Potential Functions" deck `week03.pdf` covers C-space only) | `week03.pdf` (8 pp.) | Choset ch. 4, Mezouar & Chaumette 2002 |
+| 5 | Visibility graph, GVD, cell decomposition, Minkowski sums | **none uploaded** | Choset ch. 5–6, App. F.3 (Minkowski), App. H (A*), de Berg |
+| 6 | PRM, EST, RRT, narrow passages, completeness bound, expansiveness | `week06.pdf` (54 pp.; `week05.pdf` is a 37-page subset) | Choset ch. 7, LaValle ch. 5 |
+| 7 | Review + midterm (Oct 20) | — | — |
+| 8–9 | KF, EKF, range–bearing EKF localization, data association, **EKF-SLAM (core, not optional)**, MonoSLAM | `week08.pdf` (49 pp.) | Choset ch. 8, Davison MonoSLAM 2007, Harris 1993 |
+| 10–12 | Bayes filter, discrete Bayes, beam & likelihood-field models, particle filter / MCL, resampling | `week09.pdf` (55 pp.) | Choset ch. 9, Thrun et al. 2000, Doucet et al. 2000 |
+| 13 | Review (final Dec 22 = **estimation only**) | `review.pdf` (24 pp.) | — |
+
+- **Grading detail (lecture01 p. 23):** 3 UR5 assignments 27% + 2 Jackal/Husky assignments 20% + demos 3%; midterm 25%; final 25%.
+- **Conventions:** transforms ${}^AE_B$; twists $[v;\omega]$ (MLS order); spatial Jacobian column $i=(\partial_{q_i}E\,E^{-1})^\vee$; KF prior marked with a prime, $Q$ = process noise, $R$ = measurement noise (Thrun swaps these letters; Choset uses $V$/$W$ and calls the gain $R$).
+- **Not in this course's slides:** RRT* (MR §10.5 only), UKF, KLD sampling, FastSLAM (none of these are in the student's Thrun draft either; use the 2005 edition or Stachniss's lectures).
+- **Thrun draft warning:** its EKF localization/SLAM tables have sign errors in $G_t$ and $H_t$; EKF localization is §7.5 there. Use the corrected forms in `library/probrob-part2.md`.
+- **Assignment 3 (2026):** EST with node weight $1/(1+\deg q)$ per the handout; Choset's EST uses inverse local density.
+- **Student's handwritten notes:** cover weeks 2–9 up to the likelihood field. Strengths, errors and gaps are listed in `library/asbr-slides-part2.md` and summarized in the Notion ASBR page.
+
+
 ## 1. Course identity
 
 | Field | Value | Source |
@@ -107,9 +132,9 @@ Planning and Control* / Springer Handbook.
 | Rigid transforms, SO(3)/SE(3), twists, Jacobian | App. (+Ch. 3.5 C-space of rigid bodies) | — | Ch. 3.2–3.3, 4.2 | **Ch. 3, 4, 5** | **MLS Ch. 2–3**; Sic Ch. 2–3 |
 | Quaternions | App. | — | Ch. 4.2.2 | Ch. 3 (brief) | Solà, *Quaternion kinematics for the error-state KF* (arXiv 1711.02508) |
 | Hand-eye AX=XB | — | — | — | — | Park & Martin 1994; Tsai & Lenz 1989; Horaud & Dornaika 1995; Strobl & Hirzinger 2006 |
-| Configuration space, Minkowski sums | **Ch. 3** | — | **Ch. 4**, 4.3 | **Ch. 10.1–10.2** | de Berg Ch. 13 |
+| Configuration space (Ch. 3); Minkowski sums (**App. F.3**) | **Ch. 3, App. F.3** | — | **Ch. 4**, 4.3 | **Ch. 10.1–10.2** | de Berg Ch. 13 |
 | Bug algorithms | **Ch. 2** | — | Ch. 12.3 | — | — |
-| Potential functions, navigation functions, wavefront | **Ch. 4** | — | Ch. 8.4 | **Ch. 10.6** | Khatib 1986 |
+| Potential functions, navigation functions, wavefront | **Ch. 4** | — | Ch. 8.4 | **Ch. 10.4 (wavefront), 10.6** | Khatib 1986 |
 | Roadmaps (visibility, GVD), cell decomposition | **Ch. 5, 6** | — | **Ch. 6** | Ch. 10.3–10.4 | de Berg Ch. 6, 15 |
 | Graph search (Dijkstra, A*) | App. H | — | **Ch. 2** | **Ch. 10.2.4** | Russell & Norvig Ch. 3 |
 | Sampling-based (PRM, RRT, EST, RRT*) | **Ch. 7** | — | **Ch. 5** | **Ch. 10.5** | Karaman & Frazzoli 2011 (RRT*) |
@@ -294,7 +319,7 @@ Tick each item only after you can **derive it on paper and code it in under 30 m
 
 | Gap | Why it matters here | Minimal fix |
 |---|---|---|
-| **C++** (you rated yourself weak) | All 5 assignments are C++ (raw arrays `double J[6][6]`, `std::vector`, `<random>`, classes) | 1 evening: C++ refresher (references, const, STL vectors, `std::mt19937`, `std::normal_distribution`). Port one Python mini-project (RRT) to C++. |
+| **C++** (you rated yourself weak) | Assignments mix **MATLAB** (hand-eye, EKF) and **C++/ROS 2** (MoveIt 2 planner plugin; ports) per lecture01 p. 23 (raw arrays `double J[6][6]`, `std::vector`, `<random>`, classes) | 1 evening: C++ refresher (references, const, STL vectors, `std::mt19937`, `std::normal_distribution`). Port one Python mini-project (RRT) to C++. |
 | **ROS 2** (weak) | Nodes, topics, `JointTrajectory`, tf2, launch.py, colcon, Gazebo `ros_gz`, MoveIt 2 plugins | On the Mac use **Docker** (`osrf/ros:jazzy-desktop` or humble) and do the official beginner client-library tutorials. Then build `simonleonard/asbr_description` and launch `ur5e_robotiq.launch.py`. |
 | **MATLAB** | A2 solver is MATLAB | MATLAB Onramp (free); you get a JHU license on enrollment. The Python versions you write port 1:1. |
 | Linear algebra: SVD, matrix square root, log map | Arun/ICP, Park–Martin $(M^TM)^{-1/2}$, Jacobians | Covered in Phase 0. Verify with `scipy.linalg.sqrtm`, `logm`, `svd`. |

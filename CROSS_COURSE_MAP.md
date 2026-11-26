@@ -31,11 +31,18 @@
 - **Quaternions:** (w, x, y, z) vs (x, y, z, w) ordering differs between libraries (Eigen / SciPy / ROS).
 - **Rotation vs frame transform:** "rotate the point" vs "change coordinates of the point" are inverses of each other.
 
+## More convention traps (verified from the student's books)
+- **Kalman letters:** slides & our lessons $Q$ = process, $R$ = measurement; Thrun swaps them; Choset uses $V$/$W$ and calls the **gain** $R$.
+- **Spatial twist linear part ≠ tool velocity:** $v^s=\dot p-\omega\times p$ (MLS Ex. 2.18, MR Eq. 3.73).
+- **DH:** MR Appendix C is modified (Craig) DH; MLS §3.2.3 and the UR5 handout are standard (Spong).
+- **Control error sign:** MR uses $\theta_e=\theta_d-\theta$.
+- Full table: `library/README.md`.
+
 ## Academic-integrity map (affects how we study)
 | Course | GenAI policy found in research |
 |---|---|
 | RDKDC | Fall 2026 handouts ban GenAI tools unless stated |
-| ASBR | AI tools banned; misconduct → F |
+| ASBR | No teamwork; no online tools of any kind (AI or otherwise); any misconduct → F (course page, verified) |
 | CIS I | No AI-generated code (2025 PA3/PA4 handouts); no prior solutions; no redistribution of materials |
 | DL | Not found: check syllabus |
 | Robot Learning | Coding agents allowed as a *method* in A3; general policy: check syllabus |

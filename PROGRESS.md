@@ -37,7 +37,12 @@
 ## Notion course (the student's main study interface)
 - Page **Robotics Professor** (private draft in student's Notion): https://app.notion.com/p/424fe2d3cc0281caa9d9e09c13adddf0
 - Subpages 0–6 (Foundations, RDKDC, CIS I, ASBR, Deep Learning, Computer Vision, Robot Learning). Each lesson = Why · Lecture · key equations · Build · Learn from · Self-test (hidden answers) · Lesson-done checkbox.
-- Lesson codes: F1–F10, R1–R8, C1–C8, A1–A7, D1–D8, V1–V8, H1–H8. Student can ask: "lecture me on R5", "quiz me on C2", "review my code for A5".
+- Lesson codes: F1–F10, R1–R8, C1–C8, **A1–A8** (ASBR re-split to match the real weekly schedule: A1 kinematics/spatial Jacobian, A2 hand-eye, A3 C-space + potentials, A4 graph planning, A5 sampling planners, A6 KF/EKF/EKF-SLAM, A7 Bayes/PF/MCL, A8 tools + exam prep), D1–D8, V1–V8, H1–H8. Student can ask: "lecture me on R5", "quiz me on C2", "review my code for A5".
+
+## Student's prior ASBR work (from handwritten notes, audited)
+- Covered weeks 2–9 up to the likelihood-field model. Solid: transforms/FK, spatial Jacobian, hand-eye rotation, C-space dims, KF gain derivation, unicycle model.
+- Fix: Rp+t is affine; rotation-order consistency; bearing Jacobian uses q (not √q); beam likelihoods multiply; KF is unimodal; likelihood-field normalizer + uniform term.
+- Gaps: hand-eye translation, potential fields, graph planning, Bayes/discrete Bayes, beam model, particle filter & resampling, EKF-SLAM, covariance ellipses.
 
 ## Log
 
@@ -48,4 +53,5 @@
 - Wrote `STUDY_PLAN.md` (by subject; day schedule removed at student's request) and `CROSS_COURSE_MAP.md` (12 shared engines, convention traps, GenAI policies).
 - Decision: curated MIT 18.06/18.02 path instead of full lecture series (see foundations file).
 - Built the Notion "Robotics Professor" course (59 lessons across 7 pages).
+- Read every page of the student's uploads (MLS, MR, Choset, Thrun draft, 10 ASBR decks, course page, handwritten notes) → `library/` (index, notation table, errata in `library/README.md`). Applied corrections to Notion (RDKDC rewritten, ASBR rebuilt around the real schedule, Foundations + CIS touched) and to course READMEs.
 - **Next: Foundations F1 → Mac setup, Python, Git; start 3Blue1Brown linear algebra.**

@@ -7,6 +7,8 @@
 > this research environment, so the catalog, schedule and advising-manual facts below come from search
 > snippets. Public GitHub repos *were* readable, so the lab and project details are first-hand.
 
+> **Upgraded 2026-11-26 from the student's own copies** of MLS and Modern Robotics (every page read; notes in `library/mls-part*.md`, `library/mr-part*.md`; PDF page = book page + 18 for both). Corrections applied: MLS does have DH (§3.2.3); MR Appendix C is modified DH; exponential coordinates are not singularity-free (only quaternions are); PD+gravity is asymptotically (LaSalle), not exponentially, stable; straight-line pen paths need decoupled R/p interpolation (MR Eq. 9.7–9.8). Book errata: `library/README.md`.
+
 ---
 
 ## 1. Course identity
@@ -56,7 +58,7 @@ The schedule assumes about 14 weeks of TTh lectures, weekly homework and one mid
 | 4 | SE(3), homogeneous coordinates, twists, se(3), exponential of a twist, screws, Chasles | 2.3 | 3.3.1, 3.3.3 | HW4 → **Lab 1** (SKEW6, EXPCF, FINV) |
 | 5 | Rigid-body velocity: spatial vs. body velocity, adjoint, velocity of a screw motion | 2.4 | 3.3.2 | HW5 → **Lab 2** (frame composition) |
 | 6 | Wrenches, reciprocal screws; **forward kinematics by product of exponentials**; workspace | 2.5, 3.2 | 3.4, 4.1 | HW5–6 |
-| 7 | **DH parameters** (separate handout, see §4), DH vs. PoE; UR5 FK both ways | (not in MLS) | App. C | HW6 (UR5 FK/Jacobian/singularities) |
+| 7 | **DH parameters** (separate handout, see §4), DH vs. PoE; UR5 FK both ways | MLS §3.2.3 (pp. 93–95) | App. C (**modified** DH) | HW6 (UR5 FK/Jacobian/singularities) |
 | 8 | Inverse kinematics: Paden–Kahan subproblems 1–3, closed-form 6R; UR5's 8 solutions | 3.3 | 6.1 | HW7 (unverified) |
 | 9 | Manipulator Jacobian: spatial and body Jacobians, end-effector forces / statics | 3.4.1–3.4.2 | 5.1–5.2 | **Lab 3** |
 | 10 | Singularities, manipulability; redundant and parallel manipulators | 3.4.3–3.4.4, 3.5 | 5.3–5.4, 7 | **Lab 3** |
@@ -86,12 +88,12 @@ MLS section numbers are from my knowledge of the 1994 edition; check them agains
 | Euler angles, RPY, quaternions | §2.2.3 | Appendix B |
 | Homogeneous transforms, SE(3) | §2.3.1 | §3.3.1 |
 | Twists, exponential coordinates for rigid motion | §2.3.2 | §3.3.2–3.3.3 |
-| Screws, Chasles' theorem | §2.3.3 | §3.3.2 (screw interpretation) |
+| Screws, Chasles' theorem | §2.3.3 | §3.3.3.1 |
 | Spatial/body velocity, adjoint | §2.4 | §3.3.2 |
-| Wrenches, reciprocal screws | §2.5 | §3.4 |
+| Wrenches, reciprocal screws | §2.5 | §3.4 (wrenches only; no reciprocal screws) |
 | Lie-group view (optional) | Appendix A | — |
 | **Forward kinematics, PoE** | §3.2 (3.2.2 PoE, 3.2.3 workspace) | Ch. 4: §4.1.1 space form, §4.1.2 examples (incl. a UR5 example), §4.1.3 body form; §4.2 URDF |
-| **DH parameters** | Not taught. MLS deliberately uses PoE instead (see §4). | **Appendix C** (frame assignment, why 4 parameters, DH FK, examples, PoE↔DH relation) |
+| **DH parameters** | §3.2.3 (book pp. 93–95): standard DH matrix + DH→PoE bridge (Eq. 3.10); otherwise PoE throughout | **Appendix C** uses **modified (Craig) DH**, not the standard (Spong) DH of the UR5 handout; Eq. C.12 index should read Ad_{M1…Mi} |
 | **Inverse kinematics, Paden–Kahan** | §3.3 (3.3.3 subproblems, 3.3.4 solving IK with them) | §6.1 (analytic, PUMA/Stanford-type) |
 | Numerical IK (Newton–Raphson) | Only sketched | §6.2 |
 | Inverse velocity kinematics / resolved rate | §3.4 (end-effector velocity) | §6.3 |
@@ -122,7 +124,7 @@ Confirm your instructor's convention on day 1 and do not mix the two.
 
 ### 4.1 What the course actually uses (evidence)
 
-MLS has no DH treatment. The authors call DH "cumbersome and nonintuitive" and use PoE instead [21][25]. The
+MLS covers DH only briefly (§3.2.3, book pp. 93–95, with the DH→PoE bridge in Eq. 3.10) and otherwise uses PoE. (An earlier version of this file quoted MLS calling DH "cumbersome and nonintuitive"; a full-text search of the book found no such phrase.) The
 DH material in RDKDC comes from a **course handout**:
 
 - **"M.E. 530.646 — UR5 Inverse Kinematics", Ryan Keating (TA), 2014, updated by Noah J. Cowan, 2016.** It assigns DH frames to the UR5 using **standard (distal, Spong-style) DH**, gives the table below, and derives the closed-form IK: θ1, then θ5, θ6, then θ3 (elbow up/down), θ2, θ4, for **8 solutions**. The PDF is in a public student repo [14b] and on SlideShare [15]. The course's `ur5InvKin.m` (author: TA Long Qian) is "adapted from Ryan Keating's 'UR5 Inverse Kinematics' paper". Its `DH.m` builds `Trans_z(d)·Rot_z(θ)·Trans_x(a)·Rot_x(α)`, which is the standard (distal) convention [14].
@@ -448,7 +450,7 @@ Write pytest tests as you go: they become your Lab 1/Lab 3 tests later.
 - **Visualize:** a matplotlib 3-D `plot_frame(g)`. Animate e^{ξ̂θ} for θ ∈ [0, 2π] for a screw with pitch 0.1 and watch the helix.
 
 ### Project 2: UR5 forward kinematics, DH vs. PoE
-- **Watch:** MR Ch. 4 videos and MR Appendix C. **Read:** MLS §3.2, Keating handout p.1–2 (DH table), and a DH explainer (Corke).
+- **Watch:** MR Ch. 4 videos and MR Appendix C (modified DH, so don't copy its tables into standard-DH code). **Read:** MLS §3.2, Keating handout p.1–2 (DH table), and a DH explainer (Corke).
 - **Build:**
   - `fk_dh(q)` from the Keating/UR table (standard DH).
   - `fk_poe(q)` using twists derived at q = 0 (procedure in §4.4).
