@@ -322,3 +322,52 @@ DH: minimal (4/joint), but frames are constrained, conventions vary (z- vs x-axi
 ## Bibliography and Index (PDF pp. 617–642, book pp. 599–624)
 Bibliography of ~190 references (pp. 599–616); Index (pp. 617–624). Skimmed for completeness. References cited in the chapters above that are worth knowing: [74] Khatib unified motion/force (operational-space) control; [99] Luh–Walker–Paul resolved-acceleration control; [107] Mason natural/artificial constraints; [144] Raibert & Craig hybrid control; [56–58] Hogan impedance control; [184] Takegaki & Arimoto PD+gravity; [122] Murray–Li–Sastry (MLS); [177] Spong et al.; [171] Siciliano et al.; [32] Craig; [34] Denavit & Hartenberg (1955) original DH paper; [19] Brockett stabilization theorem; [28] Chow; [41] Dubins; [146] Reeds & Shepp; [5] Balkcom & Mason diff-drive time-optimal; [89] three-finger spatial force closure; [149–151] Rimon & Burdick second-order mobility.
 
+---
+
+## Errata found in this range of the May 2017 preprint (all checked against the rendered page; numerical ones verified in Python)
+| Where (PDF / book p.) | Printed | Correct |
+|---|---|---|
+| Eq (11.18), PDF 438 / 420 | $\log(R^T(d)R_d(t))$ | $\log(R^T(t)R_d(t))$ |
+| Summary bullet, PDF 468 / 450 | $\tau=K_p\theta_e+K_d\dot\theta+\tilde g(\theta)$ | $\tau=K_p\theta_e-K_d\dot\theta+\tilde g(\theta)$ (= $+K_d\dot\theta_e$ for setpoints), as in Eq (11.39) |
+| Eq (B.11), PDF 599 / 581 | $r_{21}-212$ | $r_{21}-r_{12}$ |
+| Eq (B.13), PDF 600 / 582 | $Q$ entry $q_2+ip_3$ | $q_2+iq_3$ |
+| Eqs (B.17)–(B.18), PDF 600 / 582 | $R=(I-[r])(I+[r])^{-1}$, $[r]=(I-R)(I+R)^{-1}$ | inconsistent with (B.16)/(B.21)/(B.22) (gives −θ); use $R=(I+[r])(I-[r])^{-1}$, $[r]=(R-I)(R+I)^{-1}$ |
+| Eqs (B.19)–(B.20), PDF 601 / 583 | alternatives for tr R = −1 | invalid as printed ($I-R$ singular for all $R\in SO(3)$; $-(\text{rotation})\notin SO(3)$) |
+| Text before (B.21), PDF 601 / 583 | "Equation (B.18) can be explicitly computed as" | (B.17) |
+| Eq (C.5), PDF 608 / 590 | $\cos\phi_{i-1},\sin\phi_{i-1}$ | $\cos\phi_i,\sin\phi_i$ |
+| Eq (C.12), PDF 612 / 594 | $(M_1\cdots M_{i-1})[A_i](M_1\cdots M_{i-1})^{-1}$ | $(M_1\cdots M_i)[A_i](M_1\cdots M_i)^{-1}$ |
+| App. D QP solution, PDF 616 / 598 | $x=Gb+(I-GA)Q^{-1}c$, $\lambda=Bb+BAQ^{-1}c$ | $x=Gb-(I-GA)Q^{-1}c$, $\lambda=-(Bb+BAQ^{-1}c)$; also $Q\in\mathbb R^{n\times n}$ |
+
+---
+
+## Corrections & upgrades for the knowledge base
+- **[R4] "Learn from: … MR Appendix C"** → MR App. C uses **modified (Craig/proximal) DH**: $T_{i-1,i}=\mathrm{Rot}_x(\alpha_{i-1})\mathrm{Trans}_x(a_{i-1})\mathrm{Trans}_z(d_i)\mathrm{Rot}_z(\phi_i)$ with $\hat z_i$ on joint axis i (PDF 604–608), whereas the lesson (correctly) teaches standard Spong DH for Keating's handout → add a warning: "MR App. C is the *modified* convention; read it for concepts (C.1 special cases, C.2, C.5–C.6), but do not copy its link matrix or tables into the standard-DH UR5 code." Add the conversion rule (shift the $a,\alpha$ columns down one row) and the UR5 modified-DH table from this file.
+- **[R4] "Craig's modified DH orders the operations differently"** → incomplete: the frames are also *placed differently* ($z_i$ on axis i vs axis i+1) and the $a,\alpha$ parameters carry index i−1 (PDF 604–605) → rephrase: "Modified DH attaches frame i to the proximal end of link i (z_i on joint i), uses $(\alpha_{i-1},a_{i-1},d_i,\theta_i)$ and multiplies x-moves before z-moves."
+- **[R4] Build step "compare DH with your PoE"** → upgrade with exact facts (verified here): MR Example 4.5's UR5 PoE (with UR's exact numbers $W_1=0.10915$, $W_2=0.0823$, $L_1=0.425$, $L_2=0.39225$, $H_1=0.089159$, $H_2=0.09465$) equals $\mathrm{Rot}_z(\pi)\,T^{DH}_{06}(\theta)$ to $6\times10^{-16}$ — same joint angles, same tool frame. Give the conversion formula for standard DH: $\mathcal S_i=[\mathrm{Ad}_{N_1\cdots N_{i-1}}]\hat z$, $M=N_1\cdots N_n$, $N_i=\mathrm{Trans}_z(d_i)\mathrm{Trans}_x(a_i)\mathrm{Rot}_x(\alpha_i)$.
+- **[R4] if MR C.5 is cited for DH→PoE** → its Eq (C.12) has an index error; the correct screw is $\mathcal S_i=[\mathrm{Ad}_{M_1\cdots M_i}]A_i$ (PDF 612). Add a self-test: "Why can't every base frame be a DH frame?" (Fig C.3: no y-translations, PDF 607).
+- **[R4] PoE vs DH trade-off** → add MR C.6's point that DH is **ill-conditioned for nearly parallel axes** (UR5 joints 2–4 are parallel!), which is why calibration uses PoE/other models (PDF 613).
+- **[R8] sign convention** → the lesson uses $e=\theta-\theta_d$ (MLS); MR uses $\theta_e=\theta_d-\theta$ (PDF 422, 432). Both lesson formulas are internally correct; add a one-line note so students don't mix signs when reading MR ch. 11.
+- **[R8] "stabilizes a set-point (proof via a Lyapunov function)"** → precise statement (PDF 450–451): $V=\tfrac12\theta_e^TK_p\theta_e+\tfrac12\dot\theta^TM\dot\theta$ gives only $\dot V=-\dot\theta^TK_d\dot\theta\le0$ (negative *semi*-definite, using skew-symmetry of $\dot M-2C$); convergence needs **Krasovskii–LaSalle** (Ex 11.12). Assumes zero friction and exact gravity model. → fix wording to "Lyapunov + LaSalle".
+- **[R8] computed torque** → add: (i) MR's form includes an optional integral term and evaluates $\tilde M,\tilde h$ at the **actual** state (Eq 11.35/11.37); (ii) the error dynamics are unit-mass, so pick $k_d=2\sqrt{k_p}$ for critical damping, $\omega_n=\sqrt{k_p}$, 2% settling $\approx 4/\sqrt{k_p}$; (iii) PID on a raw joint needs $0<K_i<(b+K_d)K_p/M$ (Eq 11.30 conditions, PDF 443) — an upper bound students often miss; (iv) gravity-only PD leaves steady-state error $K_p\theta_e=mgr\cos\theta$ (Eq 11.27).
+- **[R8] missing topics** → add short sections (all MR ch. 11): task-space computed torque $\tau=J_b^T(\tilde\Lambda(\dots)+\tilde\eta)$ (Eq 11.47); force control with damping (Eq 11.54); hybrid motion–force with $P=I-A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}$ (Eq 11.60–11.61); impedance vs admittance control (Eq 11.65–11.66). These are the "workspace control" topics listed in the course README for week 14.
+- **[R8] "Learn from: MLS ch. 4.5 · MR ch. 11"** → sharpen to "MR 11.1–11.2 (error dynamics, PDF 422–431), 11.4.1–11.4.2 (PID, computed torque, PD+gravity proof, PDF 439–451), 11.4.3 (task space, PDF 451–452); MR Ex 11.7, 11.9–11.12 as the simulation project".
+- **[R6/A1] resolved-rate** → cite MR Eq (11.16) as the continuous-time controller behind the lab's discrete resolved-rate law ($\mathcal V_b=k_p\log(X^{-1}X_d)^\vee$, $\dot\theta=J_b^\dagger\mathcal V_b$), and Fig 11.10 for why SE(3)-log control moves the origin on a screw path while decoupled $(R,p)$ control moves it straight (PDF 437–439). The lesson's sign ($\hat\xi=\log(g_d^{-1}g)$ with a minus) is consistent with MR's $\log(X^{-1}X_d)$ with a plus.
+- **[R1] "Euler angles … hit gimbal lock, which exponential coordinates and quaternions avoid"** → exponential coordinates are also a 3-parameter chart with singular/ambiguous points (θ = π antipodal ambiguity; log numerically sensitive near θ = 0, MR B.3 p. 581); only unit quaternions (4 numbers, double cover) are globally singularity-free → reword.
+- **[R1/F3/C2/A2] quaternion formulas** → add MR (B.9)–(B.15) with the two typo fixes ($r_{21}-r_{12}$; $q_2+iq_3$) and the scalar-first vs scalar-last warning (Eigen/ROS/scipy).
+- **[F6] Lagrange multipliers / equality-constrained QP** → if MR App. D is cited, use the corrected solution $x^*=Gb-(I-GA)Q^{-1}c$, $\lambda^*=-(Bb+BAQ^{-1}c)$ (PDF 616).
+- **[A5/A6] odometry motion model** → MR 13.4 (PDF 564–566) gives the exact SE(2)-exponential odometry update (Eq 13.35) — a nice complement to Thrun's odometry model; link it from A5/A6.
+
+## Best-reference map
+- **[R8]** → MR 11.2.2 overshoot & 11.3 velocity-input control (PDF 431–438); **11.4.1–11.4.2 PID / feedforward / computed torque / PD+gravity Lyapunov–LaSalle proof (PDF 439–451)**; 11.4.3 task-space CT (PDF 451–452); Summary (PDF 467–469, mind the sign typo); Exercises 11.5–11.7, 11.9–11.12 (PDF 471–476); software `ComputedTorque`, `SimulateControl` (PDF 469).
+- **[R8 extension: force/hybrid/impedance]** → MR 11.5–11.7 (PDF 452–463); 11.8 joint-torque hardware & SEAs (PDF 463–465).
+- **[R4]** → MR App. C (PDF 603–614): C.1 rules & special cases, C.2 Fig C.3, C.3 link matrix (modified DH!), C.4 examples, **C.5 DH→PoE (fix C.12)**, C.6 comparison; plus this file's standard-vs-modified table and UR5 conversions.
+- **[R1 / F3]** → MR App. B (PDF 593–602): ZYX/ZYZ Euler & inverse algorithm (B.1.1), RPY (B.2), **unit quaternions (B.3, PDF 599–600)**, Cayley–Rodrigues (B.4).
+- **[C1/C2/A2 quaternion background]** → MR B.3 (PDF 599–600) for definitions/product; then Horn 1987 for registration.
+- **[R1–R8 formula sheet]** → MR App. A (PDF 583–592).
+- **[F6 / F4]** → MR App. D (PDF 615–616) — least squares, Lagrange multipliers, equality-constrained QP (fix signs).
+- **[R6 redundancy / weighted pseudoinverse]** → App. D QP + 13.5 weighted pseudoinverse remark (PDF 568).
+- **[A1 task-space kinematic control]** → MR Eq 11.16 (PDF 437), 13.5 mobile manipulation + Ex 13.33 youBot capstone (PDF 566–582).
+- **[A3/A4 nonholonomic planning]** → MR 13.3.3 (PDF 555–560): Dubins/Reeds–Shepp/diff-drive optimal paths, RRT/grid with nonholonomic local planners, recursive subdivision.
+- **[A5/A6 motion model]** → MR 13.4 odometry (PDF 564–566).
+- **[C8 cooperative/virtual-fixture robots]** → MR 11.7 impedance vs admittance control (PDF 459–463).
+- **[R5 statics / wrench duality]** → MR 12.1–12.2 contact wrenches, form/force closure LP (PDF 481–512) (optional depth).

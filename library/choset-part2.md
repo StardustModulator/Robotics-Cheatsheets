@@ -464,3 +464,47 @@ $x^i\leftarrow x^i+[d'\cos(\theta^i+\alpha'),\ d'\sin(\theta^i+\alpha'),\ \alpha
 **Exercises:** none in this range (ch. 11 problems are beyond PDF p. 410).
 
 **Pitfalls (ch. 11):** Choset's "Lagrangian" $L$ in optimal control is the running cost, not $K-V$ (book flags this). $L(s,\dot s)$ in §11.2 is the *lower acceleration bound*, unrelated to either. Time scaling assumes the robot can hold any configuration statically ($\dot s=0$ admissible) and at most one admissible→inadmissible switch per $s$ (no "islands").
+
+---
+
+## Corrections & upgrades for the knowledge base
+Checked against Notion ASBR page (A3–A7, fetched 2026-11-26) and `courses/05-algorithms-sensor-based-robotics/README.md` §5.4–5.5.
+
+**A3 (C-space, potential fields, graph search)**
+- [A3] "Learn from: Choset ch. 2–4" → week 5 also covers **roadmaps and cell decompositions** (Choset ch. 5 visibility graph/GVD, book pp. 107–160; ch. 6 trapezoidal/boustrophedon, book pp. 161–196), and the A*/Dijkstra material is **Choset Appendix H**, not ch. 2–4 → change to "Choset ch. 2–6 + App. H". (Ch. 5–6 sit in Part 1 of the PDF; only §6.3 pursuit/evasion and the ch. 6 problems fall in this file's range.)
+- [A3] Lecture text never mentions the visibility graph, GVD or trapezoidal decomposition although the README (§5.4) does → add a short paragraph and a build item: Choset ch. 6 Problem 2 (trapezoidal-decomposition planner for a translating convex robot) is the natural coding exercise.
+- [A3] No error found in the potential formulas (match README and Choset ch. 4 notation $\zeta,\eta,Q^*$; ch. 4 itself is outside this range).
+
+**A4 (sampling-based planners) — vs Choset ch. 7**
+- [A4] Claims checked and correct: PRM = sample, connect neighbours with collision-free local paths, search (Alg. 6–7, pp. 204–206); RRT grows toward random samples (Alg. 10–11, p. 234); EST "expands from nodes in sparsely explored regions" (p. 232); probabilistic completeness definition (p. 201, 243).
+- [A4] Incomplete EST description → add the actual mechanism (book Alg. 8–9, pp. 230–232): pick tree node $q$ with $\pi_T(q)\propto1/w_T(q)$, $w_T$ = number of tree nodes in a neighbourhood of $q$; sample $q_\text{new}$ *in the neighbourhood of $q$*; add it **only if the local planner connects $q\to q_\text{new}$**; bidirectional merge = connect each new node to its $k$ nearest nodes in the other tree, else swap. Practical density estimate = coarse grid/projection (SBL, p. 238) — this is what OMPL `EST`/`ProjEST`/`BiEST` do.
+- [A4] Note for Assignment 3: the 2026 handout weights nodes by **degree** ($w\approx1/(1+\deg)$, README §4.2). That is Choset's **connection-sampling** weight for PRM (p. 224), *not* the book's EST density weight. Both favour under-explored nodes, but in a tree, degree ≠ local density (a leaf in a crowded region has degree 1). Follow the handout, but know the difference. Likewise the handout samples nearby with a Gaussian; the book samples uniformly in a neighbourhood — either is fine.
+- [A4] Add the precise completeness statements: random sampling → probabilistic completeness, deterministic/quasirandom/grid → **resolution** completeness (p. 201, 222); failure probability decays **exponentially**, $\Pr[\text{fail}]\le\lceil2L/\rho\rceil e^{-\sigma\rho^dn}$ (Thm 7.4.1, p. 244) — narrow passages hurt as $\rho^d$. Likely exam derivation.
+- [A4] Missing topics worth a line each: local planner + **subdivision vs incremental edge collision checking** (pp. 211–213; the A3 `is_local_path_collision_free` TODO); distance metrics for SE(3) / embeddings (pp. 209–211); kd-tree/ANN nearest neighbours (p. 209; the A3 code uses FLANN); goal bias $p\approx0.05$ (p. 236); RRT-Connect/merge (Alg. 12–13); LazyPRM/SBL lazy collision checking (pp. 226–228, 238); narrow-passage samplers (Gaussian, bridge, OBPRM, p. 217).
+- [A4] "Learn from: Choset ch. 7" → make it specific: §7.1.1–7.1.2 (pp. 203–215), §7.2 (pp. 227–238), §7.4.1 (pp. 243–246); RRT* is **not** in Choset (2005) — cite Karaman & Frazzoli 2011 for it (README already does).
+- [A4] Build list: add "bidirectional EST with grid-based density" and Choset ch. 7 Problems 6, 7, 9.
+
+**A5 (KF/EKF) — vs Choset ch. 8** (bonus: in this range)
+- [A5] Notation clash to flag in the lesson: Choset uses $F,G,H$; $V$ = process covariance; $W$ = measurement covariance; **$R$ = Kalman gain**. Notion/README use Thrun's $A,B,H,Q,R,K$, so "R" means opposite things in the two books.
+- [A5] Self-test answer "gain near $H^{-1}$" → $H$ is generally not square. Better: as $W\to0$ (or $P^-\to\infty$), $K\to P^-H^T(HP^-H^T)^{-1}$, the $P^{-1}$-weighted right pseudo-inverse of $H$ (Choset Eq. 8.21, p. 281) — the update then projects the prediction onto the measurement hyperplane $\{x:Hx=z\}$; only if $H$ is invertible is this $H^{-1}$.
+- [A5] Add Choset §8.2 (pp. 274–285) to "Learn from": the geometric (projection/Mahalanobis) derivation is the clearest intuition for the KF; §8.2.7 observability test $\text{rank}[H;HF;\dots;HF^{n-1}]=n$; §8.3.1–8.3.2 EKF range-bearing localization + $\chi^2$ data association (Leonard's `Chap8-Kalman-Mapping.pdf` is derived from it).
+- [A5] Book errata to warn about: $y^*$ sign typo (p. 283), Eq. 8.34 $G$ vs $H$ typo, Eq. 8.48 missing inverse on $S_{ij}$, inconsistent bearing convention §8.3.1 vs §8.4.2 (see ch. 8 pitfalls above).
+- README §5.5 formulas (KF, EKF unicycle $F$, range-bearing $H$) checked: correct.
+
+**A6 (PF/MCL) — vs Choset ch. 9**
+- [A6] Correct as written. Add Choset §9.1 (pp. 302–327) as a reference: Alg. 17 (PF), Alg. 18 (O(N) low-variance resampling), odometry motion model (9.18–9.21), beam sensor-model mixture (9.23), kidnapped-robot recovery via average likelihood (p. 322). Choset Problem 6 (circular 10-place world) is a perfect hand-computed discrete Bayes filter warm-up (answer in ch. 9 section above). Choset uses the beam model; A5 uses the likelihood field (Choset p. 327 mentions it only in passing → keep PR ch. 6 as main ref).
+
+**R7 (dynamics) — vs Choset ch. 10**
+- [R7] Choset ch. 10 (pp. 349–372) is a compact Lagrangian reference: RP-arm worked example, Christoffel symbols, Pfaffian constraints with $M$-orthogonal projections, Euler's equations. Errata: Eq. 10.3 gravity sign; "PD iff det and trace > 0" only for 2×2; $x^2+y^2=R$ → $R^2$.
+
+**Errata list for Choset ch. 7 (for the A4 lesson):** Thm 7.4.2 proof "$t\ge1.5\beta$" → $1.5/\beta$; "$e^{-n\epsilon/2}\le e^{-n/2\alpha\epsilon}$" → $e^{-n\alpha\epsilon/2}$; Halton ball-discrepancy exponent (p. 222); random axis + random angle is not uniform on SO(3) (p. 214); Alg. 11 checks only $q_\text{new}$, not the edge.
+
+## Best-reference map
+- [A3] Choset §6.3 + ch. 6 problems (PDF 206–212, book 190–196) — enrichment only; main A3 material (ch. 2–6, App. H) is in Part 1 / appendices.
+- [A4] **Choset ch. 7** (PDF 213–283, book 197–267): PRM §7.1.1 (book 203–208) · practical PRM: sampling, kd-tree, metrics, local planner, edge collision checking, smoothing §7.1.2 (208–215) · sampling strategies §7.1.3 (216–225) · connection strategies / LazyPRM §7.1.4 (225–227) · **EST §7.2.1 (230–233)** · RRT/RRT-Connect §7.2.2 (233–238) · SBL §7.2.3 (238) · SRT §7.3 (238–242) · completeness analysis §7.4 (242–253) · kinodynamic/multi-robot/manipulation §7.5 (253–262) · problems p. 267.
+- [A5] **Choset ch. 8** (PDF 284–315, book 269–300): KF derivation §8.2.2–8.2.5 (274–285) · dead-reckoning example §8.2.6 (285–288) · observability §8.2.7 (287–289) · EKF §8.3 (289–294) · data association §8.3.2 (292–293) · EKF-SLAM §8.4 (294–297) · problems 297–300 (P9 EKF by hand).
+- [A5/A6] **Choset ch. 9** (PDF 316–362, book 301–347): Bayes filter derivation §9.1.2–9.1.3 (304–310) · grid localization Alg. 16 (312–316) · particle filter Alg. 17–18 + motion model (316–322) · beam sensor model §9.1.5 (322–327) · occupancy grids / log-odds §9.2.1 (328–337) · RBPF SLAM §9.2.2 (337–345) · problems 345–347.
+- [R7] **Choset ch. 10** (PDF 363–386, book 349–372): Lagrange + RP arm (349–353), Christoffel symbols (353–355), constraints (357–361), rigid-body/Euler equations (361–370), problems 370–372 (P2–P3 = 2R arm).
+- [R8/A4] Choset ch. 11 §11.2 time-optimal time scaling (book 374–384), §11.3.1 Pontryagin + min-effort cubic example (385–389), §11.3.2 trajectory optimization (389–392), §11.3.3 grid search (392–396).
+- [F8] Thm 8.2.1 product of Gaussians (book p. 283); Bayes rule with background knowledge (ch. 9 P1).
+- [F4] Simple observer = minimum-norm least squares / projection (book pp. 274–277).
