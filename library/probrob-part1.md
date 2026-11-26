@@ -90,7 +90,7 @@ Algorithm Bayes_filter(bel(x_{t-1}), u_t, z_t):
 ```
 Initialization: point mass if $x_0$ known; uniform if ignorant (p. 23–24). Implementable as-is only for finite state or closed-form integrals.
 
-**Derivation (§2.3.3, PDF 40–41, pp. 28–29) — know this cold for A5:**
+**Derivation (§2.4.3, PDF 40–41, pp. 28–29) — know this cold for A5:**
 1. Bayes rule (2.23) on $z_t$: $p(x_t|z_{1:t},u_{1:t})=\eta\,p(z_t|x_t,z_{1:t-1},u_{1:t})\,p(x_t|z_{1:t-1},u_{1:t})$ (2.55).
 2. Markov/complete state: $p(z_t|x_t,z_{1:t-1},u_{1:t})=p(z_t|x_t)$ (2.56) ⇒ $bel(x_t)=\eta\,p(z_t|x_t)\,\overline{bel}(x_t)$ (2.57)/(2.58).
 3. Total probability over $x_{t-1}$ (2.59): $\overline{bel}(x_t)=\int p(x_t|x_{t-1},z_{1:t-1},u_{1:t})\,p(x_{t-1}|z_{1:t-1},u_{1:t})\,dx_{t-1}$.
