@@ -372,3 +372,77 @@ correspondences; true global localization needs grids or particles (Ch 8).
 
 **Conventions / pitfalls:** Thrun's $R$ (motion) / $Q$ (measurement); $Q$ must hold variances; heading wraps; signature row of $H$ is zero; sum-of-gains update in draft Table 7.2/7.3 is not the standard sequential update.
 
+## Ch 8 Grid and Monte Carlo Localization (PDF pp. 199–232, book pp. 187–220) — Lessons: A6 (core; Assignment 5 MCL), A5 (comparison)
+**Big idea:** To localize *globally* (and recover from kidnapping) you need a belief that can be multimodal and
+a filter that eats raw scans. Grid localization is the histogram filter over (x, y, θ); MCL is the particle
+filter with the Ch 5 sampling motion model and a Ch 6 measurement model. MCL is simpler, resource-adaptive and
+became the default — but out of the box it cannot recover from failures and it degrades with very accurate
+sensors; both have simple, important fixes (random-particle injection, inflated noise / mixture proposal).
+
+### 8.2 Grid localization (pp. 188–200)
+- Belief (8.1) = histogram $\{p_{k,t}\}$ over a partition (8.2) of pose space; typical indoor resolution **15 cm × 15 cm × 5°**.
+- **Table 8.1 in words:** predicted mass of cell k = Σ over cells i of (old mass of i) × motion-model density evaluated between the cells' centres of gravity; corrected mass = η × measurement model at k's centre × predicted mass. Assumes equal cell volumes. (Text calls it "the basic binary Bayes filter" — it means the discrete Bayes filter, Table 4.1.) Fig 8.1: hallway example.
+- **Resolution (§8.2.2, pp. 189–193):** coarse variable-resolution/topological grids (significant places: doors, junctions; Fig 8.5) vs fine fixed metric grids (Fig 8.2: one x-y layer per heading). **Coarse grids need inflated models**: a laser likelihood can vary wildly inside a cell, and a slow robot (10 cm/s, 1 s updates, 1 m cells) would *never* change cell — so widen the measurement Gaussian by ~half a cell and give the motion model a probability of jumping to a neighbouring cell ∝ arc length / cell size (at the price of over-fast apparent motion). Fig 8.3/8.4: error grows and CPU time falls with cell size (sonar vs laser).
+- **Computation (§8.2.3, pp. 193–195):** motion update is a convolution (6-D operation for a 3-D grid); fixes: **pre-caching** ray-cast ranges per cell + tabulated sensor model (two lookups); **sensor subsampling** (8 of 360 beams); **delayed motion updates** (integrate odometry over short windows, ~10× faster); **selective updating** (only cells above threshold; must reactivate cells for kidnapping).
+- Illustrations (§8.2.4): Fig 8.6 laser global localization in 3 scans; Fig 8.7 sonar in an office — two symmetric maxima (180° apart) resolved by entering a room; Fig 8.8–8.9 AAAI'94 arena, sonar, symmetric corridors; Fig 8.10 odometry heading error ~50° after 40 m of a 240 m run, corrected by grid localization. Finer grids are better if you can afford them (less discretization error ⇒ fewer Markov violations, fewer catastrophic failures).
+
+### 8.3 Monte Carlo localization (pp. 200–211)
+- **Table 8.2 = Table 4.3 with** `sample_motion_model(u_t, x^{[m]}_{t-1})` (Table 5.3 or 5.6) and `measurement_model(z_t, x^{[m]}_t, m)` (beam Table 6.1 or likelihood field Table 6.3) as weights, then resampling. Initialize with M particles from $p(x_0)$ (uniform over free space for global), weights $1/M$.
+- Fig 8.11 (hallway): the measurement step changes only *weights*; resampling + motion concentrate particles near the door hypotheses. Fig 8.12: 54 m × 18 m office, sonar — 4 hypotheses remain after reaching the upper left corner, resolved after ~55 m. Fig 8.13: ceiling-camera MCL.
+- **Properties (§8.3.2):** approximates almost any distribution; accuracy controlled by M; **resource-adaptive** — keep sampling until the next $(u,z)$ arrives; seamlessly mixes multimodal global phases with Gaussian-like tracking.
+- **Random-particle MCL / Augmented MCL (§8.3.3, Table 8.3, pp. 204–209):**
+  - Problem: once converged, no particles survive elsewhere ⇒ no recovery from kidnapping or a wrong convergence (worse for small M like 50, and during wide global phases).
+  - Fix: inject random poses; justified as a small kidnapping probability in the motion model.
+  - How many: monitor the measurement likelihood (8.3) estimated by the mean unnormalized weight (8.4) $p(z_t|z_{1:t-1},u_{1:t},m)\approx\frac1M\sum_m w_t^{[m]}$. Keep a slow and a fast exponential average, $w_{slow}\mathrel{+}=\alpha_{slow}(w_{avg}-w_{slow})$, $w_{fast}\mathrel{+}=\alpha_{fast}(w_{avg}-w_{fast})$ with $0\le\alpha_{slow}\ll\alpha_{fast}$; during resampling replace each draw by a random pose with probability $\max(0,1-w_{fast}/w_{slow})$. Short-term likelihood worse than long-term ⇒ more random particles; smoothing avoids over-reacting to one noisy scan.
+  - From where: uniform over pose space (weighted by the current measurement), or — for landmark sensors — **sampled from the measurement** using Table 6.5.
+  - Fig 8.15: RoboCup legged robot, 6 coloured markers, global localization then kidnapping (carried across the field) and recovery. Fig 8.16 (left): lost-track rate vs M (250–4000) for plain MCL > MCL+random samples > Mixture MCL in a crowded museum.
+  - Draft listing quirks: $w_{avg}$ must be reset to 0 each call; the index range "1..N" should be 1..M; $w$'s here must be *unnormalized* likelihoods.
+- **Modifying the proposal (§8.3.4, pp. 209–211):** plain MCL proposes from the motion model, so a *perfect* (or noise-free but under-determined, e.g. one exact range) sensor makes MCL fail: no particle lands on the zero-volume likelihood manifold — a less accurate sensor can work better! EKF does not have this issue (its update uses the measurement). Fixes: (1) **inflate sensor noise** (accounts also for the PF's own approximation error); (2) **Mixture MCL**: for a small fraction (~5%) of particles swap roles — sample $x\sim p(z_t|x_t)$ (8.5) and weight by the predicted prior (8.6) $\int p(x|u_t,x_{t-1})bel(x_{t-1})dx_{t-1}$. Hard parts: sampling poses from a laser scan (they used density trees) and evaluating (8.6) with a particle prior (kernel-smooth particles with narrow Gaussians). Also a principled kidnapping solution.
+
+### 8.4 Localization in dynamic environments (pp. 211–216)
+- Failure mode: unmodeled people produce *correlated* errors over time (crowd lined up looks like a wall; Rhino in the Deutsches Museum Bonn, Fig 8.17–8.18). Two options: estimate the hidden state (people) — general but expensive and variable-dimensional; or **filter the measurements**.
+- **Outlier rejection for the beam model (8.7)–(8.10):** introduce per-beam cause variable $\bar c_t^k\in\{hit,short,max,rand\}$ with priors $z_c$; posterior probability that a beam is "short" (unexpected object) = $\int z_{short}p_{short}\,bel\,dx\,/\int\sum_c z_cp_c\,bel\,dx$ (8.10), approximated with particles/high-probability grid cells; reject if it exceeds a threshold χ (Table 8.4).
+  - **Draft error (Table 8.4 Line 4):** the numerator accumulates $z_{hit}p_{hit}$; per (8.10) it must accumulate $z_{short}\,p_{short}$ (the 2005 book has $z_{short}$). With $z_{hit}$ the test would reject well-explained beams.
+  - Asymmetry: rejects surprisingly **short** beams, keeps surprisingly long ones ⇒ can still recover from global failures (Fig 8.19). Fig 8.20: final error 19 cm (certainty 0.003) with standard MCL vs 1 cm (0.998) with rejection. Subtle bonus: lets you remove clutter from a map and keep the beam model workable (not needed for the smooth likelihood field).
+  - Where no asymmetry exists (vision, removed obstacles), cap the fraction of rejectable measurements.
+
+### 8.5 Practical considerations (Table 8.5, PDF 229) — comparison of Markov-localization implementations (paraphrased)
+| | EKF | MHT | coarse/topological grid | fine metric grid | MCL |
+|---|---|---|---|---|---|
+| measurements | landmarks | landmarks | landmarks | raw | raw |
+| noise model | Gaussian | Gaussian | any | any | any |
+| posterior | Gaussian | Gaussian mixture | histogram | histogram | particles |
+| efficiency | best | very good | good | poor | good |
+| ease of implementation | good | poor | good | poor | best |
+| resolution | best | best | poor | good | good |
+| robustness | poor | good | good | best | best |
+| global localization | no | no | yes | yes | yes |
+- Tune on recorded reference datasets; inflate conditional probabilities for nearby (correlated) measurements.
+
+**Summary (§8.6):** grids ↔ histograms (resolution trade-off, model inflation for coarse grids, selective updates for fine ones); MCL ↔ particles (M trades accuracy vs cost); both localize globally; random particles solve kidnapping; Mixture MCL helps low-noise sensors; reject "short" beams in crowds.
+
+**Exercises (§8.7, PDF 231):** the only printed exercise: *derive the additive multi-feature update of Table 7.2 lines 14–15* — worth doing because it shows the additivity holds only in information form (see Ch 7 note).
+
+**Worked examples worth redoing (Assignment 5):** Fig 8.11 1-D MCL; build a full MCL = Table 5.6 (odometry sampling) + Table 6.3 (likelihood field) + Table 4.4 (low-variance resampler) + Augmented-MCL injection; reproduce a kidnapping test like Fig 8.15.
+
+**Conventions / pitfalls:** use unnormalized weights for $w_{avg}$ but normalized ones for resampling; don't resample when the robot is stationary (Ch 4); estimate pose as weighted mean only once unimodal (circular mean for θ); M must grow with the volume of the uncertainty.
+
+## Ch 9 Occupancy Grid Mapping, §9.1–9.3.2 (PDF pp. 233–245, book pp. 221–233) — Lessons: A6 (maps used by MCL), A3 (grids for planning), F8 (log odds)
+**Big idea:** If someone hands you the robot's path, building a map is "just" estimation — but over 10⁴+
+binary cells, so the full posterior is hopeless. Occupancy grids factor the map into independent cells and run
+the Ch 4 log-odds binary Bayes filter in each one, using an *inverse* sensor model. Its main role: turning a
+SLAM solution (poses) into a map fit for planning and localization.
+
+- Why mapping is hard (pp. 221–222): enormous hypothesis space (≥10⁵ variables); chicken-and-egg with localization (**SLAM**); difficulty grows with size, noise, perceptual ambiguity, and **cycles** (loop closure with large accumulated odometry error; Fig 9.1 raw vs corrected).
+- Target (9.1) $p(m|z_{1:t},x_{1:t})$ — controls drop out because poses are known. Map = union of cells (9.2), binary occupancy; $2^{10{,}000}$+ maps. **Factorization (9.4)** $p(m|z_{1:t},x_{1:t})\approx\prod_i p(m_i|z_{1:t},x_{1:t})$ (the product sign is missing in the draft print) — ignores neighbour dependencies (revisited in §9.4, outside this range).
+- Log odds (9.5) $l_{t,i}=\log\frac{p(m_i|\cdot)}{1-p(m_i|\cdot)}$, recovery (9.6); prior (9.7) $l_0=\log\frac{p(m_i)}{1-p(m_i)}$ (correct here, unlike (4.21)).
+- **Table 9.1 in words:** for each cell inside the sensor's perceptual field, add the inverse-model log odds and subtract $l_0$; leave other cells untouched. (9.8) defines `inverse_sensor_model` as $p(m_i|z_t,x_t)$ — meaning its *log-odds* form.
+- **Table 9.2 simple inverse range model (PDF 242), in words:** take the cell centre's range r and bearing φ relative to the robot; pick the beam k closest in angle; if the cell is beyond the reading (+α/2) or outside the beam width β ⇒ return $l_0$ (no information); if the reading is not max-range and the cell lies within ±α/2 of the measured range ⇒ $l_{occ}$; if the cell is in front of the reading ⇒ $l_{free}$. α = obstacle thickness, β = beam opening (15° sonar, Fig 9.2). **Draft error:** Line 8 tests $|r-z_{max}|<\alpha/2$; it must be $|r-z_t^k|<\alpha/2$ (2005 book). Also add the robot's own footprint as strongly free (p. 230).
+- Results: Fig 9.3 exhibit hall map vs (inaccurate) blueprint; Fig 9.4 people in raw scans are filtered out by the occupancy grid — grids, not raw endpoints, are what planners need. Cells converge quickly to ≈0 or ≈1.
+- **Multi-sensor fusion (§9.2.1, pp. 230–231):** running one Bayes filter over different sensors (e.g. stereo, Fig 9.5, vs sonar) makes the result depend on polling rates when sensors see different obstacle types; better: one map per sensor, combine with the **most pessimistic** rule (9.9) $m_i=\max_k m_i^k$ (biased toward occupied, safe for navigation).
+- **Learning inverse models (§9.3.1–9.3.2, pp. 232–233):** Bayes (9.10)/(9.11) with $p(m|x)=p(m)$; per-cell marginal (9.12) needs an integral over all maps — intractable. Instead **simulate**: sample a map from a map database, a uniform pose, a measurement from the forward model $p(z|x,m)$, read the true occupancy of cell i ⇒ training triples (9.13) $(x,z)\to occ(m_i)$ for a supervised learner (logistic regression, neural net). Page 245 ends as the text begins listing inefficiencies (e.g. cells far outside the perceptual range carry no information) — continued in Part 2.
+
+**Exercises:** none in range. Suggested: implement Tables 9.1/9.2 on a simulated laser log with known poses; then use the resulting grid's distance transform as the likelihood field for MCL (closes the loop with Ch 6/8).
+
+**Conventions / pitfalls:** subtract $l_0$ every update or the prior is counted repeatedly; clamp log odds to avoid over-confidence in dynamic scenes; occupancy grid probability ≠ likelihood field value (one is P(occupied), the other a distance-based sensor likelihood).
+

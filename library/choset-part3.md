@@ -225,8 +225,7 @@ $$\hat x(k+1|k+1)=\hat x(k+1|k)+R\nu,\qquad P(k+1|k+1)=P(k+1|k)-RH(k+1)P(k+1|k)$
 5. **p. 278:** in the $P(k+1|k)$ expansion the cross term is written $2F(x-\hat x)v^T$; it is $F(x-\hat x)v^T+v(x-\hat x)^TF^T$ (both vanish in expectation, so (8.12) is right).
 6. **p. 298 Problem 7:** uses $P_k$ for the *updated* covariance $P(k+1|k+1)$ and a non-symmetric "$-2R\nu(\cdot)^T$" cross term; it is the noise-free derivation (no $+RWR^T$ term).
 
-## Ch 9 Bayesian Methods
-(PDF pp. 315–362, book pp. 301–348) — Lessons: A6 (primary), A5, F8, C6 (ICP in scan matching)
+## Ch 9 Bayesian Methods (PDF pp. 315–362, book pp. 301–348) — Lessons: A6 (primary), A5, F8, C6 (ICP in scan matching)
 
 **Big idea:** Drop the Gaussian assumption. Keep the same predict/update recursion but represent the belief non-parametrically — as a histogram over a grid or as a weighted particle set — so it can be multimodal (global localisation, kidnapped robot, unknown data association). Then flip the problem: with known poses, mapping is a per-cell Bayes filter in log-odds; with unknown poses (SLAM), sample robot *paths* with a particle filter and compute each particle's map analytically (Rao-Blackwellisation).
 
@@ -281,3 +280,38 @@ $$\hat x(k+1|k+1)=\hat x(k+1|k)+R\nu,\qquad P(k+1|k+1)=P(k+1|k)-RH(k+1)P(k+1|k)$
 3. **p. 329, (9.30):** "posterior probability that **all cells** of $m$ are free" — the derivation is per cell ($\neg m_l$), not for the whole map.
 4. **p. 324:** "$\mathcal N(y,d,\sigma)$ … the variance σ" — σ is the standard deviation.
 
+---
+
+## Corrections & upgrades for the knowledge base
+Checked against Notion ASBR A3–A6 and Foundations F8 (fetched 2026-11-26).
+- **[A5] Notation clash** — Notion uses Thrun-style $A,B,Q$ (process), $R$ (measurement), $K$ (gain); Choset ch. 8 uses $F,G$, **$V$** (process), **$W$** (measurement) and **$R$ = Kalman gain**, $S$ = innovation covariance (book pp. 273, 284–285). → Add a one-line translation table to A5 (copy the one in §Ch 8 above) so the student is not confused when reading the primary textbook.
+- **[A5] Self-test "gain near $H^{-1}$"** — $H$ is generally non-square (GPS measures 2 of ≥3 states), so $H^{-1}$ does not exist. With $W\to0$ the gain tends to $\bar PH^T(H\bar PH^T)^{-1}$ (Choset Eq 8.14, p. 281), a $\bar P$-weighted right-inverse of $H$; only for invertible $H$ does it equal $H^{-1}$. → Reword: "near $\bar PH^T(H\bar PH^T)^{-1}$ (a right-inverse of $H$; $H^{-1}$ if $H$ is square): the update moves the estimate onto the measurement-consistent set."
+- **[A5] "Jacobians at the current estimate"** — be precise: $F$ at $\hat x(k|k)$ (posterior), $H$ at $\hat x(k+1|k)$ (prediction) (Eqs 8.39, 8.45, p. 290). → Fix wording.
+- **[A5] Missing items for Assignment 4** → add: (i) input/IMU noise enters as $F P F^T+G_uMG_u^T$ (Choset P8.10, p. 300); (ii) wrap angle innovations to $[-\pi,\pi)$; (iii) Joseph-form covariance update for numerical stability; (iv) observability check $\mathrm{rank}[H;HF;\dots]=n$ (Thm 8.2.2, p. 288) — explain why yaw is only observable through motion when GPS measures position only; (v) χ²/Mahalanobis gating of GPS outliers (§8.3.2). Add Choset P8.9 as a self-test (numbers in §Ch 8 above).
+- **[A5] Learn-from list omits the primary textbook** → add "Choset *Principles of Robot Motion* ch. 8 (§8.2 derivation, §8.3 EKF + data association, §8.4 EKF-SLAM) and App. I–J" before *Probabilistic Robotics*.
+- **[A5] Bayes-filter equation** — correct (matches Choset 9.2 up to index convention: Choset applies $u(k-1)$ to go from $x(k-1)$ to $x(k)$, Thrun writes $u_t$). → Optional note.
+- **[A6] Learn-from omits Choset ch. 9** → add "Choset ch. 9 §9.1.4 (grid vs particle representations, Algs 16–18), §9.1.5 (beam sensor model), §9.2 (occupancy grids, RBPF-SLAM)". Note that Choset teaches the **beam (ray-cast) model**; the likelihood-field model in Notion is the endpoint model Choset mentions as the faster alternative (p. 327) — both should appear, with the beam model's 4-part mixture (hit Gaussian, short exponential, uniform random, max-range) spelled out.
+- **[A6] Missing** → add: random-particle injection / $\tilde p$ monitoring for kidnapped-robot recovery (p. 322); circular mean for θ (Eq 9.17); "near-perfect sensors cause particle depletion" (P9.9); the (α, d, β) odometry motion model (Eqs 9.18–9.21, with the book's (9.18) typo corrected); self-tests from Choset P9.6 (answer: place 7 with 0.30) and P9.13.
+- **[A3] A\* optimality** — Notion: "optimal when the heuristic never overestimates (admissible)". True for tree search / with re-opening; with a closed list (Choset Alg 24, p. 531) *consistency* $h(n)\le c(n,n')+h(n')$ is needed. → add "(and consistent, if you keep a closed set — Euclidean/octile on grids are)". Add Choset App H (A*, Dijkstra, D*) and App G.3 (complete / resolution-complete / probabilistically complete) to Learn-from.
+- **[A4]** — fine; add Choset App G.3 for the completeness definitions and §12.5.6/§12.5.8 for RRT/PRM on cars/nonholonomic systems.
+- **[F8] Missing pitfall** — Choset's own App I (p. 551) wrongly says zero covariance ⇒ independence. → Add self-test: "Does $\mathrm{cov}(X,Y)=0$ imply independence?" Answer: only for jointly Gaussian variables; counter-example $Y=X^2$.
+- **[F8] Upgrade** → add the **product/fusion of two Gaussians** (Choset Thm 8.2.1: $Q=C_1(C_1+C_2)^{-1}$, $z_3=z_1+Q(z_2-z_1)$, $C_3=C_1-QC_1$) — the 1-D KF update is exactly this — and the Mahalanobis distance. Add Choset App I + §8.2.3 and the Fig 9.1 door example (which is the F8 "1D hallway with doors" build) to Learn-from.
+- **[F3/R1] RPY naming** — Choset App E.2 (p. 491) names rotation about x "yaw" and about z "roll" (Spong convention), opposite of ROS/aerospace; the matrix $R_zR_yR_x$ is the same. → Add a warning in F3 next to the fixed-vs-body self-test.
+- **[F7/A5] Discretisation** — Choset App J.5 and Ch 8 examples use Euler $F=I+TA$; exact is $F=e^{AT}$. → mention in F7 build ("discretise $\dot x=Ax+Bu$ two ways and compare").
+- **[R8/F7] LTI stability** — if any lesson quotes "stable iff Re λ ≤ 0", it is wrong for repeated imaginary-axis eigenvalues (double integrator); Choset Thm J.2.1 (p. 554) has this error.
+
+## Best-reference map
+- **[A5]** → Ch 8 all (PDF 283–314): §8.2.2–8.2.4 geometric KF derivation (pp. 274–284), summary §8.2.5 (p. 284), dead-reckoning example §8.2.6, observability §8.2.7, EKF §8.3 (pp. 289–294), EKF-SLAM §8.4 (pp. 294–297); problems 7–10 (pp. 298–300); App J.4–J.5 observers & discrete time (pp. 559–563); Ch 9 §9.1.2–9.1.3 for the Bayes-filter derivation (pp. 304–310).
+- **[A6]** → Ch 9 §9.1.4 particle filters + Algs 17–18 (pp. 316–322), §9.1.5 sensor models (pp. 322–327), grid localisation Alg 16 (pp. 312–316), §9.2.1 occupancy grids (pp. 328–337), §9.2.2 RBPF-SLAM (pp. 337–345); problems 3–7, 9, 11, 13 (pp. 345–347).
+- **[F8]** → App I (pp. 547–551), §8.2.3 + Thm 8.2.1 (pp. 277–283), Fig 9.1 (p. 303).
+- **[F7]** → App J.1–J.2 (pp. 552–556), J.5 (p. 562); Ch 12 §12.1.1 flows.
+- **[F5]** → App C.5 Jacobians/gradients/chain rule (pp. 483–486).
+- **[F6]** → App D.2 Newton–Raphson convergence (p. 488); §12.5.4 gradient end-state method (p. 446); §11.3.2 NLP trajectory optimisation.
+- **[F4]** → §8.2.2 null space/column space argument (pp. 275–277).
+- **[F3/R1]** → App E (pp. 489–498): ZYZ inverse, RPY, axis–angle, quaternions.
+- **[R2]** → Ch 12 §12.1.3 Lie brackets (pp. 409–414) as a vector-field complement to se(3) brackets; P12.8.
+- **[R7/R8]** → §12.4 simple mechanical control systems (pp. 424–440); App J.3 pole placement (pp. 557–558).
+- **[A3]** → App H (pp. 521–546: BFS/DFS, A*, Dijkstra, D*); App F (pp. 499–512: polygon collision, star algorithm, GJK); App B Minkowski sums.
+- **[A4]** → App G.3 completeness notions (p. 520); §12.5.6 car planners (pp. 450–461); §11.3.3 grid kinodynamic search (pp. 392–400).
+- **[C5]** → App F.5 GJK distance (pp. 509–512).
+- **[C6]** → §9.2.2 scan matching with ICP inside SLAM (pp. 338–339).

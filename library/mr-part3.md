@@ -75,7 +75,7 @@ $$\boxed{\tau=\tilde M(\theta)\Big(\ddot\theta_d+K_p\theta_e+K_i\!\int\!\theta_e
 **Decentralized vs centralized (11.4.2.1–2):** decentralized (independent per-joint PID) is fine when $M(\theta)$ ≈ diagonal: Cartesian/gantry robots, highly geared robots without gravity (reflected motor inertia $G^2I_{rotor}$ dominates), high joint friction.
 
 **PD + gravity compensation, Eq (11.38):** $\tau=K_p\theta_e+K_i\int\theta_e+K_d\dot\theta_e+\tilde g(\theta)$ (no need for full $M,C$).
-- Lyapunov/energy proof (Eq 11.39–11.43, PDF 450–451): with zero friction, perfect $\tilde g$, $K_i=0$, setpoint: closed loop $M\ddot\theta+C\dot\theta=K_p\theta_e-K_d\dot\theta$. Error energy $V=\tfrac12\theta_e^TK_p\theta_e+\tfrac12\dot\theta^TM\dot\theta$ gives $\dot V=-\dot\theta^TK_d\dot\theta+\tfrac12\dot\theta^T(\dot M-2C)\dot\theta=-\dot\theta^TK_d\dot\theta\le0$ using **skew-symmetry of $\dot M-2C$** (Prop. 8.1.2). $\dot V=0$ only at $\dot\theta=0$, and there $\theta\ne\theta_d$ implies $\ddot\theta\ne0$, so by **Krasovskii–LaSalle** (Ex 11.12) ⇒ global convergence to $\theta_d$. This is *the* classic R8 proof (also in MLS Ch. 4 and Spong Ch. 8).
+- Lyapunov/energy proof (Eq 11.39–11.43, PDF 450–451): with zero friction, perfect $\tilde g$, $K_i=0$, setpoint: closed loop $M\ddot\theta+C\dot\theta=K_p\theta_e-K_d\dot\theta$. Error energy $V=\tfrac12\theta_e^TK_p\theta_e+\tfrac12\dot\theta^TM\dot\theta$ gives $\dot V=-\dot\theta^TK_d\dot\theta+\tfrac12\dot\theta^T(\dot M-2C)\dot\theta=-\dot\theta^TK_d\dot\theta\le0$ using **skew-symmetry of $\dot M-2C$** (Prop. 8.1.2). $\dot V=0$ only at $\dot\theta=0$, and there $\theta\ne\theta_d$ implies $\ddot\theta\ne0$, so by **Krasovskii–LaSalle** (Ex 11.12) ⇒ global convergence to $\theta_d$. This is *the* classic R8 proof (also in MLS §4.5 and Spong et al.'s multivariable-control chapter).
 - **Preprint typo** in Summary (PDF 468, book 450): "$\tau=K_p\theta_e+K_d\dot\theta+\tilde g(\theta)$" — the damping sign is wrong; should be $-K_d\dot\theta$ (equivalently $+K_d\dot\theta_e$ since $\dot\theta_d=0$), consistent with Eq (11.39).
 
 ### 11.4.3 Task-space motion control (PDF 451–452, book 433–434)
@@ -110,11 +110,11 @@ Ladder of joint-torque implementations: (1) current control of direct-drive moto
 
 ### 11.10–11.12 Summary, software, notes (PDF 467–470)
 - Software: `ComputedTorque(thetalist,dthetalist,eint,g,Mlist,Glist,Slist,thetalistd,dthetalistd,ddthetalistd,Kp,Ki,Kd)`; `SimulateControl(...)` simulates computed torque with a possibly wrong model ($\tilde g$, $\tilde M_{i-1,i}$, $\tilde G_i$).
-- References: computed torque 1970s; PD+gravity Takegaki–Arimoto [184]; operational space Khatib [99]; natural/artificial constraints Mason [107]; Raibert–Craig hybrid [144]; Duffy's critique of non-invariant "orthogonality" [42]; Hogan impedance [56–58].
+- References: computed torque 1970s; PD+gravity Takegaki–Arimoto [184]; operational space / resolved acceleration: Luh–Walker–Paul [99], Khatib [74]; natural/artificial constraints Mason [107]; Raibert–Craig hybrid [144]; Duffy's critique of non-invariant "orthogonality" [42]; Hogan impedance [56–58].
 
 **Exercises worth doing (PDF 471–478):**
 - 11.2 (5% settling time ⇒ $\approx3/(\zeta\omega_n)$), 11.3–11.4 (solve underdamped responses) — quick F7/R8 drills.
-- **11.5** pendulum linearization, stability of upright with P control ($K_p>mgL$) — classic exam question.
+- **11.5** pendulum linearization; upright equilibrium has negative stiffness $-mgL=-20$ N m/rad, so a restoring P gain must exceed $mgL$ — classic exam question.
 - **11.6** PD/PID design for a mass-spring-damper incl. 2% settling 0.01 s and steady-state error — matches RDKDC control HW style.
 - **11.7 / 11.9 / 11.10 / 11.11** build a 1-dof then 2R simulator: Euler integration, PD/PID tuning, torque saturation, friction, quintic trajectories (Eq 11.67), computed torque with 20% mass error — **best practical R8 project** (and R7 2R dynamics derivation).
 - **11.12** LaSalle with $K_p=0$ or $K_d=0$ — tests understanding of the PD+gravity proof.
@@ -188,4 +188,137 @@ Ladder of joint-torque implementations: (1) current control of direct-drive moto
 **Exercises worth doing:** 13.14–13.16 (Pfaffian constraints), **13.18/13.20** (Lie bracket by Taylor expansion and as $AB-BA$ on se(2) — ties R2 to nonholonomy), 13.22, **13.25–13.27** (point tracking, nonlinear tracking, odometry from encoders — A5/A6 motion model practice), 13.23–13.24 (grid/RRT planner for a car — A3/A4), **13.33 youBot capstone** (MR Coursera capstone: odometry + mobile-manipulator Jacobian + feedforward-PI task-space control — superb integrated project for A1/R5/R6).
 
 **Conventions / pitfalls:** MR orders planar twists $(\omega,v_x,v_y)$ and configurations $(\phi,x,y)$ — heading first (most mobile-robot texts and ROS use $(x,y,\theta)$). Wheel separation is $2d$ (not $d$). $H(\phi)$ depends on heading, $H(0)$ does not. Brockett: you can *track trajectories* with smooth feedback but not *stabilize a pose*.
+
+---
+
+## Appendix A Summary of Useful Formulas (PDF pp. 583–592, book pp. 565–574) — Lessons: R1–R8, F3, F5, F7 (formula sheet)
+**Big idea:** A one-stop crib sheet for the whole book — ideal as the "allowed formula sheet" template for RDKDC exams, as long as you translate MR's $(\omega,v)$ ordering into MLS's $(v,\omega)$.
+
+**Contents worth copying onto your own sheet (all verified against the page):**
+- Ch. 2: dof = freedoms − independent constraints; **Grübler** $\text{dof}=m(N-1-J)+\sum f_i$ ($m=3$ planar, 6 spatial); Pfaffian $A(\theta)\dot\theta=0$.
+- Ch. 3 side-by-side SO(3)/SE(3) table (PDF 584–585): $R^{-1}=R^T$; $T^{-1}=\begin{bmatrix}R^T&-R^Tp\\0&1\end{bmatrix}$; **pre-multiply = rotate/translate about space-frame axes, post-multiply = about body-frame axes**; screw axis $\mathcal S=(\omega,v)$ with $v=-\hat s\times q+h\hat s$; skew identities $[\omega]x=-[x]\omega$, $R[\omega]R^T=[R\omega]$; $\dot RR^{-1}=[\omega_s]$, $R^{-1}\dot R=[\omega_b]$, $\dot TT^{-1}=[\mathcal V_s]$, $T^{-1}\dot T=[\mathcal V_b]$; $[\mathrm{Ad}_T]=\begin{bmatrix}R&0\\{[p]}R&R\end{bmatrix}$ (MR order); Rodrigues $e^{[\hat\omega]\theta}=I+\sin\theta[\hat\omega]+(1-\cos\theta)[\hat\omega]^2$; $e^{[\mathcal S]\theta}$ translation part $(I\theta+(1-\cos\theta)[\omega]+(\theta-\sin\theta)[\omega]^2)v$; wrench change of frame $\mathcal F_a=[\mathrm{Ad}_{T_{ba}}]^T\mathcal F_b$.
+- Ch. 4 PoE: space $T=e^{[\mathcal S_1]\theta_1}\cdots e^{[\mathcal S_n]\theta_n}M$, body $T=Me^{[\mathcal B_1]\theta_1}\cdots e^{[\mathcal B_n]\theta_n}$.
+- Ch. 5: $J_{si}=[\mathrm{Ad}_{e^{[\mathcal S_1]\theta_1}\cdots e^{[\mathcal S_{i-1}]\theta_{i-1}}}]\mathcal S_i$; $J_{bi}=[\mathrm{Ad}_{e^{-[\mathcal B_n]\theta_n}\cdots e^{-[\mathcal B_{i+1}]\theta_{i+1}}}]\mathcal B_i$; $J_b=[\mathrm{Ad}_{T_{bs}}]J_s$; $\tau=J^T\mathcal F$; manipulability ellipsoid $\mathcal V^T(JJ^T)^{-1}\mathcal V=1$ (axes = eigvecs of $JJ^T$, semi-axes $\sqrt{\lambda_i}$); force ellipsoid $\mathcal F^TJJ^T\mathcal F=1$.
+- Ch. 6: law of cosines; **Newton–Raphson IK**: $[\mathcal V_b]=\log(T_{sb}^{-1}(\theta^i)T_{sd})$, $\theta^{i+1}=\theta^i+J_b^\dagger\mathcal V_b$ until $\|\omega_b\|<\epsilon_\omega,\|v_b\|<\epsilon_v$; $J^\dagger=J^T(JJ^T)^{-1}$ (fat, right inverse) or $(J^TJ)^{-1}J^T$ (tall, left inverse).
+- Ch. 8: Euler–Lagrange $\tau=\frac{d}{dt}\frac{\partial L}{\partial\dot\theta}-\frac{\partial L}{\partial\theta}$; four equivalent forms $M\ddot\theta+h=M\ddot\theta+c+g=M\ddot\theta+\dot\theta^T\Gamma\dot\theta+g=M\ddot\theta+C\dot\theta+g$, $c_{ij}=\sum_k\Gamma_{ijk}\dot\theta_k$; add $J^T\mathcal F_{tip}$; inertia integrals; Steiner $I_q=I_b+m(q^TqI-qq^T)$; $G_a=[\mathrm{Ad}_{T_{ba}}]^TG_b[\mathrm{Ad}_{T_{ba}}]$; $[\mathrm{ad}_\mathcal V]=\begin{bmatrix}[\omega]&0\\{[v]}&[\omega]\end{bmatrix}$; Newton–Euler single body $\mathcal F_b=G_b\dot{\mathcal V}_b-[\mathrm{ad}_{\mathcal V_b}]^TG_b\mathcal V_b$; KE $\tfrac12\mathcal V^TG\mathcal V$, $\tfrac12\dot\theta^TM\dot\theta$; full **recursive Newton–Euler** forward/backward iterations (gravity as base acceleration $\dot{\mathcal V}_0=(0,-g)$); $M=\sum J_{ib}^TG_iJ_{ib}$; task-space $\Lambda=J^{-T}MJ^{-1}$, $\eta=J^{-T}h-\Lambda\dot JJ^{-1}\mathcal V$; constrained-dynamics projections $P=I-A^T(AM^{-1}A^T)^{-1}AM^{-1}$, $P_{\ddot\theta}=I-M^{-1}A^T(AM^{-1}A^T)^{-1}A$.
+- Ch. 9: straight-line joint path; constant-screw path $X(s)=X_{start}\exp(\log(X_{start}^{-1}X_{end})s)$; path-constrained dynamics $m(s)\ddot s+c(s)\dot s^2+g(s)=\tau$. Ch. 13: vector-field Lie bracket.
+- **Missing from App. A** (add to your own sheet): Ch. 11 control laws (computed torque, PD+gravity, hybrid projector) and Ch. 10 planning — the appendix has nothing on Chs. 10–12.
+
+**Pitfalls:** MR's $\mathrm{Ad}$ has $[p]R$ in the **lower-left** (because twists are $(\omega,v)$); MLS's has $\hat pR$ in the **upper-right** (twists $(v,\omega)$). Same object, permuted blocks.
+
+---
+
+## Appendix B Other Representations of Rotations (PDF pp. 593–602, book pp. 575–584) — Lessons: R1, F3, C1–C2 (Horn's quaternion registration), A1–A2 (hand-eye with quaternions), A5 (EKF orientation states), F7
+**Big idea:** Exponential coordinates are the "natural" chart on SO(3), but every 3-parameter chart has singularities somewhere. Euler/RPY angles are intuitive but suffer gimbal lock when the middle angle aligns axes 1 and 3; unit quaternions trade one extra (constrained) number for a smooth, singularity-free double cover $S^3\to SO(3)$ with a cheap product; Cayley–Rodrigues parameters give rational formulas and a neat composition law.
+
+### B.1 Euler angles (PDF 593–597)
+- **ZYX Euler angles** = successive rotations about **body** axes $\hat z_b$ (α), $\hat y_b$ (β), $\hat x_b$ (γ): $R=\mathrm{Rot}(\hat z,\alpha)\mathrm{Rot}(\hat y,\beta)\mathrm{Rot}(\hat x,\gamma)$ (post-multiplication = body axes). Eq (B.1)/(B.2):
+  $$R=\begin{bmatrix}c_\alpha c_\beta&c_\alpha s_\beta s_\gamma-s_\alpha c_\gamma&c_\alpha s_\beta c_\gamma+s_\alpha s_\gamma\\ s_\alpha c_\beta&s_\alpha s_\beta s_\gamma+c_\alpha c_\gamma&s_\alpha s_\beta c_\gamma-c_\alpha s_\gamma\\ -s_\beta&c_\beta s_\gamma&c_\beta c_\gamma\end{bmatrix}$$
+- **Algorithm B.1.1 (inverse):** if $r_{31}\ne\pm1$: $\beta=\mathrm{atan2}(-r_{31},\sqrt{r_{11}^2+r_{21}^2})$ (B.3), $\alpha=\mathrm{atan2}(r_{21},r_{11})$ (B.4), $\gamma=\mathrm{atan2}(r_{32},r_{33})$ (B.5). (Second branch: negative square root ⇒ $\beta\in[90^\circ,270^\circ]$.) If $r_{31}=-1$: $\beta=\pi/2$, one-parameter family, e.g. $\alpha=0,\gamma=\mathrm{atan2}(r_{12},r_{22})$ (only $\gamma-\alpha$ determined). If $r_{31}=1$: $\beta=-\pi/2$, $\alpha=0,\gamma=-\mathrm{atan2}(r_{12},r_{22})$ (only $\alpha+\gamma$ determined). I re-derived both degenerate cases: correct. (Minor inconsistency: the stated range $\beta\in[-\pi/2,\pi/2)$ excludes the $\beta=\pi/2$ that case (b) returns.)
+- **Wrist-mechanism interpretation** (Fig B.2): ZYX angles are the joint angles of a 3R wrist with axes z, y, x at zero; gimbal lock (Fig B.3) at $\beta=\pm90^\circ$ when axes 1 and 3 align = **wrist singularity** (cf. UR5 $\theta_5=0$, R5).
+- **ZYZ Euler angles**, Eq (B.6): $R=\mathrm{Rot}(\hat z,\alpha)\mathrm{Rot}(\hat y,\beta)\mathrm{Rot}(\hat z,\gamma)$ with last column $(c_\alpha s_\beta,s_\alpha s_\beta,c_\beta)$ and bottom row $(-s_\beta c_\gamma,s_\beta s_\gamma,c_\beta)$; singular at $\beta=0,\pi$.
+- General rule (B.7): any $\mathrm{Rot}(a_1,\alpha)\mathrm{Rot}(a_2,\beta)\mathrm{Rot}(a_3,\gamma)$ with $a_1\perp a_2$, $a_2\perp a_3$ is a valid parametrization (first/third angles range $2\pi$, middle range $\pi$).
+
+### B.2 Roll–pitch–yaw (PDF 598)
+- XYZ RPY = rotate γ about **fixed** $\hat x$, then β about fixed $\hat y$, then α about fixed $\hat z$ ⇒ pre-multiplication ⇒ $R=\mathrm{Rot}(\hat z,\alpha)\mathrm{Rot}(\hat y,\beta)\mathrm{Rot}(\hat x,\gamma)$, Eq (B.8) — **identical matrix to ZYX Euler**. "Body ZYX = fixed XYZ in reverse order." Aircraft convention: x forward, z down, y along the wing.
+- **RDKDC Lab 1 note:** `EULERXYZ` in the lab is a different sequence (XYZ); derive its inverse the same way (find the entry that is $\pm\sin$ of the middle angle, use atan2 pairs for the outer angles, handle the $\cos(\text{middle})=0$ gimbal case).
+
+### B.3 Unit quaternions (PDF 599–600) — **high priority for CIS I and ASBR**
+- Definition Eq (B.9): for $R=e^{[\hat\omega]\theta}$, $\theta\in[0,\pi]$: $q=(q_0,q_1,q_2,q_3)=(\cos\frac\theta2,\ \hat\omega\sin\frac\theta2)\in S^3$. **Scalar-first** (Hamilton) convention.
+- From $R$, Eqs (B.10)–(B.11): $q_0=\tfrac12\sqrt{1+r_{11}+r_{22}+r_{33}}$, $(q_1,q_2,q_3)=\frac{1}{4q_0}(r_{32}-r_{23},\ r_{13}-r_{31},\ r_{21}-r_{12})$. **Preprint typo:** third entry printed "$r_{21}-212$" — should be $r_{21}-r_{12}$. **Numerical caveat (not in the book):** this formula divides by $q_0$, which → 0 as θ → π; robust code (Shepperd's method, used by Eigen/scipy) picks the largest of $q_0,\dots,q_3$ from the diagonal first.
+- To $R$, Eq (B.12) (verified numerically against Rodrigues):
+  $$R=\begin{bmatrix}q_0^2+q_1^2-q_2^2-q_3^2&2(q_1q_2-q_0q_3)&2(q_0q_2+q_1q_3)\\2(q_0q_3+q_1q_2)&q_0^2-q_1^2+q_2^2-q_3^2&2(q_2q_3-q_0q_1)\\2(q_1q_3-q_0q_2)&2(q_0q_1+q_2q_3)&q_0^2-q_1^2-q_2^2+q_3^2\end{bmatrix}$$
+  Axis = direction of $(q_1,q_2,q_3)$, angle $=2\cos^{-1}q_0$. **Double cover:** $q$ and $-q$ give the same $R$.
+- **Product** Eqs (B.13)–(B.15): embed $q\mapsto Q=\begin{bmatrix}q_0+iq_1&q_2+iq_3\\-q_2+iq_3&q_0-iq_1\end{bmatrix}$ (an SU(2) matrix), multiply $N=QP$, read off $n$:
+  $n_0=q_0p_0-q_1p_1-q_2p_2-q_3p_3$, $n_1=q_0p_1+p_0q_1+q_2p_3-q_3p_2$, $n_2=q_0p_2+p_0q_2-q_1p_3+q_3p_1$, $n_3=q_0p_3+p_0q_3+q_1p_2-q_2p_1$ — i.e. the Hamilton product $n_0=q_0p_0-\vec q\cdot\vec p$, $\vec n=q_0\vec p+p_0\vec q+\vec q\times\vec p$, and $R(n)=R_qR_p$ (verified numerically). **Preprint typo:** $Q$ is printed with entry "$q_2+ip_3$"; it must be $q_2+iq_3$ (with the typo the product is wrong).
+- Not in MR but needed for C2/A2 (see Horn 1987, MLS §2.2.3): conjugate $q^*=(q_0,-\vec q)$ is the inverse; rotate a vector by $(0,R\vec x)=q\otimes(0,\vec x)\otimes q^*$; quaternion product as matrix: $q\otimes p=Q_L(q)p=Q_R(p)q$ — the left/right 4×4 matrices are what Horn's registration and Daniilidis' dual-quaternion hand-eye methods build on; $\|q_a-q_b\|$ vs. $|q_a\cdot q_b|$ as rotation distance; SLERP for interpolation. **Convention trap:** Eigen's `Quaterniond(w,x,y,z)` constructor is scalar-first but `.coeffs()` stores $(x,y,z,w)$; ROS `geometry_msgs/Quaternion` and scipy `as_quat()` are scalar-last.
+
+### B.4 Cayley–Rodrigues parameters (PDF 600–602)
+- Definition (B.16): $r=\hat\omega\tan\frac\theta2$ (stretches the radius-π ball to all of $\mathbb R^3$; singular at θ = π).
+- **Preprint sign error (verified numerically):** (B.17) $R=(I-[r])(I+[r])^{-1}$ and (B.18) $[r]=(I-R)(I+R)^{-1}$ give the rotation by **−θ** (i.e. they correspond to $r=-\hat\omega\tan\frac\theta2$), contradicting (B.16) and the book's own (B.21)/(B.22). Consistent forms: $R=(I+[r])(I-[r])^{-1}$, $[r]=(R-I)(R+I)^{-1}$. Also (B.19)–(B.20) for tr R = −1 are not valid as printed: $I-R$ is singular for **every** $R\in SO(3)$ (eigenvalue 1) and $-(\cdot)$ of a rotation has det −1. Near θ = π use quaternions instead.
+- Correct, verified formulas: (B.21) $R=\frac{(1-r^Tr)I+2rr^T+2[r]}{1+r^Tr}$ (the text says "Equation (B.18) can be explicitly computed" — it means (B.17)); (B.22) $[r]=\frac{R-R^T}{1+\mathrm{tr}R}$; (B.23) $1+\mathrm{tr}R=\frac{4}{1+r^Tr}$; (B.24) $R-R^T=\frac{4[r]}{1+r^Tr}$.
+- **Composition** (B.25): $r_3=\frac{r_1+r_2+r_1\times r_2}{1-r_1^Tr_2}$ for $R_3=R_1R_2$ (verified). Alternative with $s=r/\sqrt{1+r^Tr}$, $\|s\|=\sin\frac\theta2$ (= quaternion vector part): $R=I+2\sqrt{1-s^Ts}[s]+2[s]^2$ (B.27), $s_3=s_1\sqrt{1-s_2^Ts_2}+s_2\sqrt{1-s_1^Ts_1}+s_1\times s_2$ (B.28).
+- Angular velocity (B.29)–(B.30) (verified by finite differences): $\omega_s=\frac{2}{1+\|r\|^2}(r\times\dot r+\dot r)$, $\omega_b=\frac{2}{1+\|r\|^2}(-r\times\dot r+\dot r)$; accelerations (B.31)–(B.32).
+
+**Exercises worth doing:** none in the appendix; instead (i) implement ZYX/ZYZ/XYZ forward+inverse with gimbal handling (= RDKDC Lab 1), (ii) implement quat↔R (Shepperd), Hamilton product, and check $R(q\otimes p)=R(q)R(p)$, (iii) verify (B.25) numerically.
+
+**Conventions / pitfalls:** Euler (body, post-multiply) vs RPY (fixed, pre-multiply) — same matrix, reversed reading order. Quaternion scalar-first in MR/MLS/Horn; scalar-last in ROS/scipy. $q$ and $-q$ are the same rotation (flip sign before averaging/interpolating so $q_a\cdot q_b\ge0$).
+
+---
+
+## Appendix C Denavit–Hartenberg Parameters (PDF pp. 603–614, book pp. 585–596) — Lessons: **R4** (primary), R3, R5
+**Big idea:** DH buys a minimal description (4 numbers per joint instead of 6) by forcing every link frame to obey strict placement rules, so that each neighbouring transform uses only x- and z-axis rotations/translations. PoE buys freedom (any base/tool frame, no link frames at all) at the price of 6 numbers per joint. MR teaches the **modified (Craig, proximal) DH convention** — *not* the standard (Spong, distal) convention used in the RDKDC UR5 IK handout. The two describe the same robot with the same four physical quantities, but place frames on different joint axes and shift the $a,\alpha$ indices by one.
+
+### C.1 Assigning link frames (MR = modified/proximal DH) (PDF 603–606)
+- Links 0 (ground) … n; frame {i} on link i; FK Eq (C.1) $T_{0n}=T_{01}(\theta_1)\cdots T_{n-1,n}(\theta_n)$.
+- Rules (Fig C.1): **$\hat z_i$ along joint axis i** (MR/Craig) — vs Spong: $z_i$ along joint axis i+1. Origin of {i−1} where the common perpendicular of axes i−1 and i meets axis i−1; $\hat x_{i-1}$ along the common perpendicular, pointing from axis i−1 to axis i; $\hat y=\hat z\times\hat x$.
+- Parameters (PDF 605): $a_{i-1}$ = length of the common perpendicular (**link length**, not the physical length); $\alpha_{i-1}$ = angle from $\hat z_{i-1}$ to $\hat z_i$ about $\hat x_{i-1}$ (**link twist**); $d_i$ = distance from the intersection of $\hat x_{i-1}$ with $\hat z_i$ to the origin of {i}, along $\hat z_i$ (**link offset**); $\phi_i$ = angle from $\hat x_{i-1}$ to $\hat x_i$ about $\hat z_i$ (**joint angle**). Revolute: $\phi_i$ variable; prismatic: $d_i$ variable, $\hat z$ along positive translation (Fig C.2).
+- Special cases: intersecting axes ⇒ $a=0$, $\hat x_{i-1}=\pm$ normal to the plane of the two axes (either sign; changes the sign of α). Parallel axes ⇒ 1-parameter family of common normals; choose the one giving most zero parameters. Ground frame: usually coincide with {1} at zero ⇒ $a_0=\alpha_0=d_1=0$ (revolute) or $a_0=\alpha_0=\phi_1=0$ (prismatic). **Not every base/tool frame is DH-admissible** (Fig C.3: a pure translation along $\hat y$ cannot be written with x/z moves only) — exactly why the RDKDC project needs fixed transforms $g_{S0}$ and $g_{6T}$ around the Keating DH chain.
+
+### C.2 Why four parameters suffice (PDF 607–608)
+Rules remove 2 of 6 freedoms (no y-motions); Denavit–Hartenberg proved 4 is minimal. Some authors put the joint axis along $\hat x$ — always state your convention with a frame drawing.
+
+### C.3 Forward kinematics (PDF 608–609)
+**Modified DH link transform** (verified numerically that the closed form equals the product):
+$$T_{i-1,i}=\mathrm{Rot}(\hat x,\alpha_{i-1})\mathrm{Trans}(\hat x,a_{i-1})\mathrm{Trans}(\hat z,d_i)\mathrm{Rot}(\hat z,\phi_i)=\begin{bmatrix}c\phi_i&-s\phi_i&0&a_{i-1}\\ s\phi_ic\alpha_{i-1}&c\phi_ic\alpha_{i-1}&-s\alpha_{i-1}&-d_is\alpha_{i-1}\\ s\phi_is\alpha_{i-1}&c\phi_is\alpha_{i-1}&c\alpha_{i-1}&d_ic\alpha_{i-1}\\0&0&0&1\end{bmatrix}$$
+(Eqs C.2–C.5 are the four factors.) **Preprint typo:** (C.5) prints $\mathrm{Rot}(\hat z,\phi_i)$ with entries $\cos\phi_{i-1},\sin\phi_{i-1}$ — should be $\phi_i$. Steps (a)/(b) commute and (c)/(d) commute (same axis). The text also writes "$T_{i,i-1}$" in places where $T_{i-1,i}$ is meant (PDF 603, 609).
+
+**Standard (Spong/distal) DH, for comparison (used by Keating's UR5 IK handout, Corke `DHRobot`, UR's own table):**
+$$A_i=\mathrm{Rot}_z(\theta_i)\mathrm{Trans}_z(d_i)\mathrm{Trans}_x(a_i)\mathrm{Rot}_x(\alpha_i)=\begin{bmatrix}c\theta_i&-s\theta_ic\alpha_i&s\theta_is\alpha_i&a_ic\theta_i\\ s\theta_i&c\theta_ic\alpha_i&-c\theta_is\alpha_i&a_is\theta_i\\0&s\alpha_i&c\alpha_i&d_i\\0&0&0&1\end{bmatrix}$$
+| | Standard (Spong) | Modified (MR App. C / Craig) |
+|---|---|---|
+| $z_i$ lies on | joint axis i+1 | joint axis i |
+| Frame i sits at | distal end of link i | proximal end of link i |
+| Row i uses | $\theta_i,d_i,a_i,\alpha_i$ | $\alpha_{i-1},a_{i-1},d_i,\theta_i$ |
+| Order | rotate/translate about z, **then** x | rotate/translate about x, **then** z |
+| Joint i rotates about | $z_{i-1}$ | $z_i$ |
+**Conversion recipe (same robot):** take the standard table, keep the $d_i,\theta_i$ columns in place and shift the $(a,\alpha)$ columns **down one row** (row i of the modified table gets $a_{i-1},\alpha_{i-1}$ from row i−1 of the standard table; row 1 gets $a_0=\alpha_0=0$). Tool frames then differ by $\mathrm{Trans}_x(a_n)\mathrm{Rot}_x(\alpha_n)$ (zero for the UR5). **UR5 modified-DH table** (derived here, verified to give FK identical to the standard table to machine precision over 100 random configurations):
+| i | $\alpha_{i-1}$ | $a_{i-1}$ (m) | $d_i$ (m) | $\theta_i$ |
+|---|---|---|---|---|
+| 1 | 0 | 0 | 0.089159 | θ1 |
+| 2 | π/2 | 0 | 0 | θ2 |
+| 3 | 0 | −0.425 | 0 | θ3 |
+| 4 | 0 | −0.39225 | 0.10915 | θ4 |
+| 5 | π/2 | 0 | 0.09465 | θ5 |
+| 6 | −π/2 | 0 | 0.0823 | θ6 |
+
+### C.4 Examples (PDF 609–611)
+- Ex C.1 3R spatial chain (Fig 4.3): rows $(\alpha_{i-1},a_{i-1},d_i,\phi_i)$ = (0,0,0,θ1), (90°,L1,0,θ2−90°), (−90°,L2,0,θ3). Note the **joint-angle offset** −90°: the DH zero ≠ the robot's PoE zero. Always check offsets.
+- Ex C.2 RRRP (Fig C.4): (0,0,0,θ1), (90°,0,0,θ2), (0,L2,0,θ3+90°), (90°,0,θ4,0) — prismatic variable in the d column.
+- Ex C.3 6R arm with ZYZ-type wrist (Fig C.5): (0,0,0,θ1), (90°,0,0,θ2), (0,L1,0,θ3+90°), (90°,0,L2,θ4+180°), (90°,0,0,θ5+180°), (90°,0,0,θ6).
+
+### C.5 Relation between PoE and DH (PDF 611–613) — the key derivation for R4
+- Revolute: $M_i=\mathrm{Rot}(\hat x,\alpha_{i-1})\mathrm{Trans}(\hat x,a_{i-1})\mathrm{Trans}(\hat z,d_i)$ (C.6), $\mathrm{Rot}(\hat z,\theta_i)=e^{[A_i]\theta_i}$ with $A_i=(0,0,1,0,0,0)$ (C.7); prismatic: swap the $\hat z$ factors, $M_i=\mathrm{Rot}(\hat x,\alpha_{i-1})\mathrm{Trans}(\hat x,a_{i-1})\mathrm{Rot}(\hat z,\phi_i)$ (C.8), $A_i=(0,0,0,0,0,1)$ (C.9). Then $T_{0n}=M_1e^{[A_1]\theta_1}M_2e^{[A_2]\theta_2}\cdots M_ne^{[A_n]\theta_n}$ (C.10).
+- Using $Me^PM^{-1}=e^{MPM^{-1}}$ repeatedly ⇒ (C.11) $T_{0n}=e^{[\mathcal S_1]\theta_1}\cdots e^{[\mathcal S_n]\theta_n}M$ with $M=M_1\cdots M_n$ (C.13) and, **correctly**, $[\mathcal S_i]=(M_1\cdots M_i)[A_i](M_1\cdots M_i)^{-1}$, i.e. $\mathcal S_i=[\mathrm{Ad}_{M_1\cdots M_i}]A_i$.
+  **Preprint index error:** (C.12) prints $(M_1\cdots M_{i-1})[A_i](M_1\cdots M_{i-1})^{-1}$ — off by one; the book's own expansion on the line above (C.11) uses $M_1[A_1]M_1^{-1}$ and $(M_1M_2)[A_2](M_1M_2)^{-1}$. Verified numerically: with $M_1\cdots M_i$ the PoE equals the DH FK to $5\times10^{-16}$; with $M_1\cdots M_{i-1}$ it does not. Physical meaning (C.14)–(C.15): $A_i$ = joint-i screw seen from link frame {i}; $\mathcal S_i$ = same screw seen from {0} at the zero configuration, i.e. $\mathcal S_i=[\mathrm{Ad}_{T_{0i}(0)}]A_i$.
+- **Standard-DH version (what you need for Keating's UR5 table):** write $A_i=e^{[\hat z]\theta_i}N_i$ with $N_i=\mathrm{Trans}_z(d_i)\mathrm{Trans}_x(a_i)\mathrm{Rot}_x(\alpha_i)$; then $\mathcal S_i=[\mathrm{Ad}_{N_1\cdots N_{i-1}}](0,0,1,0,0,0)$ (axis $z_{i-1}$ of frame $T_{0,i-1}(0)$: $\omega_i$ = its z-column, $q_i$ = its origin, $v_i=-\omega_i\times q_i$), $M=N_1\cdots N_n$. For the UR5 (computed here, $(\omega,v)$ order, Keating base frame): $\mathcal S_1=(0,0,1,0,0,0)$, $\mathcal S_2=(0,-1,0,0.0892,0,0)$, $\mathcal S_3=(0,-1,0,0.0892,0,0.425)$, $\mathcal S_4=(0,-1,0,0.0892,0,0.8173)$, $\mathcal S_5=(0,0,-1,0.1092,-0.8173,0)$, $\mathcal S_6=(0,-1,0,-0.0055,0,0.8173)$; $M$ = rotation $[\,e_1,\ e_3,\ -e_2\,]$ (columns), position $(-0.81725,-0.19145,-0.00549)$. Max error vs DH over 100 random θ: $5\times10^{-16}$.
+- **Link to MR Example 4.5 (UR5 PoE):** with $W_1=d_4$, $W_2=d_6$, $L_1=|a_2|$, $L_2=|a_3|$, $H_1=d_1$, $H_2=d_5$, MR's PoE model equals $\mathrm{Rot}_z(\pi)\,T^{DH}_{06}(\theta)$ exactly (verified, error $6\times10^{-16}$): **MR's {s} is Keating/UR's DH frame {0} rotated 180° about z, MR's end-effector frame {b} is DH frame {6}, and the joint angles/zero configuration coincide.** So for RDKDC: $g_{S0}=\mathrm{Rot}_z(\pi)$ if your course base frame matches MR's (verify against the lab's frame drawings), and $g_{6T}$ = the tool offset.
+
+### C.6 Final comparison (PDF 613–614)
+DH: minimal (4/joint), but frames are constrained, conventions vary (z- vs x-axis on joint), revolute vs prismatic bookkeeping differs, and **ill-conditioned** for nearly parallel axes (the common normal jumps) ⇒ bad for calibration. PoE: base/tool arbitrary, no link frames, uniform R/P treatment, Jacobian columns = current joint screws; only cost is 6 numbers per joint. Authors' verdict: "little practical reason" to use DH for open chains (but industry IK papers and the UR5 handout use it — so you must read both).
+
+**Exercises worth doing:** (1) Redo Ex C.1–C.3 tables from the figures. (2) **UR5 three ways**: standard DH (Keating), modified DH (table above), PoE (MR Ex 4.5); check all agree up to $\mathrm{Rot}_z(\pi)$ — exactly the RDKDC `ur5FwdKin_DH` vs `ur5FwdKin` bridge. (3) Code both the (corrected) C.12 conversion and the standard-DH conversion.
+
+**Conventions / pitfalls:** don't copy MR's $T_{i-1,i}$ matrix into a standard-DH table (the $a,\alpha$ indices and multiplication order differ); watch joint-angle offsets (θ2−90°, θ4+180° …); intersecting axes ⇒ sign choice for x and α; parallel axes ⇒ free choice of d; DH zero configuration may differ from the vendor's zero.
+
+---
+
+## Appendix D Optimization and Lagrange Multipliers (PDF pp. 615–616, book pp. 597–598) — Lessons: F6 (primary), F4 (least squares), R6 (pseudoinverse / redundancy resolution), R7 & 11.6 (Lagrange multipliers for constrained dynamics), C2 (constrained least squares in registration)
+**Big idea:** Unconstrained minimum ⇒ zero gradient (and nonnegative curvature). Equality constraints $g(x)=0$ ⇒ at a regular minimum the objective's gradient is a combination of constraint gradients: $\nabla f+\frac{\partial g}{\partial x}^T\lambda=0$. Least squares and equality-constrained QPs are solved in closed form — and they are exactly how the pseudoinverses of Ch. 6 arise.
+
+**Key results & equations**
+- 1-D: $f'(x^*)=0$, $f''(x^*)\ge0$; n-D: $\nabla f(x^*)=0$ (necessary).
+- Overdetermined least squares $\min\tfrac12\|Ax-b\|^2$, $A\in\mathbb R^{m\times n}$, $m>n$: normal equations (D.1) $A^TAx=A^Tb$; rank $n$ ⇒ $x^*=(A^TA)^{-1}A^Tb$ (= left pseudoinverse). (Printed expansion "$\tfrac12x^TA^TAx-2b^TAx+b^Tb$" is missing parentheses: it is $\tfrac12(x^TA^TAx-2b^TAx+b^Tb)$.)
+- Equality constraints $g:\mathbb R^n\to\mathbb R^m$, regular point (rank $\partial g/\partial x=m$): **Lagrange condition (D.2)** $\nabla f(x^*)+\frac{\partial g}{\partial x}^T(x^*)\lambda^*=0$ plus $g(x^*)=0$: $n+m$ equations in $n+m$ unknowns.
+- Equality-constrained QP: $\min\tfrac12x^TQx+c^Tx$ s.t. $Ax=b$ ($Q\succ0$, $A$ full row rank $m\le n$). KKT: $Qx+A^T\lambda=-c$, $Ax=b$. With $B=(AQ^{-1}A^T)^{-1}$, $G=Q^{-1}A^TB$:
+  $$x^*=Gb-(I-GA)Q^{-1}c,\qquad \lambda^*=-(Bb+BAQ^{-1}c).$$
+  **Preprint sign errors (verified numerically against a direct KKT solve):** the book prints $x=Gb+(I-GA)Q^{-1}c$ and $\lambda=Bb+BAQ^{-1}c$; both $c$-terms (and λ's overall sign) are wrong. Also "$Q\in\mathbb R^n$" should be $Q\in\mathbb R^{n\times n}$.
+- **Why it matters (connections):** with $Q=I$, $c=0$: $x^*=A^T(AA^T)^{-1}b$ = minimum-norm solution = right pseudoinverse ⇒ $\dot\theta=J^\dagger\mathcal V$ for redundant arms (R6); with $Q=W$ ⇒ weighted pseudoinverse $W^{-1}J^T(JW^{-1}J^T)^{-1}$ (used for wheel/joint weighting in 13.5); with $c=-W\dot\theta_0$ ⇒ null-space secondary objective. Same algebra gives $\lambda=(A\Lambda^{-1}A^T)^{-1}(\dots)$ in hybrid control (Eq 11.58) and the constrained dynamics in Ch. 8.
+
+**Pitfalls:** necessary conditions only (no inequality/KKT complementarity, no second-order sufficiency; see a real optimization text for F6); regularity (constraint qualification) matters.
+
+---
+
+## Bibliography and Index (PDF pp. 617–642, book pp. 599–624)
+Bibliography of ~190 references (pp. 599–616); Index (pp. 617–624). Skimmed for completeness. References cited in the chapters above that are worth knowing: [74] Khatib unified motion/force (operational-space) control; [99] Luh–Walker–Paul resolved-acceleration control; [107] Mason natural/artificial constraints; [144] Raibert & Craig hybrid control; [56–58] Hogan impedance control; [184] Takegaki & Arimoto PD+gravity; [122] Murray–Li–Sastry (MLS); [177] Spong et al.; [171] Siciliano et al.; [32] Craig; [34] Denavit & Hartenberg (1955) original DH paper; [19] Brockett stabilization theorem; [28] Chow; [41] Dubins; [146] Reeds & Shepp; [5] Balkcom & Mason diff-drive time-optimal; [89] three-finger spatial force closure; [149–151] Rimon & Burdick second-order mobility.
 
