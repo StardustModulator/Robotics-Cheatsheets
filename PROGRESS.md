@@ -19,6 +19,12 @@
 - **Learning style:** application-first; build to get intuition, then theory; never stall.
 - **Research interests:** deferred until the six courses are done.
 
+## Standing rules
+- **Student writes all implementation code.** Claude explains, designs with, debugs with and reviews the student's code,
+  but does not write the solutions. Reason: CIS I (2025 handouts) forbids AI-generated code in the PAs and forbids
+  prior-year solutions; the same discipline also builds real skill for every other course.
+- Never use public solution repos for JHU assignments. Get course materials from official sites only.
+
 ## Log
 
 ### 2026-11-26 — Day 0 (planning)
