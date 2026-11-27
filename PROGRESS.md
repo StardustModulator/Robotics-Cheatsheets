@@ -46,6 +46,10 @@
 
 ## Log
 
+### 2026-11-27: teaching mode changed
+- Student: the Notion lessons are summaries, not lectures. New mode: **Claude teaches each lesson live** ("teach F4"); Notion = map + progress tracker (Claude ticks "Lesson done" and logs here on "done X"). Notion main page "How every lesson works" updated.
+- Foundations F1–F10: student self-studies from the Learn-from links / Foundations Watch-List now; the other subjects come afterwards with Claude.
+
 ### 2026-11-26: resource audit (local folders)
 - Read every file in `~/Downloads/Algorithms_For_Sensor_Based_Robotics/`, `~/Downloads/RobotDevicesKinematicsDynamicsAndControl/`, `~/Downloads/682 MLDL/`, `~/Downloads/syllabus.pdf` and `~/Downloads/External_Resources/RDKDCFinalProject.pdf`.
 - `syllabus.pdf` is the **RDKDC Spring 2026 (Cowan)** syllabus, not DL → RDKDC README §0 (real grading: HW 5 / quizzes 20 / 2×15 midterms / project 20 / final 25, closed book). The DL syllabus is `682 MLDL/Syllabus_DL_Fall20_no_hyperlinks.pdf` → DL README §2.1 (full L-1…L-24 schedule; the unknown 10% = quizzes) + §5.13 missing topics.
